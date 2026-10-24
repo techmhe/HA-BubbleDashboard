@@ -26,6 +26,14 @@ segmented tab bar itself and switches pages internally, so switching tabs never 
 an HA view and the bar looks exactly like the mockup. `page:` sets the tab shown first;
 `nav: false` hides the bar if you prefer one HA view per tab.
 
+Gestures:
+
+- **Tab bar**: tap a tab, or slide your finger along the bar. A glass lens follows the
+  finger, with a light haptic tick per tab; the page switches on release.
+- **Pop-ups**: close with the ✕, by tapping outside, or by pulling the sheet down at its
+  grabber or header (or anywhere when the content is scrolled to the top). A short pull
+  springs back; a pull of a quarter of the sheet (80–140 px) or a quick flick closes it.
+
 ```yaml
 views:
   - title: Start

@@ -19,7 +19,7 @@ interface State {
 
 const states = new WeakMap<Element, State>();
 
-function haptic(el: Element, type = 'medium') {
+export function haptic(el: Element, type = 'medium') {
   el.dispatchEvent(new CustomEvent('haptic', { detail: type, bubbles: true, composed: true }));
 }
 

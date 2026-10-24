@@ -1,5 +1,6 @@
 import { css, html, type TemplateResult } from 'lit';
 import { I } from '../icons';
+import { swipeToClose } from './swipe';
 
 export function icon(path: string, size: number, stroke: string, width = 2.2): TemplateResult {
   return html`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke=${stroke} stroke-width=${width}
@@ -41,6 +42,7 @@ export function sheet(o: SheetOptions): TemplateResult {
     <div class="backdrop" @click=${o.onClose}></div>
     <section class="sheet" role="dialog" aria-modal="true" aria-label=${o.title}
       style="background-image: radial-gradient(100% 30% at 50% 0%, ${o.glow}, transparent 70%)"
+      ${swipeToClose(o.onClose)}
       @keydown=${(e: KeyboardEvent) => e.key === 'Escape' && o.onClose()}>
       <div class="grabber" aria-hidden="true"></div>
       <header class="sheet-head">
@@ -99,7 +101,7 @@ export const sheetStyles = css`
     z-index: 21;
     left: 50%;
     bottom: 0;
-    transform: translateX(-50%);
+    transform: translate(-50%, var(--drag, 0px));
     width: min(100%, 480px);
     max-height: calc(100% - 44px);
     overflow-y: auto;
@@ -113,13 +115,21 @@ export const sheetStyles = css`
     animation: rise 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
   }
   .grabber {
+    position: relative;
+    cursor: grab;
     align-self: center;
     width: 40px;
     height: 5px;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.25);
   }
+  .grabber::before {
+    content: '';
+    position: absolute;
+    inset: -12px -60px -8px;
+  }
   .sheet-head {
+    cursor: grab;
     display: flex;
     align-items: center;
     gap: 8px;

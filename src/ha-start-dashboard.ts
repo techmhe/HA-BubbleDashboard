@@ -7,6 +7,8 @@ import { dateLine } from './logic/overview';
 import { resolveRooms, type Room } from './logic/rooms';
 import { num } from './logic/util';
 import { baseStyles } from './styles';
+import { haptic } from './components/hold';
+import { lensBox, tabAt } from './logic/gestures';
 import { applyHeader, removeHeader, type HeaderMode } from './header';
 import type { CardConfig, HomeAssistant, PageId } from './types';
 import { loadEnergyToday } from './data/series';
@@ -89,6 +91,7 @@ export class HaStartDashboard extends LitElement {
     _energy: { state: true },
     _series: { state: true },
     _scenes: { state: true },
+    _navDrag: { state: true },
   };
 
   hass?: HomeAssistant;
@@ -111,6 +114,7 @@ export class HaStartDashboard extends LitElement {
   private _energyAt = 0;
   private _energyLoading = false;
   private _series: Record<string, SeriesData & { at: number }> = {};
+  private _navDrag: { left: number; width: number; hover: number } | null = null;
   private _scenes: Record<string, SceneConfig | undefined> | null = null;
   private _forecast: ForecastData = { loading: false, hourly: [], daily: [], at: 0 };
   private _debounce: Record<string, number> = {};
@@ -463,24 +467,85 @@ export class HaStartDashboard extends LitElement {
     `;
   }
 
+  /** Tab bar: tap a tab, or slide a finger along the bar; a glass lens follows and snaps on release. */
   private _renderNav() {
+    const n = PAGES.length;
+    const idx = Math.max(0, PAGES.findIndex((p) => p.id === this._page));
+    const drag = this._navDrag;
+    // At rest the lens sits under the active tab (flex 2, the others flex 1, gap 4 px, padding 6 px).
+    const unit = `((100% - 12px - ${(n - 1) * 4}px) / ${n + 1})`;
+    const lensStyle = drag
+      ? `left:${drag.left}px;width:${drag.width}px`
+      : `left:calc(6px + ${idx} * (${unit} + 4px));width:calc(2 * ${unit})`;
     return html`
-      <nav class="nav" aria-label="Bereiche">
-        ${PAGES.map((p) => {
+      <nav class="nav ${drag ? 'dragging' : ''}" aria-label="Bereiche"
+        @pointerdown=${this._navDown} @pointermove=${this._navMove} @pointerup=${this._navUp} @pointercancel=${this._navCancel}>
+        <span class="lens" style=${lensStyle} aria-hidden="true"></span>
+        ${PAGES.map((p, i) => {
           const active = p.id === this._page;
+          const hover = drag?.hover === i;
           return html`
-            <button class="tab ${active ? 'active' : ''}" aria-label=${p.name} aria-current=${active ? 'page' : 'false'}
-              @click=${() => {
-                this._page = p.id;
-                if (p.id === 'rooms') this._roomsFilter = 'all';
-              }}>
-              ${icon(p.icon, 20, active ? '#101218' : 'rgba(255,255,255,0.8)')}${active ? p.name : nothing}
+            <button class="tab ${active ? 'active' : ''} ${hover ? 'hover' : ''}" aria-label=${p.name} aria-current=${active ? 'page' : 'false'}
+              @click=${() => this._selectPage(p.id)}>
+              ${icon(p.icon, 20, 'currentColor')}${active ? html`<span>${p.name}</span>` : nothing}
             </button>
           `;
         })}
       </nav>
     `;
   }
+
+  private _selectPage(id: PageId) {
+    this._page = id;
+    if (id === 'rooms') this._roomsFilter = 'all';
+  }
+
+  private _navStart?: { x: number; id: number; tabs: { left: number; right: number }[]; width: number; barWidth: number; navLeft: number };
+
+  private _navDown = (e: PointerEvent) => {
+    if (e.button > 0) return;
+    const nav = e.currentTarget as HTMLElement;
+    const r = nav.getBoundingClientRect();
+    const tabs = [...nav.querySelectorAll<HTMLElement>('.tab')].map((t) => {
+      const b = t.getBoundingClientRect();
+      return { left: b.left - r.left, right: b.right - r.left };
+    });
+    const unit = (r.width - 12 - (PAGES.length - 1) * 4) / (PAGES.length + 1);
+    this._navStart = { x: e.clientX, id: e.pointerId, tabs, width: Math.round(unit * 1.6), barWidth: r.width, navLeft: r.left };
+  };
+
+  private _navMove = (e: PointerEvent) => {
+    const s = this._navStart;
+    if (!s || e.pointerId !== s.id) return;
+    if (!this._navDrag && Math.abs(e.clientX - s.x) < 8) return;
+    const nav = e.currentTarget as HTMLElement;
+    if (!this._navDrag) {
+      try {
+        nav.setPointerCapture(e.pointerId);
+      } catch {
+        // pointer already gone; the drag still works while it stays over the bar
+      }
+    }
+    const x = e.clientX - s.navLeft;
+    const hover = tabAt(x, s.tabs);
+    if (this._navDrag && hover !== this._navDrag.hover) haptic(this, 'selection');
+    this._navDrag = { ...lensBox(x, s.width, s.barWidth, 6), hover };
+  };
+
+  private _navUp = (e: PointerEvent) => {
+    const drag = this._navDrag;
+    this._navStart = undefined;
+    if (!drag) return;
+    const nav = e.currentTarget as HTMLElement;
+    if (nav.hasPointerCapture?.(e.pointerId)) nav.releasePointerCapture(e.pointerId);
+    this._navDrag = null;
+    this._selectPage(PAGES[drag.hover].id);
+  };
+
+  private _navCancel = () => {
+    this._navStart = undefined;
+    this._navDrag = null;
+  };
 
   private _renderSheets(ctx: PageContext) {
     if (this._confirm) {
@@ -561,6 +626,9 @@ export class HaStartDashboard extends LitElement {
       }
       .nav {
         position: sticky;
+        touch-action: pan-y;
+        user-select: none;
+        -webkit-user-select: none;
         bottom: calc(16px + env(safe-area-inset-bottom));
         z-index: 10;
         width: calc(100% - 28px);
@@ -576,7 +644,43 @@ export class HaStartDashboard extends LitElement {
         border: 1px solid rgba(255, 255, 255, 0.1);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
       }
+      .lens {
+        position: absolute;
+        top: 6px;
+        bottom: 6px;
+        border-radius: 23px;
+        background: #fff;
+        transition:
+          left 0.42s cubic-bezier(0.25, 1.3, 0.4, 1),
+          width 0.42s cubic-bezier(0.25, 1.3, 0.4, 1),
+          background 0.2s ease,
+          transform 0.2s ease;
+        pointer-events: none;
+      }
+      .nav.dragging .lens {
+        transition:
+          background 0.2s ease,
+          transform 0.2s ease;
+        top: 2px;
+        bottom: 2px;
+        border-radius: 27px;
+        background: rgba(255, 255, 255, 0.16);
+        backdrop-filter: blur(6px) saturate(1.8) brightness(1.15);
+        -webkit-backdrop-filter: blur(6px) saturate(1.8) brightness(1.15);
+        box-shadow:
+          inset 0 1px 1px rgba(255, 255, 255, 0.7),
+          inset 0 -1px 1px rgba(255, 255, 255, 0.25),
+          0 6px 18px rgba(0, 0, 0, 0.35);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        transform: scale(1.06);
+      }
       .tab {
+        position: relative;
+        color: rgba(255, 255, 255, 0.8);
+        transition:
+          flex 0.3s cubic-bezier(0.25, 1.2, 0.4, 1),
+          color 0.2s ease,
+          transform 0.2s ease;
         flex: 1;
         display: flex;
         align-items: center;
@@ -586,12 +690,23 @@ export class HaStartDashboard extends LitElement {
         border-radius: 23px;
         font-size: 13px;
         font-weight: 700;
-        transition: flex 0.2s ease;
       }
       .tab.active {
         flex: 2;
-        background: #fff;
         color: #101218;
+      }
+      .nav.dragging .tab.active {
+        color: #fff;
+      }
+      .tab.hover {
+        transform: scale(1.18);
+        color: #fff;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .lens,
+        .tab {
+          transition: none;
+        }
       }
       .page-head {
         padding: 0 6px 12px;
