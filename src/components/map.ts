@@ -6,6 +6,34 @@ export interface MapEntity {
   focus?: boolean;
 }
 
+/** Card-styled map controls: round glass buttons. ha-map renders MapLibre (HA 2026) or Leaflet (older). */
+const CONTROLS_CSS = `
+.maplibregl-ctrl-top-left .maplibregl-ctrl { margin: 10px 0 0 10px !important; }
+.maplibregl-ctrl-group, .leaflet-bar {
+  background: none !important; box-shadow: none !important; border: none !important;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.maplibregl-ctrl-group button, .leaflet-bar a, .leaflet-bar a:hover {
+  width: 36px !important; height: 36px !important; line-height: 36px !important;
+  border: none !important; border-radius: 50% !important;
+  background: rgba(20, 22, 28, 0.72) !important; color: #fff !important;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
+}
+.maplibregl-ctrl-group button + button { border-top: none !important; }
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: brightness(0) invert(1); }
+.maplibregl-ctrl-group button:disabled .maplibregl-ctrl-icon { opacity: 0.35; }
+.leaflet-bar a.leaflet-disabled { color: rgba(255, 255, 255, 0.35) !important; }
+.leaflet-control-zoom { margin: 10px !important; }
+.maplibregl-ctrl-attrib, .leaflet-control-attribution {
+  background: rgba(20, 22, 28, 0.72) !important; color: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-radius: 14px !important; margin: 0 8px 8px 0 !important;
+}
+.maplibregl-ctrl-attrib a, .leaflet-control-attribution a { color: rgba(255, 255, 255, 0.8) !important; }
+.maplibregl-ctrl-attrib-button { background-color: transparent !important; filter: brightness(0) invert(1); opacity: 0.7; }
+`;
+
 /**
  * HA's own map (`ha-map`, Leaflet) inside the card. HA loads it lazily with the map card,
  * so the element asks the card helpers for a map card once, then renders `ha-map`.
@@ -58,6 +86,18 @@ class SdMap extends HTMLElement {
     map.style.cssText = 'display:block;width:100%;height:100%';
     this._map = map;
     this.replaceChildren(map);
+    void this._styleControls(map);
+  }
+
+  /** ha-map has its own shadow root; add the control styles there once it has rendered. */
+  private async _styleControls(map: HTMLElement) {
+    await (map as unknown as { updateComplete?: Promise<unknown> }).updateComplete;
+    const root = map.shadowRoot;
+    if (!root || root.querySelector('style.sd-map')) return;
+    const style = document.createElement('style');
+    style.className = 'sd-map';
+    style.textContent = CONTROLS_CSS;
+    root.appendChild(style);
   }
 }
 

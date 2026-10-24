@@ -7211,7 +7211,7 @@ var ts = o`
     background: #bf9bff;
     color: #1d1030;
   }
-`, ns = class extends HTMLElement {
+`, ns = "\n.maplibregl-ctrl-top-left .maplibregl-ctrl { margin: 10px 0 0 10px !important; }\n.maplibregl-ctrl-group, .leaflet-bar {\n  background: none !important; box-shadow: none !important; border: none !important;\n  display: flex; flex-direction: column; gap: 6px;\n}\n.maplibregl-ctrl-group button, .leaflet-bar a, .leaflet-bar a:hover {\n  width: 36px !important; height: 36px !important; line-height: 36px !important;\n  border: none !important; border-radius: 50% !important;\n  background: rgba(20, 22, 28, 0.72) !important; color: #fff !important;\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) !important;\n}\n.maplibregl-ctrl-group button + button { border-top: none !important; }\n.maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: brightness(0) invert(1); }\n.maplibregl-ctrl-group button:disabled .maplibregl-ctrl-icon { opacity: 0.35; }\n.leaflet-bar a.leaflet-disabled { color: rgba(255, 255, 255, 0.35) !important; }\n.leaflet-control-zoom { margin: 10px !important; }\n.maplibregl-ctrl-attrib, .leaflet-control-attribution {\n  background: rgba(20, 22, 28, 0.72) !important; color: rgba(255, 255, 255, 0.7) !important;\n  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);\n  border-radius: 14px !important; margin: 0 8px 8px 0 !important;\n}\n.maplibregl-ctrl-attrib a, .leaflet-control-attribution a { color: rgba(255, 255, 255, 0.8) !important; }\n.maplibregl-ctrl-attrib-button { background-color: transparent !important; filter: brightness(0) invert(1); opacity: 0.7; }\n", rs = class extends HTMLElement {
 	constructor(...e) {
 		super(...e), this._entities = [];
 	}
@@ -7247,13 +7247,20 @@ var ts = o`
 			fitZones: !1,
 			themeMode: "dark",
 			zoom: 14
-		}), e.style.cssText = "display:block;width:100%;height:100%", this._map = e, this.replaceChildren(e);
+		}), e.style.cssText = "display:block;width:100%;height:100%", this._map = e, this.replaceChildren(e), this._styleControls(e);
+	}
+	async _styleControls(e) {
+		await e.updateComplete;
+		let t = e.shadowRoot;
+		if (!t || t.querySelector("style.sd-map")) return;
+		let n = document.createElement("style");
+		n.className = "sd-map", n.textContent = ns, t.appendChild(n);
 	}
 };
-customElements.get("start-dashboard-map") || customElements.define("start-dashboard-map", ns);
+customElements.get("start-dashboard-map") || customElements.define("start-dashboard-map", rs);
 // src/sheets/persons.ts
-var rs = "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0";
-function is(e) {
+var is = "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0";
+function as(e) {
 	let { hass: t } = e, n = ka(t, e.config), r = Object.keys(t.states).filter((e) => e.startsWith("zone.")), i = [...n.map((e) => ({
 		entity_id: e.id,
 		color: pa[e.place],
@@ -7267,7 +7274,7 @@ function is(e) {
 		subtitle: Aa(n),
 		color: "#30d158",
 		glow: "rgba(48,209,88,0.2)",
-		iconPath: rs,
+		iconPath: is,
 		iconStroke: "#0b1a10",
 		onClose: e.closeSheet,
 		body: C`
@@ -7287,7 +7294,7 @@ function is(e) {
     `
 	});
 }
-var as = o`
+var os = o`
   .ps-map {
     height: 260px;
     border-radius: 22px;
@@ -7332,18 +7339,18 @@ var as = o`
     font-size: 12px;
     color: var(--sd-muted);
   }
-`, os = [
+`, ss = [
 	"Dauerhaft",
 	"1 h",
 	"2 h",
 	"4 h"
-], ss = 7, cs = 25;
-async function ls(e) {
+], cs = 7, ls = 25;
+async function us(e) {
 	let t = e.allRooms, n = e.config;
 	await e.call("input_number", "set_value", { value: t.temp }, { entity_id: F(n, "all_rooms_temperature") }), await e.call("input_text", "set_value", { value: kn(e.rooms, t.selected) }, { entity_id: F(n, "all_rooms_selection") }), await e.call("input_select", "select_option", { option: t.duration }, { entity_id: F(n, "all_rooms_duration") }), await e.runScript(F(n, "all_rooms_apply"));
 }
-function us(e) {
-	let t = e.allRooms, n = xn(e.hass, e.rooms), r = (n) => e.setAllRooms({ temp: Math.min(cs, Math.max(ss, Math.round((t.temp + n) * 2) / 2)) }), i = (n) => {
+function ds(e) {
+	let t = e.allRooms, n = xn(e.hass, e.rooms), r = (n) => e.setAllRooms({ temp: Math.min(ls, Math.max(cs, Math.round((t.temp + n) * 2) / 2)) }), i = (n) => {
 		let r = new Set(t.selected);
 		r.has(n) ? r.delete(n) : r.add(n), e.setAllRooms({ selected: r });
 	}, a = t.selected.size;
@@ -7381,18 +7388,18 @@ function us(e) {
 
       <div class="section-head"><h2 style="font-size:14px">Wie lange</h2><span class="rule" aria-hidden="true"></span></div>
       <div class="durations" role="radiogroup" aria-label="Dauer">
-        ${os.map((n) => C`<button role="radio" aria-checked=${t.duration === n} class=${t.duration === n ? "sel" : ""}
+        ${ss.map((n) => C`<button role="radio" aria-checked=${t.duration === n} class=${t.duration === n ? "sel" : ""}
           @click=${() => e.setAllRooms({ duration: n })}>${n}</button>`)}
       </div>
 
       <button class="btn primary apply" ?disabled=${a === 0}
         @click=${async () => {
-			await ls(e), e.closeSheet();
+			await us(e), e.closeSheet();
 		}}>Übernehmen</button>
     `
 	});
 }
-var ds = o`
+var fs = o`
   .arcontrol {
     display: flex;
     align-items: center;
@@ -7464,7 +7471,7 @@ var ds = o`
   .apply:disabled {
     opacity: 0.4;
   }
-`, fs = 300, ps = 20, ms = 120, hs = [
+`, ps = 300, ms = 20, hs = 120, gs = [
 	{
 		id: "24h",
 		name: "24 h"
@@ -7478,7 +7485,7 @@ var ds = o`
 		name: "30 Tage"
 	}
 ];
-function gs(e, t, n) {
+function _s(e, t, n) {
 	let r = [];
 	for (let i = 0; i < 4; i++) {
 		let a = new Date(t + (n - t) * i / 4);
@@ -7486,8 +7493,8 @@ function gs(e, t, n) {
 	}
 	return r.push("jetzt"), r;
 }
-function _s(e, t) {
-	let n = e === "temp", r = n ? "#ff9f0a" : "#5ac8fa", i = n ? jn(t, fs, ps, ms, .3, .3, 1) : jn(t, fs, ps, ms, 1, 1, 2), a = t.map((e) => e.v), o = a[a.length - 1], s = n ? "°" : " %", c = (e) => n ? R(e, 1) : R(Math.round(e)), l = a.length ? `${c(Math.min(...a))}${n ? "°" : ""} – ${c(Math.max(...a))}${s} · jetzt ${c(o)}${s}` : "keine Daten", u = (i.lo + i.hi) / 2, d = i.y(60), f = !n && 60 > i.lo && 60 < i.hi;
+function vs(e, t) {
+	let n = e === "temp", r = n ? "#ff9f0a" : "#5ac8fa", i = n ? jn(t, ps, ms, hs, .3, .3, 1) : jn(t, ps, ms, hs, 1, 1, 2), a = t.map((e) => e.v), o = a[a.length - 1], s = n ? "°" : " %", c = (e) => n ? R(e, 1) : R(Math.round(e)), l = a.length ? `${c(Math.min(...a))}${n ? "°" : ""} – ${c(Math.max(...a))}${s} · jetzt ${c(o)}${s}` : "keine Daten", u = (i.lo + i.hi) / 2, d = i.y(60), f = !n && 60 > i.lo && 60 < i.hi;
 	return C`
     <figure class="fig" style="background:${n ? "rgba(255,159,10,0.08)" : "rgba(90,200,250,0.08)"}">
       <figcaption>
@@ -7503,10 +7510,10 @@ function _s(e, t) {
               <line x1="0" y1=${i.y(e)} x2="338" y2=${i.y(e)} stroke="rgba(255,255,255,0.08)"></line>
               <text x="334" y=${i.y(e) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${R(e, e % 1 ? 1 : 0)}°</text>`)}` : w`
               ${f ? w`
-                <rect x="0" y=${ps} width="338" height=${Math.max(0, d - ps)} fill="rgba(255,255,255,0.04)"></rect>
+                <rect x="0" y=${ms} width="338" height=${Math.max(0, d - ms)} fill="rgba(255,255,255,0.04)"></rect>
                 <line x1="0" y1=${d} x2="338" y2=${d} stroke="rgba(90,200,250,0.5)" stroke-dasharray="4 4"></line>
                 <text x="4" y=${d - 4} fill="rgba(143,216,255,0.85)" font-size="10">60 % Lüftgrenze</text>` : E}
-              <line x1="0" y1=${ms} x2="338" y2=${ms} stroke="rgba(255,255,255,0.08)"></line>
+              <line x1="0" y1=${hs} x2="338" y2=${hs} stroke="rgba(255,255,255,0.08)"></line>
               <text x="334" y=${16} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${R(i.hi)} %</text>
               <text x="334" y=${116} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${R(i.lo)} %</text>`}
         ${i.area ? w`<polygon points=${i.area} fill=${n ? "rgba(255,159,10,0.16)" : "rgba(90,200,250,0.16)"}></polygon>` : E}
@@ -7516,10 +7523,10 @@ function _s(e, t) {
     </figure>
   `;
 }
-function vs(e, t, n) {
+function ys(e, t, n) {
 	let r = e.rooms.find((e) => e.slug === t);
 	if (!r) return E;
-	let i = e.history(t, n), a = n === "24h" && !i.loading ? Mn(i.hum, i.temp) : null, o = gs(n, i.start, i.end);
+	let i = e.history(t, n), a = n === "24h" && !i.loading ? Mn(i.hum, i.temp) : null, o = _s(n, i.start, i.end);
 	return P({
 		title: `${r.name} · Verlauf`,
 		subtitle: n === "30d" ? "Tagesmittel" : "Stundenmittel",
@@ -7533,7 +7540,7 @@ function vs(e, t, n) {
 		}),
 		body: C`
       <div class="tabs3" role="tablist" aria-label="Zeitraum">
-        ${hs.map((r) => C`<button role="tab" aria-selected=${r.id === n} class=${r.id === n ? "sel" : ""}
+        ${gs.map((r) => C`<button role="tab" aria-selected=${r.id === n} class=${r.id === n ? "sel" : ""}
           @click=${() => e.openSheet({
 			id: "history",
 			slug: t,
@@ -7541,16 +7548,16 @@ function vs(e, t, n) {
 		})}>${r.name}</button>`)}
       </div>
       ${i.loading ? C`<div class="hist-msg">Lade Verlauf …</div>` : i.error ? C`<div class="hist-msg">Verlauf nicht verfügbar: ${i.error}</div>` : C`
-            ${_s("temp", i.temp)}
+            ${vs("temp", i.temp)}
             <div>
-              ${_s("hum", i.hum)}
+              ${vs("hum", i.hum)}
               <div class="xlabels">${o.map((e) => C`<span>${e}</span>`)}</div>
             </div>
             ${a ? C`<div class="insight">${N(k.wind, 16, "#8fd8ff", 2.2)}<span>${a}</span></div>` : E}`}
     `
 	});
 }
-var ys = o`
+var bs = o`
   .tabs3 {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -7613,7 +7620,7 @@ var ys = o`
   }
 `;
 // src/sheets/room.ts
-function bs(e, t) {
+function xs(e, t) {
 	let { hass: n } = e, r = e.rooms.find((e) => e.slug === t);
 	if (!r) return E;
 	let i = vn(n, r, e.target(r.climate)), a = r.climate, o = i.heating ? "#ff9f0a" : i.vent ? "#5ac8fa" : "rgba(255,255,255,0.16)", s = i.heating ? "rgba(255,159,10,0.2)" : i.vent ? "rgba(90,200,250,0.2)" : "rgba(255,255,255,0.06)", c = i.off ? "Aus" : i.heating ? `heizt${i.valve === null ? "" : ` · Ventile ${i.valve} %`}` : "Soll erreicht", l = jr(n, r), u = Nr(n, l.map((e) => e.id), e.sceneConfigs(), e.now), d = Ar(n, r, e.config.names), f = I(n, F(e.config, "outdoor_dew")), p = L(n, F(e.config, "airing_timer")) === "active", m = [
@@ -7744,7 +7751,7 @@ function bs(e, t) {
     `
 	});
 }
-var xs = o`
+var Ss = o`
   .histpill {
     flex-shrink: 0;
     display: flex;
@@ -7920,7 +7927,7 @@ var xs = o`
     min-width: 0;
     text-align: left;
   }
-`, Ss, Cs = "0.10.1", Q = [
+`, Cs, ws = "0.10.2", Q = [
 	{
 		id: "overview",
 		name: "Übersicht",
@@ -7951,13 +7958,13 @@ var xs = o`
 		icon: k.shield,
 		milestone: 4
 	}
-], ws = {
+], Ts = {
 	overview: "radial-gradient(100% 30% at 0% 0%, rgba(110,90,200,0.34), transparent 70%), radial-gradient(80% 30% at 100% 40%, rgba(90,200,250,0.12), transparent 70%)",
 	climate: "radial-gradient(100% 30% at 50% 0%, rgba(255,140,60,0.26), transparent 70%), radial-gradient(80% 30% at 0% 55%, rgba(90,200,250,0.12), transparent 70%)",
 	rooms: "radial-gradient(100% 28% at 50% 0%, rgba(255,214,10,0.18), transparent 70%)",
 	energy: "radial-gradient(100% 28% at 50% 0%, rgba(48,209,88,0.2), transparent 70%)",
 	security: "radial-gradient(100% 28% at 50% 0%, rgba(191,155,255,0.22), transparent 70%)"
-}, $ = 36e5, Ts = {
+}, $ = 36e5, Es = {
 	"24h": {
 		ms: 24 * $,
 		bucket: $,
@@ -7973,14 +7980,14 @@ var xs = o`
 		bucket: 24 * $,
 		period: "day"
 	}
-}, Es = 700, Ds = 15e3;
-function Os() {
+}, Ds = 700, Os = 15e3;
+function ks() {
 	let e = "ha-start-dashboard-font";
 	if (document.getElementById(e)) return;
 	let t = document.createElement("link");
 	t.id = e, t.rel = "stylesheet", t.href = "https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap", document.head.appendChild(t);
 }
-var ks = class extends Re {
+var As = class extends Re {
 	constructor(...e) {
 		super(...e), this._page = "overview", this._sheet = null, this._confirm = null, this._now = /* @__PURE__ */ new Date(), this._roomsFilter = "all", this._consumersAll = !1, this._rooms = [], this._pending = {}, this._ui = {}, this._hdr = "", this._energy = {}, this._energyAt = 0, this._energyLoading = !1, this._series = {}, this._navDrag = null, this._scenes = null, this._forecast = {
 			loading: !1,
@@ -8035,7 +8042,7 @@ var ks = class extends Re {
 	setConfig(e) {
 		if (!e) throw Error("Invalid configuration");
 		if (e.page && !Q.some((t) => t.id === e.page)) throw Error(`Unknown page "${e.page}" (use ${Q.map((e) => e.id).join(", ")})`);
-		this._config = e, this._page = e.page ?? "overview", this._roomsKey = void 0, e.load_font !== !1 && Os();
+		this._config = e, this._page = e.page ?? "overview", this._roomsKey = void 0, e.load_font !== !1 && ks();
 	}
 	getCardSize() {
 		return 12;
@@ -8070,7 +8077,7 @@ var ks = class extends Re {
 			let e = Date.now(), t = !1, n = { ...this._pending };
 			for (let [r, i] of Object.entries(n)) {
 				let [a, o] = r.split("|");
-				(Number(this.hass.states[a]?.attributes[o]) === i.value && e - i.at > Es || e - i.at > Ds) && (delete n[r], t = !0);
+				(Number(this.hass.states[a]?.attributes[o]) === i.value && e - i.at > Ds || e - i.at > Os) && (delete n[r], t = !0);
 			}
 			t && (this._pending = n);
 		}
@@ -8090,7 +8097,7 @@ var ks = class extends Re {
 				value: n,
 				at: Date.now()
 			}
-		}, window.clearTimeout(this._debounce[i]), this._debounce[i] = window.setTimeout(r, Es);
+		}, window.clearTimeout(this._debounce[i]), this._debounce[i] = window.setTimeout(r, Ds);
 	}
 	_stepTarget(e, t) {
 		let n = this.hass?.states[e]?.attributes;
@@ -8111,7 +8118,7 @@ var ks = class extends Re {
 			this._allRooms = {
 				temp: e !== null && e >= 7 ? e : 19,
 				selected: new Set(this._rooms.map((e) => e.slug)),
-				duration: t && os.includes(t) ? t : "Dauerhaft"
+				duration: t && ss.includes(t) ? t : "Dauerhaft"
 			};
 		}
 		this._ui = {}, this._sheet = e;
@@ -8122,7 +8129,7 @@ var ks = class extends Re {
 	_historyFor(e, t) {
 		let n = `${e}:${t}`, r = this._history[n];
 		if (r && (r.loading || Date.now() - r.end < 3e5)) return r;
-		let i = Ts[t], a = Date.now(), o = Math.floor((a - i.ms) / i.bucket) * i.bucket, s = {
+		let i = Es[t], a = Date.now(), o = Math.floor((a - i.ms) / i.bucket) * i.bucket, s = {
 			loading: !0,
 			temp: [],
 			hum: [],
@@ -8339,7 +8346,7 @@ var ks = class extends Re {
 		if (!this.hass || !this._config) return E;
 		let e = this._ctx(), t = this._config.nav !== !1;
 		return C`
-      <div class="wrap ${this._hdr ? `hdr-${this._hdr}` : ""}" style="background-image:${ws[this._page]}">
+      <div class="wrap ${this._hdr ? `hdr-${this._hdr}` : ""}" style="background-image:${Ts[this._page]}">
         <main class="content">${this._renderPage(e)}</main>
         ${t ? this._renderNav() : E}
       </div>
@@ -8421,12 +8428,12 @@ var ks = class extends Re {
 	}
 	_sheetView(e, t) {
 		switch (t.id) {
-			case "persons": return is(e);
+			case "persons": return as(e);
 			case "alarm": return es(e);
-			case "room": return bs(e, t.slug);
-			case "history": return vs(e, t.slug, t.range);
+			case "room": return xs(e, t.slug);
+			case "history": return ys(e, t.slug, t.range);
 			case "airing": return Qo(e);
-			case "allRooms": return us(e);
+			case "allRooms": return ds(e);
 			case "device": return Ki(e, t.entity, t);
 			case "robby": return io(e);
 			case "weather": return _o(e);
@@ -8439,7 +8446,7 @@ var ks = class extends Re {
 		}
 	}
 };
-Ss = ks, Ss.properties = {
+Cs = As, Cs.properties = {
 	hass: { attribute: !1 },
 	_config: { state: !0 },
 	_page: { state: !0 },
@@ -8458,17 +8465,17 @@ Ss = ks, Ss.properties = {
 	_series: { state: !0 },
 	_scenes: { state: !0 },
 	_navDrag: { state: !0 }
-}, Ss.styles = [
+}, Cs.styles = [
 	Vn,
 	lt,
 	Fi,
 	Ai,
 	ts,
-	as,
-	xs,
-	ys,
+	os,
+	Ss,
+	bs,
 	$o,
-	ds,
+	fs,
 	ra,
 	$i,
 	fa,
@@ -8607,12 +8614,12 @@ Ss = ks, Ss.properties = {
         color: var(--sd-muted);
       }
     `
-], customElements.get("ha-start-dashboard") || customElements.define("ha-start-dashboard", ks);
-var As = window;
-As.customCards = As.customCards ?? [], As.customCards.push({
+], customElements.get("ha-start-dashboard") || customElements.define("ha-start-dashboard", As);
+var js = window;
+js.customCards = js.customCards ?? [], js.customCards.push({
 	type: "ha-start-dashboard",
 	name: "Start Dashboard",
 	description: "Phone-first Start dashboard (Übersicht, Klima, Räume, Energie, Schutz) in one card.",
 	preview: !1
-}), console.info(`%c START-DASHBOARD %c ${Cs} `, "background:#bf9bff;color:#1d1030;font-weight:700", "background:#181a22;color:#fff");
-export { ks as HaStartDashboard };
+}), console.info(`%c START-DASHBOARD %c ${ws} `, "background:#bf9bff;color:#1d1030;font-weight:700", "background:#181a22;color:#fff");
+export { As as HaStartDashboard };
