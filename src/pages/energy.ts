@@ -76,7 +76,7 @@ export function renderEnergy(ctx: PageContext) {
           </button>
         </div>
         ${bat
-          ? html`<button class="bnode" aria-label="Akku, Ladestand-Verlauf anzeigen" @click=${() => chart('battery')}>
+          ? html`<button class="bnode" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
               ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
               <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
                 aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">

@@ -27,7 +27,7 @@ export type SheetState =
   | { id: 'weatherMetric'; metric: WeatherMetric }
   /** One forecast day; `date` is the daily forecast item's datetime. */
   | { id: 'weatherDay'; date: string }
-  /** Energy chart: 'pv' | 'import' | 'export' | 'house' | 'battery' | 'autarky' | 'selfuse' or a consumer's power sensor. */
+  /** Energy chart: 'pv' | 'import' | 'export' | 'house' | 'battery' (charged/discharged) | 'autarky' | 'selfuse' or a consumer's power sensor. */
   | { id: 'energyChart'; key: string; range: ChartRange; name?: string; back?: SheetState }
   /** Long-press sheet for a device; `back` returns to the sheet it was opened from. */
   | { id: 'device'; entity: string; back?: SheetState };

@@ -43,14 +43,15 @@ function labels(range: ChartRange, start: number, end: number): string[] {
  * - kWh: energy per hour/day (PV, grid import/export, house consumption, a consumer with an energy statistic)
  * - W: mean power (a consumer without an energy statistic)
  * - share: autarky / self-use in percent
- * - soc: battery charge level in percent
+ * The battery has its own sheet: energy charged and discharged.
  */
 export function energyChartSheet(ctx: PageContext, key: string, range: ChartRange, name?: string, back?: SheetState) {
+  if (key === 'battery') return batteryChartSheet(ctx, range);
   const { prefs } = ctx.energy();
   const role = ROLES[key];
   const share = SHARES[key];
   const ids = prefs ? { ...energyStatIds(prefs), ...batteryStatIds(prefs) } : null;
-  let kind: 'kWh' | 'W' | 'share' | 'soc' = 'kWh';
+  let kind: 'kWh' | 'W' | 'share' = 'kWh';
   let title: string;
   let color: string;
   let load: (() => ReturnType<typeof loadEnergy>) | null = null;
@@ -64,12 +65,6 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     title = 'Hausverbrauch';
     color = '#ffffff';
     if (ids) load = () => loadConsumption(ctx.hass, ids, range);
-  } else if (key === 'battery') {
-    kind = 'soc';
-    title = 'Akku-Ladestand';
-    color = '#30d158';
-    needsPrefs = false;
-    load = () => loadPower(ctx.hass, ent(ctx.config, 'battery_soc'), range);
   } else if (role) {
     title = role.name;
     color = role.color;
@@ -86,24 +81,20 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
       load = () => loadPower(ctx.hass, key, range);
     }
   }
-  const unit = kind === 'share' || kind === 'soc' ? '%' : kind;
+  const unit = kind === 'share' ? '%' : kind;
   const data = load
     ? ctx.series(`energy:${key}:${range}:${kind}`, load)
     : { loading: needsPrefs && !prefs, error: prefs ? 'nicht im Energie-Dashboard' : undefined, past: [], start: 0, end: 0 };
   const sum = data.past.reduce((s, p) => s + p.v, 0);
-  const vals = data.past.map((p) => p.v);
-  const soc = num(ctx.hass, ent(ctx.config, 'battery_soc'));
   const caption = !data.past.length
     ? undefined
     : kind === 'share'
       ? data.total != null ? `gesamt ${data.total} % ${share.total}` : undefined
-      : kind === 'soc'
-        ? `${soc !== null ? `jetzt ${fmt(soc)} % · ` : ''}${fmt(Math.min(...vals))} – ${fmt(Math.max(...vals))} %`
-        : kind === 'kWh'
-          ? `Summe ${fmt(sum, sum < 10 ? 2 : 1)} kWh`
-          : `Ø ${fmt(sum / data.past.length)} W`;
+      : kind === 'kWh'
+        ? `Summe ${fmt(sum, sum < 10 ? 2 : 1)} kWh`
+        : `Ø ${fmt(sum / data.past.length)} W`;
   const per = range === '24h' ? 'Stunde' : 'Tag';
-  const subtitle = { kWh: `kWh pro ${per}`, W: 'mittlere Leistung', share: `Anteil pro ${per}`, soc: `Mittel pro ${per}` }[kind];
+  const subtitle = { kWh: `kWh pro ${per}`, W: 'mittlere Leistung', share: `Anteil pro ${per}` }[kind];
 
   return sheet({
     title,
@@ -123,6 +114,45 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
         bars: kind === 'kWh' || kind === 'share', zero: true, max: unit === '%' ? 100 : undefined,
         labels: labels(range, data.start, data.end),
       })}
+    `,
+  });
+}
+
+const RANGE_TABS = (ctx: PageContext, key: string, range: ChartRange) => html`
+  <div class="tabs3" role="tablist" aria-label="Zeitraum">
+    ${RANGES.map((r) => html`<button role="tab" aria-selected=${r.id === range} class=${r.id === range ? 'sel' : ''}
+      @click=${() => ctx.openSheet({ id: 'energyChart', key, range: r.id })}>${r.name}</button>`)}
+  </div>`;
+
+/** Battery: kWh charged into and discharged from the battery per hour/day (energy dashboard battery source). */
+function batteryChartSheet(ctx: PageContext, range: ChartRange) {
+  const { prefs } = ctx.energy();
+  const ids = prefs ? batteryStatIds(prefs) : null;
+  const soc = num(ctx.hass, ent(ctx.config, 'battery_soc'));
+  const part = (list: string[] | undefined, tag: string) =>
+    list?.length
+      ? ctx.series(`energy:battery-${tag}:${range}`, () => loadEnergy(ctx.hass, list, range))
+      : { loading: !prefs, error: prefs ? 'kein Akku im Energie-Dashboard' : undefined, past: [], start: 0, end: 0 };
+  const charged = part(ids?.batteryIn, 'in');
+  const discharged = part(ids?.batteryOut, 'out');
+  const sum = (d: { past: { v: number }[] }) => d.past.reduce((s, p) => s + p.v, 0);
+  const figure = (title: string, color: string, data: typeof charged) =>
+    trendFigure({
+      title, color, unit: 'kWh', digits: 1, snap: 0.5, data, bars: true, zero: true,
+      caption: data.past.length ? `Summe ${fmt(sum(data), sum(data) < 10 ? 2 : 1)} kWh` : undefined,
+      labels: labels(range, data.start, data.end),
+    });
+  return sheet({
+    title: 'Akku',
+    subtitle: `${soc !== null ? `Ladestand ${fmt(soc)} % · ` : ''}kWh pro ${range === '24h' ? 'Stunde' : 'Tag'}`,
+    color: '#30d158',
+    glow: '#30d15833',
+    iconPath: I.bolt,
+    onClose: ctx.closeSheet,
+    body: html`
+      ${RANGE_TABS(ctx, 'battery', range)}
+      ${figure('Geladen', '#30d158', charged)}
+      ${figure('Entladen', '#ffd60a', discharged)}
     `,
   });
 }

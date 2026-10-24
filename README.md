@@ -243,7 +243,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
   export blue) with the battery as a node below the house: a ring shows the charge level, a
   vertical line runs up while it feeds the house and down while it charges (*Akku liefert* /
   *Akku lädt*). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
-  (PV + import + battery out − export − battery in), Akku = charge level. *Energie-Dashboard ›*
+  (PV + import + battery out − export − battery in), Akku = kWh charged and discharged
+  per hour/day (opens on 7 days). *Energie-Dashboard ›*
   opens HA's `/energy`.
 - PV now = `pv_power` plus the solar power sensors of HA's energy dashboard.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since

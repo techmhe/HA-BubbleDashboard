@@ -46,6 +46,7 @@ hass.callWS = (async (msg: Record<string, any>) => {
       energy_sources: [
         { type: 'solar', stat_energy_from: 'sensor.solarenergytotal' },
         { type: 'grid', stat_energy_from: 'sensor.stromverbrauch_shelly_kwh', stat_energy_to: 'sensor.ruckeinspeisung_shelly_kwh' },
+        { type: 'battery', stat_energy_from: 'sensor.akku_entladen_kwh', stat_energy_to: 'sensor.akku_geladen_kwh' },
       ],
       device_consumption: [],
     };
