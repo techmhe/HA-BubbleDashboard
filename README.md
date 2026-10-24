@@ -178,7 +178,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
   lights labelled `dashboard_gerat`, groups excluded; tap: Räume filtered *An*, hold: all off
   with confirm), Energie (grid import or export in W; tap: Energie), Alarm (tap: alarm sheet,
   hold: arm away with confirm). Long-press = 500 ms with haptic feedback.
-- **Aktuell** shows only what applies, else *Alles ruhig*: alarm triggered, front door open
+- **Aktuell** (two columns: urgent items and items with a button full width first, the rest as
+  half tiles) shows only what applies, else *Alles ruhig*: alarm triggered, front door open
   ≥ 5 min, DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
   running, windows open ≥ 20 min, appliance done (`input_boolean.*_fertig`, *OK* turns it
   off), Robby error / consumable at ≤ 0 min, waste the day before and on the day,

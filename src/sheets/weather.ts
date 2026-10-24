@@ -166,7 +166,7 @@ export function weatherDaySheet(ctx: PageContext, date: string) {
         : html`<div class="w-msg">Stündliche Werte gibt es erst näher am Tag.</div>`}
       ${d.temps.length > 1
         ? trendFigure({
-            title: 'Temperatur', color: '#ffc061', unit: '°C', digits: 1, snap: 2,
+            title: 'Temperatur', color: '#ffc061', unit: '°C', digits: 1, snap: 2, dot: false,
             data: { loading: false, past: d.temps, start: d.start, end: d.end },
             caption: `${fmt(Math.min(...d.temps.map((p) => p.v)), 1)} – ${fmt(Math.max(...d.temps.map((p) => p.v)), 1)} °C`,
             labels: [at(0), at(5), at(10), at(14), at(19)],

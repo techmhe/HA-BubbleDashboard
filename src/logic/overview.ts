@@ -367,3 +367,19 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
   });
 }
 
+
+/** Items that keep a full-width row: urgent ones, so their text stays readable. */
+const WIDE = new Set(['alarm', 'door', 'warn']);
+
+/**
+ * Two-column layout for "Aktuell": urgent and actionable items full width first, the rest as
+ * half tiles in their order; a lone half tile at the end takes the full width.
+ */
+export function nowLayout(items: NowItem[]): { item: NowItem; wide: boolean }[] {
+  const wide = items.filter((i) => i.action || WIDE.has(i.id));
+  const half = items.filter((i) => !wide.includes(i));
+  return [
+    ...wide.map((item) => ({ item, wide: true })),
+    ...half.map((item, i) => ({ item, wide: half.length % 2 === 1 && i === half.length - 1 })),
+  ];
+}

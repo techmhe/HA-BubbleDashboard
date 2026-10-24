@@ -3,7 +3,7 @@ import { hold } from '../components/hold';
 import { icon } from '../components/ui';
 import { I } from '../icons';
 import {
-  dateLine, greeting, lightsOn, nowItems, roomSummaries, statusBubbles, weatherInfo,
+  dateLine, greeting, lightsOn, nowItems, nowLayout, roomSummaries, statusBubbles, weatherInfo,
   type NowItem, type StatusBubble,
 } from '../logic/overview';
 import { ent } from '../logic/entities';
@@ -65,13 +65,13 @@ function itemTap(ctx: PageContext, n: NowItem): (() => void) | undefined {
   }
 }
 
-function renderItem(ctx: PageContext, n: NowItem) {
+function renderItem(ctx: PageContext, n: NowItem, wide = true) {
   const tap = itemTap(ctx, n);
   const act = n.action;
   return html`
-    <div class="now" style="background: linear-gradient(90deg, ${n.tint}, rgba(255,255,255,0.05) 75%)">
+    <div class="now ${wide ? 'wide' : ''}" style="background: linear-gradient(90deg, ${n.tint}, rgba(255,255,255,0.05) ${wide ? 75 : 100}%)">
       <button class="now-main" ?disabled=${!tap} @click=${() => tap?.()}>
-        <span class="circle" style="width:42px;height:42px;background:${n.color}">${icon(n.icon, 18, '#101010')}</span>
+        <span class="circle" style="width:34px;height:34px;background:${n.color}">${icon(n.icon, 16, '#101010')}</span>
         <span class="now-text">
           <span class="now-title ellipsis">${n.title}</span>
           <span class="now-sub ellipsis">${n.text}</span>
@@ -126,10 +126,10 @@ export function renderOverview(ctx: PageContext) {
           <span class="meta">${items.length || ''}</span>
         </div>
         ${items.length
-          ? items.map((n) => renderItem(ctx, n))
+          ? html`<div class="now-grid">${nowLayout(items).map((l) => renderItem(ctx, l.item, l.wide))}</div>`
           : html`
-            <div class="now calm">
-              <span class="circle" style="width:42px;height:42px;background:#30d158">${icon(I.check, 18, '#101010', 2.4)}</span>
+            <div class="now calm wide">
+              <span class="circle" style="width:34px;height:34px;background:#30d158">${icon(I.check, 16, '#101010', 2.4)}</span>
               <span class="now-text">
                 <span class="now-title">Alles ruhig</span>
                 <span class="now-sub">Gerade gibt es nichts zu tun</span>
@@ -236,14 +236,23 @@ export const overviewStyles = css`
     font-size: 11px;
     color: var(--sd-muted);
   }
+  .now-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
   .now {
     display: flex;
     align-items: center;
-    gap: 10px;
-    height: 58px;
+    gap: 8px;
+    height: 50px;
     padding: 0 8px;
-    border-radius: 29px;
+    border-radius: 25px;
     width: 100%;
+    min-width: 0;
+  }
+  .now.wide {
+    grid-column: 1 / -1;
   }
   .now-main {
     flex: 1;
@@ -251,7 +260,8 @@ export const overviewStyles = css`
     height: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    text-align: left;
   }
   .now-main:disabled {
     cursor: default;
@@ -265,19 +275,19 @@ export const overviewStyles = css`
   }
   .now-title {
     display: block;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
   }
   .now-sub {
     display: block;
-    font-size: 12px;
+    font-size: 11px;
     color: rgba(255, 255, 255, 0.8);
   }
   .now-action {
     flex-shrink: 0;
-    height: 34px;
+    height: 32px;
     padding: 0 14px;
-    border-radius: 17px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     font-size: 13px;

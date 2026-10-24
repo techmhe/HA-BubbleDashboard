@@ -21,6 +21,8 @@ export interface TrendOptions {
   zero?: boolean;
   /** Fixed top of the scale (100 for percentages). */
   max?: number;
+  /** Dot on the last point ("now"); off for curves that are not up to now. */
+  dot?: boolean;
   /** Text right of the title (sum, range, ...). */
   caption?: string;
   /** Labels under the chart, spread evenly. */
@@ -72,7 +74,7 @@ export function trendFigure(o: TrendOptions) {
                     ? svg`<line x1=${nowX} y1=${TOP - 6} x2=${nowX} y2=${BOTTOM} stroke="rgba(255,255,255,0.35)" stroke-dasharray="2 3"></line>
                         <text x=${nowX + 4} y=${TOP - 2} fill="rgba(255,255,255,0.7)" font-size="10">Vorhersage</text>`
                     : nothing}
-                  ${g.last ? svg`<circle cx=${g.last.x} cy=${g.last.y} r="4.5" fill=${o.color} stroke="#181a22" stroke-width="2"></circle>` : nothing}`}
+                  ${g.last && o.dot !== false ? svg`<circle cx=${g.last.x} cy=${g.last.y} r="4.5" fill=${o.color} stroke="#181a22" stroke-width="2"></circle>` : nothing}`}
             </svg>
             <div class="tr-x">${o.labels.map((l) => html`<span>${l}</span>`)}</div>`}
     </figure>
