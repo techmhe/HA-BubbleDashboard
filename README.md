@@ -298,6 +298,9 @@ activated scene while its entities stay untouched), PM2.5 / dew point / window f
 start, and the room's devices (`dashboard_gerat` + purifier; tap toggles). The
 temperature pill opens the history sheet: 24 h / 7 days (hourly means) / 30 days (daily
 means) from long-term statistics, falling back to raw history.
+Tapping the dew point fact opens a dew point chart (24 h / 3 days / 7 days from history): the
+room line, the outdoor dew point, and green bands where the room's `sensor.<slug>_luftung` said
+"Jetzt lüften" (dark) or "Lüften möglich" (light).
 
 ## Development
 

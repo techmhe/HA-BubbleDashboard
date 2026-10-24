@@ -329,3 +329,31 @@ export function timeChart(
   const lastP = pts[pts.length - 1];
   return { line, area, last: lastP ? { x: lastP[0], y: lastP[1] } : null, lo, hi, x, y };
 }
+
+export interface AiringBand {
+  from: number;
+  to: number;
+  level: 'now' | 'possible';
+}
+
+const AIRING_LEVEL: Record<string, AiringBand['level']> = { 'Jetzt lüften': 'now', 'Lüften möglich': 'possible' };
+
+/**
+ * Periods in which the room's airing sensor recommended airing ("Jetzt lüften") or allowed it
+ * ("Lüften möglich"), from its history rows (`s` state, `lu` seconds), clipped to [start, end].
+ */
+export function airingBands(rows: { s: string; lu: number }[], start: number, end: number): AiringBand[] {
+  const sorted = [...rows].sort((a, b) => a.lu - b.lu);
+  const out: AiringBand[] = [];
+  sorted.forEach((r, i) => {
+    const level = AIRING_LEVEL[r.s];
+    if (!level) return;
+    const from = Math.max(start, Math.round(r.lu * 1000));
+    const to = Math.min(end, i + 1 < sorted.length ? Math.round(sorted[i + 1].lu * 1000) : end);
+    if (to <= from) return;
+    const prev = out[out.length - 1];
+    if (prev && prev.level === level && prev.to === from) prev.to = to;
+    else out.push({ from, to, level });
+  });
+  return out;
+}

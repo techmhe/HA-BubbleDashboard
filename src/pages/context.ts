@@ -3,7 +3,7 @@ import type { Point } from '../logic/climate';
 import type { ForecastItem, WeatherMetric } from '../logic/weather';
 import type { EnergyPrefs, EnergyTotals } from '../logic/energy';
 import type { SceneConfig } from '../logic/devices';
-import type { ChartRange, SeriesResult } from '../data/series';
+import type { ChartRange, SeriesResult, DewRange } from '../data/series';
 import type { Room } from '../logic/rooms';
 import type { CardConfig, HomeAssistant, PageId } from '../types';
 import type { ConfirmOptions } from '../components/ui';
@@ -25,6 +25,8 @@ export type SheetState =
   | { id: 'care' }
   | { id: 'ac' }
   | { id: 'weatherMetric'; metric: WeatherMetric }
+  /** Room dew point vs. outdoor, with the airing recommendation as bands. */
+  | { id: 'dew'; slug: string; range: DewRange }
   /** One forecast day; `date` is the daily forecast item's datetime. */
   | { id: 'weatherDay'; date: string }
   /** Energy chart: 'pv' | 'import' | 'export' | 'house' | 'battery' (charged/discharged) | 'autarky' | 'selfuse' or a consumer's power sensor. */

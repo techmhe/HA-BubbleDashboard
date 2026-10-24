@@ -7,6 +7,7 @@ export function sheetParent(sh: SheetState): SheetState | null {
     case 'weatherDay':
       return { id: 'weather' };
     case 'history':
+    case 'dew':
       return { id: 'room', slug: sh.slug };
     case 'device':
     case 'energyChart':
@@ -21,6 +22,7 @@ export function sheetKey(sh: SheetState): string {
   switch (sh.id) {
     case 'room':
     case 'history':
+    case 'dew':
       return `${sh.id}:${sh.slug}`;
     case 'weatherMetric':
       return `${sh.id}:${sh.metric}`;

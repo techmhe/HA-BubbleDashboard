@@ -28,7 +28,10 @@ export function roomSheet(ctx: PageContext, slug: string) {
     c.pm25 !== null
       ? { value: fmt(c.pm25), label: 'PM2.5', icon: IC.leaf, c: c.aq!, tint: c.aq + '1f' }
       : null,
-    c.dew !== null ? { value: `${fmt(c.dew, 1)}°`, label: 'Taupunkt', icon: IC.drop, c: '#8fd8ff', tint: 'rgba(255,255,255,0.07)' } : null,
+    c.dew !== null
+      ? { value: `${fmt(c.dew, 1)}°`, label: 'Taupunkt', icon: IC.drop, c: '#8fd8ff', tint: 'rgba(143,216,255,0.12)',
+          tap: () => ctx.openSheet({ id: 'dew', slug, range: '24h' }) }
+      : null,
     room.window
       ? c.windowOpen
         ? { value: 'offen', label: 'Fenster', icon: I.window, c: '#ff453a', tint: 'rgba(255,69,58,0.14)' }
@@ -99,11 +102,12 @@ export function roomSheet(ctx: PageContext, slug: string) {
 
       ${facts.length
         ? html`<div class="facts" style="grid-template-columns: repeat(${facts.length}, minmax(0, 1fr))">
-            ${facts.map((f) => html`<div class="fact" style="background:${f.tint}">
-              ${icon(f.icon, 18, f.c, 2)}
-              <span class="fv">${f.value}</span>
-              <span class="fl">${f.label}</span>
-            </div>`)}
+            ${facts.map((f) => {
+              const inner = html`${icon(f.icon, 18, f.c, 2)}<span class="fv">${f.value}</span><span class="fl">${f.label}</span>`;
+              return 'tap' in f && f.tap
+                ? html`<button class="fact" style="background:${f.tint}" aria-label="${f.label}, Verlauf anzeigen" @click=${f.tap}>${inner}</button>`
+                : html`<div class="fact" style="background:${f.tint}">${inner}</div>`;
+            })}
           </div>`
         : nothing}
 

@@ -6,6 +6,7 @@ describe('sheet stack', () => {
     expect(sheetParent({ id: 'weatherMetric', metric: 'humidity' })).toEqual({ id: 'weather' });
     expect(sheetParent({ id: 'weatherDay', date: '2026-10-25T00:00:00Z' })).toEqual({ id: 'weather' });
     expect(sheetParent({ id: 'history', slug: 'bad', range: '7d' })).toEqual({ id: 'room', slug: 'bad' });
+    expect(sheetParent({ id: 'dew', slug: 'bad', range: '3d' })).toEqual({ id: 'room', slug: 'bad' });
     expect(sheetParent({ id: 'device', entity: 'light.a', back: { id: 'room', slug: 'bad' } })).toEqual({ id: 'room', slug: 'bad' });
     expect(sheetParent({ id: 'device', entity: 'light.a' })).toBeNull();
     const device = { id: 'device', entity: 'switch.tv', back: { id: 'room', slug: 'bad' } } as const;

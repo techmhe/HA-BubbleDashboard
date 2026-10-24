@@ -26,6 +26,7 @@ import { renderSecurity, securityStyles } from './pages/security';
 import { deviceSheet, deviceStyles } from './sheets/device';
 import { robbySheet, robbyStyles } from './sheets/robby';
 import { weatherDaySheet, weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
+import { dewSheet, dewStyles } from './sheets/dew';
 import { trendStyles } from './components/trend';
 import { careSheet, careStyles } from './sheets/care';
 import { acSheet, acStyles } from './sheets/ac';
@@ -613,6 +614,8 @@ export class HaStartDashboard extends LitElement {
         return energyChartSheet(ctx, sh.key, sh.range, sh.name, sh.back);
       case 'weatherMetric':
         return weatherMetricSheet(ctx, sh.metric);
+      case 'dew':
+        return dewSheet(ctx, sh.slug, sh.range);
       case 'weatherDay':
         return weatherDaySheet(ctx, sh.date);
     }
@@ -634,6 +637,7 @@ export class HaStartDashboard extends LitElement {
     securityStyles,
     robbyStyles,
     weatherStyles,
+    dewStyles,
     careStyles,
     acStyles,
     trendStyles,

@@ -51,6 +51,22 @@ hass.callWS = (async (msg: Record<string, any>) => {
       device_consumption: [],
     };
   }
+  if (msg.type === 'history/history_during_period' && (msg.entity_ids as string[]).some((id) => id.endsWith('_taupunkt'))) {
+    const start = Date.parse(msg.start_time);
+    const out: Record<string, { s: string; lu: number }[]> = {};
+    for (const id of msg.entity_ids as string[]) {
+      const rows = [];
+      for (let t = start, i = 0; t < Date.now(); t += 1800_000, i++) {
+        const h = new Date(t).getHours();
+        const inside = 12 + Math.sin(i / 9) * 0.8;
+        const outside = 8 + Math.sin((h - 15) / 24 * 2 * Math.PI) * 4;
+        if (id.endsWith('_luftung')) rows.push({ s: outside < inside - 3 ? 'Jetzt lüften' : outside < inside - 1 ? 'Lüften möglich' : 'Nicht lüften', lu: t / 1000 });
+        else rows.push({ s: String(id.includes('aussen') ? outside : inside), lu: t / 1000 });
+      }
+      out[id] = rows;
+    }
+    return out;
+  }
   if (msg.type === 'history/history_during_period') {
     const start = Date.parse(msg.start_time);
     const rows = [];

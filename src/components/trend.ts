@@ -27,6 +27,10 @@ export interface TrendOptions {
   caption?: string;
   /** Labels under the chart, spread evenly. */
   labels: string[];
+  /** Second, thinner line from data.compare (e.g. outdoor), on the same scale. */
+  compareColor?: string;
+  /** Background bands from data.bands, coloured by level. */
+  bandColors?: Record<string, string>;
 }
 
 /** Line or bar chart over time; a forecast part (data.future) is drawn dashed after a "jetzt" marker. */
@@ -35,9 +39,13 @@ export function trendFigure(o: TrendOptions) {
   const past = d.past ?? [];
   const future = d.future ?? [];
   const step = d.step ?? 0;
+  const compare = d.compare ?? [];
   const g = timeChart(past, d.start, d.end, W, TOP, BOTTOM, {
-    snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: future.map((p) => p.v),
+    snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: [...future, ...compare].map((p) => p.v),
   });
+  const cmp = compare.length
+    ? timeChart(compare, d.start, d.end, W, TOP, BOTTOM, { snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: [...past, ...future].map((p) => p.v) })
+    : null;
   const fut = future.length ? timeChart(future, d.start, d.end, W, TOP, BOTTOM, { snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: past.map((p) => p.v) }) : null;
   const unit = o.unit ? ` ${o.unit}` : '';
   const grid = [g.hi, (g.lo + g.hi) / 2, g.lo];
@@ -59,6 +67,9 @@ export function trendFigure(o: TrendOptions) {
               ${grid.map((v) => svg`
                 <line x1="0" y1=${g.y(v)} x2=${VW} y2=${g.y(v)} stroke="rgba(255,255,255,0.08)"></line>
                 <text x=${VW - 4} y=${g.y(v) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${fmt(v, v % 1 ? 1 : 0)}${unit}</text>`)}
+              ${(d.bands ?? []).map((band) => svg`<rect x=${g.x(band.from)} y=${TOP - 6} width=${Math.max(1, g.x(band.to) - g.x(band.from))}
+                height=${BOTTOM - TOP + 6} fill=${o.bandColors?.[band.level] ?? 'rgba(255,255,255,0.08)'}></rect>`)}
+              ${cmp?.line ? svg`<polyline points=${cmp.line} fill="none" stroke=${o.compareColor ?? 'rgba(255,255,255,0.6)'} stroke-width="1.6" stroke-linejoin="round" opacity="0.9"></polyline>` : nothing}
               ${o.bars && step
                 ? past.map((p) => {
                     const x0 = g.x(p.t);

@@ -1,4 +1,4 @@
-import { bucket, type Point } from '../logic/climate';
+import { airingBands, bucket, type AiringBand, type Point } from '../logic/climate';
 import { consumptionSeries, shareSeries, statChanges, type EnergyTotals, type ShareKind } from '../logic/energy';
 import { weatherSeries, type ForecastItem, type HistoryRow, type WeatherMetric } from '../logic/weather';
 import type { HomeAssistant } from '../types';
@@ -17,6 +17,10 @@ export interface SeriesResult {
   step?: number;
   /** Total over the whole range, where the mean of the buckets would be wrong (percentages). */
   total?: number | null;
+  /** Second line for comparison (e.g. outdoor dew point). */
+  compare?: Point[];
+  /** Background bands (e.g. when airing was recommended). */
+  bands?: AiringBand[];
 }
 
 type StatRow = { start: number | string; change?: number | null; mean?: number | null };
@@ -88,6 +92,43 @@ export async function loadConsumption(
   const base = [pv, imp, exp].find((r) => r.start) ?? pv;
   const past = consumptionSeries({ pv: pv.past, import: imp.past, export: exp.past, batteryOut: bOut.past, batteryIn: bIn.past });
   return { past, start: base.start, end: base.end, step: base.step };
+}
+
+export type DewRange = '24h' | '3d' | '7d';
+
+/**
+ * Room dew point with the outdoor dew point and the room's airing recommendation, from the
+ * recorder history (the room dew sensors keep no long-term statistics, so 7 days at most).
+ */
+export async function loadDewPoint(
+  hass: HomeAssistant, ids: { room: string; outdoor?: string; airing?: string }, range: DewRange,
+): Promise<SeriesResult> {
+  const now = Date.now();
+  const size = range === '24h' ? HOUR / 2 : HOUR;
+  const end = Math.ceil(now / size) * size;
+  const start = end - (range === '24h' ? 1 : range === '3d' ? 3 : 7) * DAY;
+  const entityIds = [ids.room, ids.outdoor, ids.airing].filter((x): x is string => !!x);
+  const rows = await hass.callWS<Record<string, HistoryRow[]>>({
+    type: 'history/history_during_period',
+    start_time: new Date(start).toISOString(),
+    end_time: new Date(now).toISOString(),
+    entity_ids: entityIds,
+    minimal_response: true,
+    no_attributes: true,
+    significant_changes_only: false,
+  });
+  // The first row is the state at the window start; clamp it so the line starts there.
+  const pts = (id?: string) =>
+    (id ? rows[id] ?? [] : [])
+      .map((r) => ({ t: Math.max(start, Math.round(r.lu * 1000)), v: Number(r.s) }))
+      .filter((p) => Number.isFinite(p.v));
+  return {
+    past: bucket(pts(ids.room), start, end, size),
+    compare: ids.outdoor ? bucket(pts(ids.outdoor), start, end, size) : undefined,
+    bands: ids.airing ? airingBands(rows[ids.airing] ?? [], start, now) : undefined,
+    start,
+    end,
+  };
 }
 
 /** Mean power per hour/day for sensors without an energy statistic. */
