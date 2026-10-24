@@ -3,7 +3,7 @@ import { sheet } from '../components/ui';
 import { trendFigure } from '../components/trend';
 import { I } from '../icons';
 import { loadEnergy, loadEnergyShare, loadPower, type ChartRange } from '../data/series';
-import { consumerEnergyStat, energyStatIds, type ShareKind } from '../logic/energy';
+import { batteryStatIds, consumerEnergyStat, energyStatIds, type ShareKind } from '../logic/energy';
 import { friendlyName, fmt } from '../logic/util';
 import type { PageContext, SheetState } from '../pages/context';
 
@@ -50,7 +50,7 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     title = share.name;
     color = share.color;
     unit = '%';
-    if (prefs) load = () => loadEnergyShare(ctx.hass, energyStatIds(prefs), range, share.kind);
+    if (prefs) load = () => loadEnergyShare(ctx.hass, { ...energyStatIds(prefs), ...batteryStatIds(prefs) }, range, share.kind);
   } else if (role) {
     title = role.name;
     color = role.color;

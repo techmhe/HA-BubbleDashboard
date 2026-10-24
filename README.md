@@ -241,7 +241,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - PV now = `pv_power` plus the solar power sensors of HA's energy dashboard.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since
   midnight), falling back to the daily utility meters: PV, Netzbezug, Eingespeist,
-  consumption (PV + import − export), autarky and PV self-use. Tiles open a chart (kWh per
+  consumption (PV + import + battery discharge − export − battery charge; the battery comes
+  from the energy dashboard's battery source), autarky and PV self-use. Tiles open a chart (kWh per
   hour for 24 h, per day for 7 / 30 days); the two split bars open autarky / self-use in
   percent per hour or day.
 - *Verbraucher jetzt*: every `*_power` sensor that sits in an area, one per device (measured

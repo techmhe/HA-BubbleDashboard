@@ -14,7 +14,7 @@ import { lensBox, tabAt } from './logic/gestures';
 import { applyHeader, removeHeader, type HeaderMode } from './header';
 import type { CardConfig, HomeAssistant, PageId } from './types';
 import { loadEnergyToday } from './data/series';
-import { energyStatIds, type EnergyPrefs } from './logic/energy';
+import { batteryStatIds, energyStatIds, type EnergyPrefs } from './logic/energy';
 import type { SceneConfig } from './logic/devices';
 import type { EnergyInfo, SeriesData } from './pages/context';
 import type { AllRoomsState, ForecastData, HistoryData, HistoryRange, PageContext, SheetState, Target } from './pages/context';
@@ -355,7 +355,7 @@ export class HaStartDashboard extends LitElement {
       this._energy = { ...this._energy, prefs };
       const ids = energyStatIds(prefs);
       if (ids.solar.length + ids.import.length + ids.export.length) {
-        const today = await loadEnergyToday(this.hass!, ids);
+        const today = await loadEnergyToday(this.hass!, { ...ids, ...batteryStatIds(prefs) });
         this._energy = { ...this._energy, today };
       }
     } catch (err) {

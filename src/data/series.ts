@@ -1,5 +1,5 @@
 import { bucket, type Point } from '../logic/climate';
-import { shareSeries, statChanges, type ShareKind } from '../logic/energy';
+import { shareSeries, statChanges, type EnergyTotals, type ShareKind } from '../logic/energy';
 import { weatherSeries, type ForecastItem, type HistoryRow, type WeatherMetric } from '../logic/weather';
 import type { HomeAssistant } from '../types';
 
@@ -61,16 +61,17 @@ export async function loadEnergy(hass: HomeAssistant, ids: string[], range: Char
 /** Autarky or self-use in percent per hour/day, from the energy dashboard's PV and grid statistics. */
 export async function loadEnergyShare(
   hass: HomeAssistant,
-  ids: { solar: string[]; import: string[]; export: string[] },
+  ids: { solar: string[]; import: string[]; export: string[]; batteryOut: string[]; batteryIn: string[] },
   range: ChartRange,
   kind: ShareKind,
 ): Promise<SeriesResult> {
   const none = (): Promise<SeriesResult> => Promise.resolve({ past: [], start: 0, end: 0 });
-  const [pv, imp, exp] = await Promise.all(
-    [ids.solar, ids.import, ids.export].map((list) => (list.length ? loadEnergy(hass, list, range) : none())),
-  );
+  const lists = kind === 'autarky'
+    ? [ids.solar, ids.import, ids.export, ids.batteryOut, ids.batteryIn]
+    : [ids.solar, ids.import, ids.export];
+  const [pv, imp, exp, bOut, bIn] = await Promise.all(lists.map((list) => (list.length ? loadEnergy(hass, list, range) : none())));
   const base = [pv, imp, exp].find((r) => r.start) ?? pv;
-  const share = shareSeries(kind, { pv: pv.past, import: imp.past, export: exp.past });
+  const share = shareSeries(kind, { pv: pv.past, import: imp.past, export: exp.past, batteryOut: bOut?.past, batteryIn: bIn?.past });
   return { past: share.points, start: base.start, end: base.end, step: base.step, total: share.total };
 }
 
@@ -91,11 +92,11 @@ export async function loadPower(hass: HomeAssistant, id: string, range: ChartRan
 
 /** Today's kWh per role from the energy dashboard statistics. */
 export async function loadEnergyToday(
-  hass: HomeAssistant, ids: { solar: string[]; import: string[]; export: string[] },
-): Promise<{ pv: number; import: number; export: number }> {
+  hass: HomeAssistant, ids: { solar: string[]; import: string[]; export: string[]; batteryOut: string[]; batteryIn: string[] },
+): Promise<EnergyTotals> {
   const midnight = new Date();
   midnight.setHours(0, 0, 0, 0);
-  const all = [...ids.solar, ...ids.import, ...ids.export];
+  const all = [...ids.solar, ...ids.import, ...ids.export, ...ids.batteryOut, ...ids.batteryIn];
   const rows = await hass.callWS<Record<string, { change?: number | null }[]>>({
     type: 'recorder/statistics_during_period',
     start_time: midnight.toISOString(),
@@ -104,7 +105,13 @@ export async function loadEnergyToday(
     types: ['change'],
     units: { energy: 'kWh' },
   });
-  return { pv: statChanges(rows, ids.solar), import: statChanges(rows, ids.import), export: statChanges(rows, ids.export) };
+  return {
+    pv: statChanges(rows, ids.solar),
+    import: statChanges(rows, ids.import),
+    export: statChanges(rows, ids.export),
+    batteryOut: statChanges(rows, ids.batteryOut),
+    batteryIn: statChanges(rows, ids.batteryIn),
+  };
 }
 
 /** Last 24 h from the weather entity's history (hourly means) and the next 24 h from the hourly forecast. */

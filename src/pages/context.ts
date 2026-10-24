@@ -1,7 +1,7 @@
 import type { TemplateResult } from 'lit';
 import type { Point } from '../logic/climate';
 import type { ForecastItem, WeatherMetric } from '../logic/weather';
-import type { EnergyPrefs } from '../logic/energy';
+import type { EnergyPrefs, EnergyTotals } from '../logic/energy';
 import type { SceneConfig } from '../logic/devices';
 import type { ChartRange, SeriesResult } from '../data/series';
 import type { Room } from '../logic/rooms';
@@ -56,7 +56,7 @@ export interface EnergyInfo {
   /** HA energy dashboard config, once loaded. */
   prefs?: EnergyPrefs;
   /** Today's kWh from the energy dashboard statistics, once loaded. */
-  today?: { pv: number; import: number; export: number };
+  today?: EnergyTotals;
 }
 
 export interface AllRoomsState {

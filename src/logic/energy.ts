@@ -39,6 +39,15 @@ export function energyStatIds(prefs: EnergyPrefs): EnergyStatIds {
   };
 }
 
+/** Battery discharge (energy into the house) and charge statistics of the energy dashboard. */
+export function batteryStatIds(prefs: EnergyPrefs): { batteryOut: string[]; batteryIn: string[] } {
+  const bat = (prefs.energy_sources ?? []).filter((s) => s.type === 'battery');
+  return {
+    batteryOut: bat.filter((s) => s.stat_energy_from).map((s) => s.stat_energy_from!),
+    batteryIn: bat.filter((s) => s.stat_energy_to).map((s) => s.stat_energy_to!),
+  };
+}
+
 /** PV power sensors: the configured one plus the solar power sensors of the energy dashboard. */
 export function pvSensors(config: CardConfig, prefs?: EnergyPrefs): string[] {
   const ids = [ent(config, 'pv_power'), ...(prefs ? energyStatIds(prefs).solarRate : [])];
@@ -115,12 +124,26 @@ function kwh(hass: HomeAssistant, id: string): number {
  * Today's totals: from energy dashboard statistics when the card has loaded them,
  * else from the daily utility meters.
  */
-export function energyToday(hass: HomeAssistant, config: CardConfig, stats?: { pv: number; import: number; export: number }): EnergyToday {
+export interface EnergyTotals {
+  pv: number;
+  import: number;
+  export: number;
+  batteryOut?: number;
+  batteryIn?: number;
+}
+
+/** Consumption and the locally covered part: PV + import + battery discharge − export − battery charge. */
+function consumption(pv: number, imp: number, exp: number, bOut = 0, bIn = 0) {
+  const r3 = (v: number) => Math.round(v * 1000) / 1000;
+  const consumed = r3(Math.max(0, pv + imp + bOut - exp - bIn));
+  return { consumed, local: r3(Math.max(0, consumed - imp)) };
+}
+
+export function energyToday(hass: HomeAssistant, config: CardConfig, stats?: EnergyTotals): EnergyToday {
   const pv = stats ? stats.pv : kwh(hass, ent(config, 'pv_today'));
   const imp = stats ? stats.import : kwh(hass, ent(config, 'import_today'));
   const exp = stats ? stats.export : kwh(hass, ent(config, 'export_today'));
-  const consumed = Math.max(0, pv + imp - exp);
-  const local = Math.max(0, consumed - imp);
+  const { consumed, local } = consumption(pv, imp, exp, stats?.batteryOut, stats?.batteryIn);
   return {
     pv,
     import: imp,
@@ -208,31 +231,42 @@ interface SharePoint {
  * "Heute" bars: autarky = locally covered share of consumption, self-use = share of solar
  * used in the house. Buckets without consumption (or without solar) are left out.
  */
-export function shareSeries(kind: ShareKind, parts: { pv: SharePoint[]; import: SharePoint[]; export: SharePoint[] }) {
+export function shareSeries(
+  kind: ShareKind,
+  parts: { pv: SharePoint[]; import: SharePoint[]; export: SharePoint[]; batteryOut?: SharePoint[]; batteryIn?: SharePoint[] },
+) {
   const byT = (p: SharePoint[]) => new Map(p.map((x) => [x.t, x.v]));
   const imp = byT(parts.import);
   const exp = byT(parts.export);
   const pv = byT(parts.pv);
-  const ts = [...new Set([...pv.keys(), ...imp.keys(), ...exp.keys()])].sort((a, b) => a - b);
-  const share = (p: number, i: number, e: number): number | null => {
+  const bo = byT(parts.batteryOut ?? []);
+  const bi = byT(parts.batteryIn ?? []);
+  const ts = [...new Set([...pv.keys(), ...imp.keys(), ...exp.keys(), ...bo.keys(), ...bi.keys()])].sort((a, b) => a - b);
+  const share = (p: number, i: number, e: number, o: number, n: number): number | null => {
     if (kind === 'selfuse') return p > 0.01 ? Math.max(0, p - e) / p : null;
-    const consumed = Math.max(0, p + i - e);
-    return consumed > 0.01 ? Math.max(0, consumed - i) / consumed : null;
+    const { consumed, local } = consumption(p, i, e, o, n);
+    return consumed > 0.01 ? local / consumed : null;
   };
   const points: SharePoint[] = [];
   let sp = 0;
   let si = 0;
   let se = 0;
+  let so = 0;
+  let sn = 0;
   for (const t of ts) {
     const p = pv.get(t) ?? 0;
     const i = imp.get(t) ?? 0;
     const e = exp.get(t) ?? 0;
+    const o = bo.get(t) ?? 0;
+    const n = bi.get(t) ?? 0;
     sp += p;
     si += i;
     se += e;
-    const v = share(p, i, e);
+    so += o;
+    sn += n;
+    const v = share(p, i, e, o, n);
     if (v !== null) points.push({ t, v: Math.round(Math.min(1, v) * 100) });
   }
-  const total = share(sp, si, se);
+  const total = share(sp, si, se, so, sn);
   return { points, total: total === null ? null : Math.round(Math.min(1, total) * 100) };
 }
