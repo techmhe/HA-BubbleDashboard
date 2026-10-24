@@ -223,7 +223,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
   `raumverbrauch_ignorieren` excludes one.
 - Device power: the device's measured `*_power` sensor, else Powercalc's `*_device_power`.
 - Tap toggles. Long-press (500 ms) opens a sheet by type:
-  - dimmable / colour light: brightness slider, colour temperature (`color_temp_kelvin`,
+  - dimmable / colour light: brightness slider (in the colour the light shows now: its colour
+    or its white tone), colour temperature (`color_temp_kelvin`,
     range from the light), colour swatches (`hs_color`), *Lesen* / *Gemütlich* /
     *Farbschleife* (only if the light has a `colorloop` effect);
   - plug, switch, on/off lamp, fan without presets: toggle, current power (→ the card's power chart), *Ausschalten in*

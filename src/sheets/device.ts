@@ -8,7 +8,9 @@ import {
   devicePower,
   displayName,
   lightCaps,
+  lightFill,
   lightPresets,
+  lightRgb,
   lightTone,
   purifierState,
   sheetKind,
@@ -76,6 +78,8 @@ export function deviceSheet(ctx: PageContext, id: string, self?: SheetState): Te
 
 // ---------- light ----------
 
+const BRIGHTNESS_FILL = 'linear-gradient(90deg, rgba(255,214,10,0.35), #ffe37a)';
+
 function lightSheet(ctx: PageContext, id: string) {
   const { hass } = ctx;
   const s = hass.states[id];
@@ -86,6 +90,9 @@ function lightSheet(ctx: PageContext, id: string) {
   const caps = lightCaps(a);
   const bri = on ? Math.max(1, Math.round((Number(a.brightness) / 255) * 100) || 100) : 0;
   const tone = on ? lightTone(a) : undefined;
+  // Brightness bar in the colour the light shows now (colour or white tone).
+  const rgb = on ? lightRgb(a) : null;
+  const tint = rgb ? lightFill(rgb) : { fill: BRIGHTNESS_FILL, icon: '#2b2200' };
   const ct = caps.colorTemp;
   const kelvin = Number(a.color_temp_kelvin);
   const call = (data: Record<string, unknown>) => ctx.call('light', 'turn_on', data, { entity_id: id });
@@ -101,10 +108,10 @@ function lightSheet(ctx: PageContext, id: string) {
     onClose: ctx.closeSheet,
     body: html`
       <start-dashboard-slider variant="bubble" label="Helligkeit" .min=${0} .max=${100} .step=${1} .value=${bri}
-        .format=${(v: number) => `${v} %`}
+        .fill=${tint.fill} .format=${(v: number) => `${v} %`}
         @slide-change=${(e: CustomEvent<{ value: number }>) =>
           e.detail.value <= 0 ? ctx.call('light', 'turn_off', {}, { entity_id: id }) : call({ brightness_pct: e.detail.value })}>
-        ${icon(ID.brightness, 22, bri > 8 ? '#2b2200' : '#fff', 2.2)}
+        ${icon(ID.brightness, 22, bri > 8 ? tint.icon : '#fff', 2.2)}
       </start-dashboard-slider>
 
       ${ct

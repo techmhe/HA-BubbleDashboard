@@ -279,3 +279,47 @@ export function activeScenes(hass: HomeAssistant, sceneIds: string[], configs: R
   }
   return out;
 }
+
+type Rgb = [number, number, number];
+const clamp255 = (v: number) => Math.round(Math.min(255, Math.max(0, v)));
+
+/** Approximate colour of a black body at `k` kelvin (Tanner Helland). */
+function kelvinRgb(k: number): Rgb {
+  const t = k / 100;
+  const r = t <= 66 ? 255 : 329.698727446 * Math.pow(t - 60, -0.1332047592);
+  const g = t <= 66 ? 99.4708025861 * Math.log(t) - 161.1195681661 : 288.1221695283 * Math.pow(t - 60, -0.0755148492);
+  const b = t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
+  return [clamp255(r), clamp255(g), clamp255(b)];
+}
+
+/** Hue/saturation (HA's hs_color) at full value. */
+function hsRgb(h: number, s: number): Rgb {
+  const f = (n: number) => {
+    const k = (n + h / 60) % 6;
+    return 255 * (1 - (s / 100) * Math.max(0, Math.min(k, 4 - k, 1)));
+  };
+  return [clamp255(f(5)), clamp255(f(3)), clamp255(f(1))];
+}
+
+/** The colour a light shows right now: its colour, or its white tone; null for dimmer-only lights. */
+export function lightRgb(a: Record<string, any>): Rgb | null {
+  if (COLOR_MODES.includes(a.color_mode)) {
+    if (Array.isArray(a.rgb_color) && a.rgb_color.length === 3) return a.rgb_color.map(Number) as Rgb;
+    if (Array.isArray(a.hs_color)) return hsRgb(Number(a.hs_color[0]), Number(a.hs_color[1]));
+    return null;
+  }
+  if (a.color_mode === 'color_temp') {
+    const k = Number(a.color_temp_kelvin);
+    return Number.isFinite(k) && k > 0 ? kelvinRgb(k) : null;
+  }
+  return null;
+}
+
+/** Fill for the brightness bar in that colour, and an icon colour that stays readable on it. */
+export function lightFill([r, g, b]: Rgb): { fill: string; icon: string } {
+  const lum = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  return {
+    fill: `linear-gradient(90deg, rgba(${r},${g},${b},0.35), rgb(${r},${g},${b}))`,
+    icon: lum > 0.5 ? '#2b2200' : '#fff',
+  };
+}
