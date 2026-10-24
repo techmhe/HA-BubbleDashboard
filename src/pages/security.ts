@@ -1,9 +1,10 @@
 import { css, html, nothing } from 'lit';
-import { icon, mdi } from '../components/ui';
+import { personAvatar } from '../components/avatar';
+import { icon } from '../components/ui';
 import { I } from '../icons';
 import { ent } from '../logic/entities';
 import { ALARM_MODES, alarmInfo, openings, openingsSummary } from '../logic/security';
-import { persons, presenceLabel, type PersonInfo } from '../logic/persons';
+import { persons, presenceLabel } from '../logic/persons';
 import { friendlyName } from '../logic/util';
 import type { PageContext } from './context';
 
@@ -12,22 +13,8 @@ const S = {
   muted: 'M4 9h4l5-4v14l-5-4H4zM17 9l4 6M21 9l-4 6',
   sound: 'M4 9h4l5-4v14l-5-4H4zM17 8a5 5 0 0 1 0 8M19.5 5.5a9 9 0 0 1 0 13',
   full: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
-  pin: 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
-  away: 'M5 12h14M13 6l6 6-6 6',
 };
 
-const PLACE_COLOR: Record<PersonInfo['place'], string> = { home: '#30d158', zone: '#64d2ff', away: '#8e8e93', unknown: '#8e8e93' };
-
-function avatar(ctx: PageContext, p: PersonInfo) {
-  const c = PLACE_COLOR[p.place];
-  return html`<button class="pp-av ${p.place === 'home' || p.place === 'zone' ? '' : 'out'}" title="${p.name}: ${p.zoneName}"
-    aria-label="${p.name}: ${p.zoneName}" @click=${() => ctx.moreInfo(p.id)}>
-    ${p.picture ? html`<img src=${p.picture} alt="" />` : html`<span class="pp-ini">${p.initials}</span>`}
-    <span class="pp-zone" style="background:${c}">
-      ${p.place === 'away' ? icon(S.away, 10, '#111', 2.6) : p.place === 'unknown' ? icon(S.pin, 10, '#111', 2.4) : mdi(p.zoneIcon, p.place === 'home' ? I.home : S.pin, '#111', 12)}
-    </span>
-  </button>`;
-}
 
 function cameraLabel(ctx: PageContext, id: string): string {
   if (ctx.config.names?.[id]) return ctx.config.names[id];
@@ -63,10 +50,10 @@ export function renderSecurity(ctx: PageContext) {
           <h1>Schutz</h1>
         </div>
         ${people.length
-          ? html`<div class="pp-pill" role="group" aria-label="Personen: ${presenceLabel(people)}">
-              <span class="pp-avs">${people.map((p) => avatar(ctx, p))}</span>
-              <span class="pp-label">${presenceLabel(people)}</span>
-            </div>`
+          ? html`<button class="pp-pill" aria-label="Personen: ${presenceLabel(people)}, Karte öffnen"
+              @click=${() => ctx.openSheet({ id: 'persons' })}>
+              ${people.map((p) => personAvatar(p))}
+            </button>`
           : nothing}
       </header>
 
@@ -153,22 +140,17 @@ export const securityStyles = css`
   .pp-pill {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     height: 52px;
-    padding: 0 14px 0 6px;
+    padding: 0 6px;
     border-radius: 26px;
     background: rgba(255, 255, 255, 0.08);
     flex-shrink: 0;
   }
-  .pp-avs {
-    display: flex;
-    gap: 6px;
-  }
   .pp-av {
+    display: block;
     position: relative;
-    width: 40px;
-    height: 40px;
-    padding: 0;
+    flex-shrink: 0;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.14);
     box-shadow: 0 0 0 2px #1c1e24;
@@ -204,11 +186,7 @@ export const securityStyles = css`
     place-items: center;
     box-shadow: 0 0 0 2px #1c1e24;
   }
-  .pp-label {
-    font-size: 13px;
-    font-weight: 700;
-    white-space: nowrap;
-  }
+
   .shead2 h1 {
     margin-top: 2px;
     font-size: 30px;

@@ -269,8 +269,9 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - Headline: open count or *Alles ruhig* and *x von y zu*.
 - Persons pill (top right, like the weather pill on Übersicht): every `person.*` with a
   device tracker (or `persons:` in the card config), picture or initials, a badge with the
-  zone's icon (green = home, blue = another zone, grey = away) and *Alle da* / *x von y da*.
-  Tap an avatar → HA's more-info (map).
+  zone's icon (green = home, blue = another zone, grey = away). Tap → *Personen* sheet: HA's
+  own map (`ha-map`, loaded via the map card) with persons and zones, plus one row per person
+  with zone and *seit* time.
 - Alarm pill with *zuletzt ausgelöst* (Alarmo's `last_triggered`) and buttons for the other
   modes (Abwesend / Zuhause / Nacht / Aus); the shield opens the alarm sheet.
 - Door camera live via HA's `ha-camera-stream` (muted by default; sound and fullscreen

@@ -16,6 +16,7 @@ export type HistoryRange = '24h' | '7d' | '30d';
 
 export type SheetState =
   | { id: 'alarm' }
+  | { id: 'persons' }
   | { id: 'room'; slug: string }
   | { id: 'history'; slug: string; range: HistoryRange }
   | { id: 'airing' }

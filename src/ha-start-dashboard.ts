@@ -34,6 +34,7 @@ import { energyChartSheet } from './sheets/energy-chart';
 import type { ForecastItem } from './logic/weather';
 import { airingSheet, airingStyles } from './sheets/airing';
 import { alarmSheet, alarmStyles } from './sheets/alarm';
+import { personsSheet, personsStyles } from './sheets/persons';
 import { allRoomsSheet, allRoomsStyles, DURATIONS } from './sheets/all-rooms';
 import { historySheet, historyStyles } from './sheets/history';
 import { roomSheet, roomStyles } from './sheets/room';
@@ -590,6 +591,8 @@ export class HaStartDashboard extends LitElement {
 
   private _sheetView(ctx: PageContext, sh: SheetState) {
     switch (sh.id) {
+      case 'persons':
+        return personsSheet(ctx);
       case 'alarm':
         return alarmSheet(ctx);
       case 'room':
@@ -627,6 +630,7 @@ export class HaStartDashboard extends LitElement {
     overviewStyles,
     climateStyles,
     alarmStyles,
+    personsStyles,
     roomStyles,
     historyStyles,
     airingStyles,

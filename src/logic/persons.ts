@@ -55,3 +55,14 @@ export function presenceLabel(list: PersonInfo[]): string {
   if (home === 0) return 'Niemand da';
   return `${home} von ${list.length} da`;
 }
+
+/** "seit 07:05" today, "seit Fr 18:30" within the last week, else "seit 10.10.". */
+export function sinceLabel(iso: string, now: Date): string {
+  const d = new Date(iso);
+  const hm = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((day(now) - day(d)) / 86_400_000);
+  if (days <= 0) return `seit ${hm}`;
+  if (days < 7) return `seit ${d.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '')} ${hm}`;
+  return `seit ${d.getDate()}.${d.getMonth() + 1}.`;
+}

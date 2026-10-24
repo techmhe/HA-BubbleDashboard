@@ -92,3 +92,13 @@ describe('energy cost', () => {
     expect(energyCost(gridTariff({ energy_sources: [], device_consumption: [] }), { import: 1, export: 0, local: 0 })).toBeNull();
   });
 });
+
+describe('person since', () => {
+  it('shows the time today and the weekday before', async () => {
+    const { sinceLabel } = await import('../src/logic/persons');
+    const now = new Date(2026, 9, 25, 9, 0);
+    expect(sinceLabel(new Date(2026, 9, 25, 7, 5).toISOString(), now)).toBe('seit 07:05');
+    expect(sinceLabel(new Date(2026, 9, 23, 18, 30).toISOString(), now)).toBe('seit Fr 18:30');
+    expect(sinceLabel(new Date(2026, 9, 10, 18, 30).toISOString(), now)).toBe('seit 10.10.');
+  });
+});
