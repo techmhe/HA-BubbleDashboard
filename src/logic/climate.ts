@@ -310,7 +310,7 @@ export interface TimeChart {
 /** Like chart(), but x follows time between start and end (for gaps, bars and past/future splits). */
 export function timeChart(
   points: Point[], start: number, end: number, width: number, top: number, bottom: number,
-  o: { padLo?: number; padHi?: number; snap?: number; zero?: boolean; extra?: number[] } = {},
+  o: { padLo?: number; padHi?: number; snap?: number; zero?: boolean; extra?: number[]; max?: number } = {},
 ): TimeChart {
   const snap = o.snap ?? 1;
   const vals = [...points.map((p) => p.v), ...(o.extra ?? [])];
@@ -319,6 +319,7 @@ export function timeChart(
   let lo = o.zero ? 0 : Math.floor((minV - (o.padLo ?? 0)) / snap) * snap;
   let hi = Math.ceil((maxV + (o.padHi ?? 0)) / snap) * snap;
   if (hi - lo < snap * 2) hi = lo + snap * 2;
+  if (o.max !== undefined) hi = o.max; // fixed top, e.g. 100 % for shares
   const r = (n: number) => Math.round(n * 10) / 10;
   const x = (t: number) => r(((t - start) / Math.max(1, end - start)) * width);
   const y = (v: number) => r(bottom - ((v - lo) / (hi - lo)) * (bottom - top));

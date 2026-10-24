@@ -95,7 +95,7 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
       </div>
       ${trendFigure({
         title, color, unit, digits: unit === 'kWh' ? 1 : 0, snap: unit === 'kWh' ? 0.5 : unit === '%' ? 25 : 10, data, caption,
-        bars: unit !== 'W', zero: true, labels: labels(range, data.start, data.end),
+        bars: unit !== 'W', zero: true, max: unit === '%' ? 100 : undefined, labels: labels(range, data.start, data.end),
       })}
     `,
   });

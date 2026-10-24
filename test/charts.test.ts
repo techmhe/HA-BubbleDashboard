@@ -84,3 +84,11 @@ describe('time chart', () => {
     expect(g.line).toBe('0,110 100,60 200,10');
   });
 });
+
+describe('fixed scale top', () => {
+  it('percent charts end at 100 % instead of rounding past it', () => {
+    const g = timeChart([{ t: 0, v: 40 }, { t: 50, v: 100 }], 0, 100, 200, 10, 110, { snap: 25, zero: true, padHi: 12.5, max: 100 });
+    expect([g.lo, g.hi]).toEqual([0, 100]);
+    expect(g.y(100)).toBe(10);
+  });
+});

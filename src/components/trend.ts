@@ -19,6 +19,8 @@ export interface TrendOptions {
   bars?: boolean;
   /** Scale starts at 0. */
   zero?: boolean;
+  /** Fixed top of the scale (100 for percentages). */
+  max?: number;
   /** Text right of the title (sum, range, ...). */
   caption?: string;
   /** Labels under the chart, spread evenly. */
@@ -32,9 +34,9 @@ export function trendFigure(o: TrendOptions) {
   const future = d.future ?? [];
   const step = d.step ?? 0;
   const g = timeChart(past, d.start, d.end, W, TOP, BOTTOM, {
-    snap: o.snap, zero: o.zero, padLo: o.snap / 2, padHi: o.snap / 2, extra: future.map((p) => p.v),
+    snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: future.map((p) => p.v),
   });
-  const fut = future.length ? timeChart(future, d.start, d.end, W, TOP, BOTTOM, { snap: o.snap, zero: o.zero, padLo: o.snap / 2, padHi: o.snap / 2, extra: past.map((p) => p.v) }) : null;
+  const fut = future.length ? timeChart(future, d.start, d.end, W, TOP, BOTTOM, { snap: o.snap, zero: o.zero, max: o.max, padLo: o.snap / 2, padHi: o.snap / 2, extra: past.map((p) => p.v) }) : null;
   const unit = o.unit ? ` ${o.unit}` : '';
   const grid = [g.hi, (g.lo + g.hi) / 2, g.lo];
   const nowX = future.length ? g.x(future[0].t) : null;

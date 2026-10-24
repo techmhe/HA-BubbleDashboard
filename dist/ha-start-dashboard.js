@@ -1743,7 +1743,7 @@ function Dn(e, t) {
 }
 function On(e, t, n, r, i, a, o = {}) {
 	let s = o.snap ?? 1, c = [...e.map((e) => e.v), ...o.extra ?? []], l = o.zero ? 0 : c.length ? Math.min(...c) : 0, u = c.length ? Math.max(...c) : 1, d = o.zero ? 0 : Math.floor((l - (o.padLo ?? 0)) / s) * s, f = Math.ceil((u + (o.padHi ?? 0)) / s) * s;
-	f - d < s * 2 && (f = d + s * 2);
+	f - d < s * 2 && (f = d + s * 2), o.max !== void 0 && (f = o.max);
 	let p = (e) => Math.round(e * 10) / 10, m = (e) => p((e - t) / Math.max(1, n - t) * r), h = (e) => p(a - (e - d) / (f - d) * (a - i)), g = e.map((e) => [m(e.t), h(e.v)]), _ = g.map((e) => `${e[0]},${e[1]}`).join(" "), ee = g.length ? `${_} ${g[g.length - 1][0]},${a} ${g[0][0]},${a}` : "", v = g[g.length - 1];
 	return {
 		line: _,
@@ -5438,12 +5438,14 @@ function Ma(e) {
 	let t = e.data, n = t.past ?? [], r = t.future ?? [], i = t.step ?? 0, a = On(n, t.start, t.end, ka, Aa, ja, {
 		snap: e.snap,
 		zero: e.zero,
+		max: e.max,
 		padLo: e.snap / 2,
 		padHi: e.snap / 2,
 		extra: r.map((e) => e.v)
 	}), o = r.length ? On(r, t.start, t.end, ka, Aa, ja, {
 		snap: e.snap,
 		zero: e.zero,
+		max: e.max,
 		padLo: e.snap / 2,
 		padHi: e.snap / 2,
 		extra: n.map((e) => e.v)
@@ -6238,6 +6240,7 @@ function so(e, t, n, r, i) {
 			caption: m,
 			bars: u !== "W",
 			zero: !0,
+			max: u === "%" ? 100 : void 0,
 			labels: oo(n, f.start, f.end)
 		})}
     `
@@ -7002,7 +7005,7 @@ var Oo = o`
     min-width: 0;
     text-align: left;
   }
-`, ko, Ao = "0.8.3", Q = [
+`, ko, Ao = "0.8.4", Q = [
 	{
 		id: "overview",
 		name: "Übersicht",
