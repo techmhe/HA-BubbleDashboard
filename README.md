@@ -215,7 +215,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - One card per room: the climate rooms plus every other area with a `dashboard_gerat`
   device (e.g. Garten), EG first, rooms without a floor last. Card: *x von y an*, a pill with
   temperature · humidity · room power (tap → room card), the area's scenes, and a 3-column
-  device grid (lights yellow, devices green, unavailable dashed; tile shows brightness or
+  device grid (lights in their current colour or white tone, else yellow; devices green;
+  unavailable dashed; tile shows brightness or
   current power).
 - Room power: `power:` from the room config, else `sensor.<slug>_leistung`, else the sum of
   `sensor.<area>_leistung` and `sensor.<part of slug>_leistung` (Küche & Esszimmer = kuche +

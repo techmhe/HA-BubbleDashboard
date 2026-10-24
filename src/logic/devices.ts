@@ -323,3 +323,17 @@ export function lightFill([r, g, b]: Rgb): { fill: string; icon: string } {
     icon: lum > 0.5 ? '#2b2200' : '#fff',
   };
 }
+
+/** Colours for a light's tile while it is on: its current colour, else the default yellow. */
+export function lightTint(a: Record<string, any>): { color: string; bg: string; text: string; icon: string } {
+  const rgb = lightRgb(a);
+  if (!rgb) return { color: '#ffd60a', bg: 'rgba(255,214,10,0.16)', text: '#ffe37a', icon: '#151005' };
+  const [r, g, b] = rgb;
+  const light = (v: number) => Math.round((v + 255) / 2);
+  return {
+    color: `rgb(${r},${g},${b})`,
+    bg: `rgba(${r},${g},${b},0.16)`,
+    text: `rgb(${light(r)},${light(g)},${light(b)})`,
+    icon: lightFill(rgb).icon === '#fff' ? '#fff' : '#151005',
+  };
+}

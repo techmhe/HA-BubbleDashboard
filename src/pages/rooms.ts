@@ -3,7 +3,7 @@ import { hold } from '../components/hold';
 import { icon, mdi, SCENE_COLORS } from '../components/ui';
 import { deviceIcon, I, IC, roomIcon } from '../icons';
 import { temp } from '../logic/climate';
-import { watts } from '../logic/devices';
+import { lightTint, watts } from '../logic/devices';
 import { applyRoomsFilter, roomsFilters, roomsHeader, roomsView, type RoomView } from '../logic/rooms-page';
 import { num } from '../logic/util';
 import { toggleDevice } from '../sheets/device';
@@ -92,16 +92,18 @@ function roomCard(ctx: PageContext, v: RoomView) {
         ? html`<div class="rgrid">
             ${v.devices.map((d) => {
               const light = d.kind === 'light';
-              const col = light ? '#ffd60a' : '#30d158';
-              const tint = light ? 'rgba(255,214,10,0.16)' : 'rgba(48,209,88,0.14)';
-              const stroke = d.on ? '#151005' : d.unavailable ? 'rgba(255,255,255,0.45)' : '#fff';
+              // Lights take their current colour (or white tone); other devices stay green.
+              const lt = light ? lightTint(ctx.hass.states[d.id]?.attributes ?? {}) : null;
+              const col = lt ? lt.color : '#30d158';
+              const tint = lt ? lt.bg : 'rgba(48,209,88,0.14)';
+              const stroke = d.on ? (lt ? lt.icon : '#151005') : d.unavailable ? 'rgba(255,255,255,0.45)' : '#fff';
               return html`<button class="rdev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${tint}` : ''}
                 aria-label="${d.name}: ${d.tileState}"
                 ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id }) })}>
                 <span class="circle" style=${circ(d.on ? col : 'rgba(255,255,255,0.1)', 32)}>${icon(deviceIcon(d.id, d.name), 15, stroke, 2.2)}</span>
                 <span class="rdtext">
                   <span class="ellipsis rdname">${d.name}</span>
-                  <span class="rdstate" style="color:${d.on ? (light ? '#ffe37a' : '#9af0b5') : 'rgba(255,255,255,0.55)'}">${d.tileState}</span>
+                  <span class="rdstate" style="color:${d.on ? (lt ? lt.text : '#9af0b5') : 'rgba(255,255,255,0.55)'}">${d.tileState}</span>
                 </span>
               </button>`;
             })}

@@ -4,7 +4,7 @@ import { icon, mdi, SCENE_COLORS, sheet } from '../components/ui';
 import { deviceIcon, I, IC, PRESET_ICONS, roomIcon } from '../icons';
 import { PRESETS, roomClimate, temp } from '../logic/climate';
 import { ent } from '../logic/entities';
-import { activeScenes, roomDevices, roomScenes } from '../logic/devices';
+import { activeScenes, lightTint, roomDevices, roomScenes } from '../logic/devices';
 import { fmt, num, state } from '../logic/util';
 import type { PageContext } from '../pages/context';
 import { toggleDevice } from './device';
@@ -122,10 +122,11 @@ export function roomSheet(ctx: PageContext, slug: string) {
       ${devices.length
         ? html`<div class="grid2">
             ${devices.map((d) => {
-              const col = d.kind === 'light' ? '#ffd60a' : '#30d158';
-              return html`<button class="dev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${col}24` : ''}
+              const lt = d.kind === 'light' ? lightTint(ctx.hass.states[d.id]?.attributes ?? {}) : null;
+              const col = lt ? lt.color : '#30d158';
+              return html`<button class="dev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${lt ? lt.bg : `${col}24`}` : ''}
                 ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id, back: { id: 'room', slug } }) })}>
-                <span class="circle" style="width:38px;height:38px;background:${d.on ? col : 'rgba(255,255,255,0.12)'}">${icon(deviceIcon(d.id, d.name), 16, d.on ? '#0b1a10' : '#fff', 2)}</span>
+                <span class="circle" style="width:38px;height:38px;background:${d.on ? col : 'rgba(255,255,255,0.12)'}">${icon(deviceIcon(d.id, d.name), 16, d.on ? (lt ? lt.icon : '#0b1a10') : '#fff', 2)}</span>
                 <span class="devtext"><span class="t1s ellipsis">${d.name}</span><span class="t2s ellipsis">${d.status}</span></span>
               </button>`;
             })}

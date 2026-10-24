@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { lightFill, lightRgb } from '../src/logic/devices';
+import { lightFill, lightRgb, lightTint } from '../src/logic/devices';
 
 describe('brightness bar in the light colour', () => {
   it('uses the colour of a colour light', () => {
@@ -19,5 +19,19 @@ describe('brightness bar in the light colour', () => {
   it('builds the fill and an icon colour that stays readable', () => {
     expect(lightFill([0, 0, 255])).toEqual({ fill: 'linear-gradient(90deg, rgba(0,0,255,0.35), rgb(0,0,255))', icon: '#fff' });
     expect(lightFill([255, 254, 250]).icon).toBe('#2b2200');
+  });
+});
+
+describe('light tile in the light colour', () => {
+  it('tints circle, tile and state text with the current colour', () => {
+    expect(lightTint({ color_mode: 'hs', rgb_color: [0, 0, 255] })).toEqual({
+      color: 'rgb(0,0,255)', bg: 'rgba(0,0,255,0.16)', text: 'rgb(128,128,255)', icon: '#fff',
+    });
+  });
+
+  it('keeps the yellow for dimmer-only lights', () => {
+    expect(lightTint({ color_mode: 'brightness' })).toEqual({
+      color: '#ffd60a', bg: 'rgba(255,214,10,0.16)', text: '#ffe37a', icon: '#151005',
+    });
   });
 });
