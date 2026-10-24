@@ -1,0 +1,356 @@
+import { css, html, nothing } from 'lit';
+import { icon } from '../components/ui';
+import { deviceIcon, I } from '../icons';
+import { watts } from '../logic/devices';
+import { consumers, energyHeadline, energyNow, energyToday, type Consumer } from '../logic/energy';
+import { fmt } from '../logic/util';
+import type { PageContext } from './context';
+
+const E = {
+  pylon: 'M12 2 6 22M12 2l6 20M8 9h8M7 14h10',
+  server: 'M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01',
+  question: 'M9 9a3 3 0 1 1 4 2.8c-.6.3-1 .9-1 1.5V14M12 18h.01',
+  battery: 'M3 8h15a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zM21 11v2',
+};
+
+const IDLE = 5;
+const kwh = (v: number) => `${fmt(v, 1)} kWh`;
+
+function consumerIcon(c: Consumer): string {
+  if (c.untracked) return E.question;
+  if (/netzwerk|nas|server|router|switch|rack/i.test(c.name)) return E.server;
+  return deviceIcon(c.id, c.name);
+}
+
+/** Line between two flow nodes; `dir` is the direction energy flows (or null when idle). */
+function flowLine(color: string, dir: 'left' | 'right' | null) {
+  if (!dir) return html`<div class="fline idle" style="border-color:${color}4d" aria-hidden="true"></div>`;
+  return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
+}
+
+export function renderEnergy(ctx: PageContext) {
+  const { hass, config } = ctx;
+  const energy = ctx.energy();
+  const now = energyNow(hass, config, energy.prefs);
+  const today = energyToday(hass, config, energy.today);
+  const top = consumers(hass, config, 6, energy.prefs);
+  const chart = (key: string, name?: string) => ctx.openSheet({ id: 'energyChart', key, range: '24h', name });
+  const max = Math.max(1, ...top.map((c) => c.value));
+  const exporting = now.export > now.import;
+  const gridW = exporting ? now.export : now.import;
+  const gridColor = exporting ? '#64d2ff' : '#ff9f0a';
+  const bat = now.battery;
+
+  return html`
+    <div class="energy">
+      <header class="ehead">
+        <div class="date">${energyHeadline(ctx.now, now)}</div>
+        <h1>Energie</h1>
+      </header>
+
+      <button class="flow" aria-label="Energie-Dashboard öffnen" @click=${() => ctx.navigate('/energy')}>
+        <div class="frow">
+          <div class="node">
+            <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 22, '#ffd60a', 2)}</span>
+            <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
+          </div>
+          ${flowLine('#ffd60a', now.pv > IDLE ? 'right' : null)}
+          <div class="node">
+            <span class="house">${icon(I.home, 22, '#101218', 2.2)}<span>${watts(now.house)}</span></span>
+            <span class="nl">Haus</span>
+          </div>
+          ${flowLine(gridColor, gridW > IDLE ? (exporting ? 'right' : 'left') : null)}
+          <div class="node">
+            <span class="circle" style="width:48px;height:48px;background:${gridW > IDLE ? gridColor : 'rgba(255,255,255,0.12)'}">${icon(E.pylon, 22, gridW > IDLE ? '#1a1206' : '#fff', 2.2)}</span>
+            <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
+          </div>
+        </div>
+        ${bat
+          ? html`<div class="batrow"><span class="bat">${icon(E.battery, 14, '#7ee8a0', 2.2)}Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}${bat.power > IDLE
+              ? ` · liefert ${watts(bat.power)}`
+              : bat.power < -IDLE
+                ? ` · lädt ${watts(-bat.power)}`
+                : ''}</span></div>`
+          : nothing}
+        <div class="elink">Energie-Dashboard ›</div>
+      </button>
+
+      <div class="section-head">
+        <h2>Heute</h2><span class="rule" aria-hidden="true"></span>
+        <span class="meta">ca. ${kwh(today.consumed)} verbraucht</span>
+      </div>
+      <div class="tiles">
+        ${[
+          { k: 'pv', v: today.pv, l: 'PV erzeugt', c: '#ffd60a' },
+          { k: 'import', v: today.import, l: 'Netzbezug', c: '#ff9f0a' },
+          { k: 'export', v: today.export, l: 'Eingespeist', c: '#64d2ff' },
+        ].map((t) => html`<button class="tile" aria-label="${t.l} ${kwh(t.v)}, Verlauf anzeigen" @click=${() => chart(t.k)}>
+          <span class="tdot" style="background:${t.c}"></span><span class="tv">${kwh(t.v)}</span><span class="tl">${t.l}</span></button>`)}
+      </div>
+
+      ${today.consumed > 0
+        ? html`<div class="split">
+            ${splitBar('Woher kam der Strom?', today.autarky !== null ? `${today.autarky} % autark` : '', '#7ee8a0',
+              [today.local, '#ffd60a', `PV & Akku ${kwh(today.local)}`], [today.import, '#ff9f0a', `Netz ${kwh(today.import)}`])}
+            ${today.pv > 0
+              ? splitBar('Wohin ging der Solarstrom?', `${today.selfUse} % selbst genutzt`, '#ffe066',
+                  [Math.max(0, today.pv - today.export), '#ffd60a', `Haus ${kwh(Math.max(0, today.pv - today.export))}`],
+                  [today.export, '#64d2ff', `Eingespeist ${kwh(today.export)}`])
+              : html`<div class="nopv">Heute noch kein Solarstrom.</div>`}
+          </div>`
+        : nothing}
+
+      <div class="section-head"><h2>Verbraucher jetzt</h2><span class="rule" aria-hidden="true"></span></div>
+      ${top.length
+        ? top.map((c) => html`
+            <button class="cons" aria-label="${c.name} ${watts(c.value)}, Verlauf anzeigen" @click=${() => chart(c.id, c.name)}>
+              <span class="cbar" style="width:${Math.round((c.value / max) * 100)}%" aria-hidden="true"></span>
+              <span class="circle" style="width:36px;height:36px;background:rgba(255,255,255,0.12)">${icon(consumerIcon(c), 16, '#fff', 2)}</span>
+              <span class="cname ellipsis">${c.name}</span>
+              <span class="cval">${watts(c.value)}</span>
+            </button>`)
+        : html`<div class="nopv">Keine Messwerte.</div>`}
+    </div>
+  `;
+}
+
+function splitBar(title: string, badge: string, badgeColor: string, a: [number, string, string], b: [number, string, string]) {
+  const total = a[0] + b[0] || 1;
+  const pa = Math.round((a[0] / total) * 100);
+  return html`<div>
+    <div class="shead"><span>${title}</span><span style="color:${badgeColor}">${badge}</span></div>
+    <div class="sbar" role="img" aria-label="${a[2]}, ${b[2]}"><span style="width:${pa}%;background:${a[1]}"></span><span style="width:${100 - pa}%;background:${b[1]}"></span></div>
+    <div class="slegend"><span>${a[2]}</span><span>${b[2]}</span></div>
+  </div>`;
+}
+
+export const energyStyles = css`
+  .energy {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ehead {
+    padding: 0 6px 4px;
+  }
+  .ehead h1 {
+    margin-top: 2px;
+    font-size: 30px;
+    font-weight: 700;
+  }
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 12px 12px;
+    border-radius: 34px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .frow {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) 86px minmax(0, 1fr) 70px;
+    align-items: center;
+  }
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .nv {
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .nl {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .house {
+    width: 78px;
+    height: 78px;
+    border-radius: 39px;
+    background: #fff;
+    color: #101218;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  .fline {
+    position: relative;
+    margin: 0 4px 34px;
+  }
+  .fline.idle {
+    height: 0;
+    border-top: 3px dotted;
+  }
+  .fline.live {
+    height: 4px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(90deg, var(--c) 0 10px, transparent 10px 16px);
+    animation: flow-right 0.8s linear infinite;
+  }
+  .fline.live.left {
+    animation-name: flow-left;
+  }
+  .fline .arrow {
+    position: absolute;
+    top: -6px;
+    width: 0;
+    height: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+  }
+  .fline.right .arrow {
+    right: -2px;
+    border-left: 10px solid var(--c);
+  }
+  .fline.left .arrow {
+    left: -2px;
+    border-right: 10px solid var(--c);
+  }
+  @keyframes flow-right {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 16px 0;
+    }
+  }
+  @keyframes flow-left {
+    from {
+      background-position: 16px 0;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .fline.live {
+      animation: none;
+    }
+  }
+  .batrow {
+    display: flex;
+    justify-content: center;
+  }
+  .bat {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 30px;
+    padding: 0 12px 0 8px;
+    border-radius: 15px;
+    background: rgba(48, 209, 88, 0.14);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .elink {
+    align-self: flex-end;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+    padding-right: 6px;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .tile {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.07);
+  }
+  .tdot {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    margin-bottom: 4px;
+  }
+  .tv {
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .tl {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .split {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .shead {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .sbar {
+    display: flex;
+    height: 14px;
+    border-radius: 7px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .slegend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.72);
+    margin-top: 4px;
+  }
+  .nopv {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0 4px;
+  }
+  .cons {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 48px;
+    padding: 0 14px 0 6px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+  }
+  .cbar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: rgba(255, 159, 10, 0.18);
+    border-radius: 24px;
+  }
+  .cons .circle,
+  .cname,
+  .cval {
+    position: relative;
+  }
+  .cname {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+  }
+  .cval {
+    font-size: 14px;
+    font-weight: 700;
+  }
+`;

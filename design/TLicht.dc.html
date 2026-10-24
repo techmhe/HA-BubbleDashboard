@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Licht</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1100px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(100% 30% at 50% 0%, rgba(255,214,10,0.2), transparent 70%); padding: 22px 14px 32px; display: flex; flex-direction: column; gap: 10px">
+
+<header style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 6px 4px">
+<div>
+<div style="font-size: 14px; color: rgba(255,255,255,0.72)">5 Lichter an · 2 Räume</div>
+<h1 style="margin: 2px 0 0; font-size: 30px; font-weight: 700">Licht</h1>
+</div>
+<button type="button" style="display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px 0 12px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 700">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3v8M6.4 6.4a8 8 0 1 0 11.2 0"></path></svg>Alle aus
+</button>
+</header>
+
+<!-- On now -->
+<div style="display: flex; align-items: center; gap: 10px; margin: 4px 6px 0">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">Gerade an</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{on}}" as="o" hint-placeholder-count="5">
+<button type="button" style="{{o.pill}}">
+<span style="width: 40px; height: 40px; border-radius: 20px; background: #ffd60a; display: flex; align-items: center; justify-content: center; flex-shrink: 0"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2b2200" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{o.icon}}"></path></svg></span>
+<span style="text-align: left; min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600">{{o.name}}</span><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.82)">{{o.room}}</span></span>
+</button>
+</sc-for>
+</div>
+
+<!-- Rooms -->
+<sc-for list="{{floors}}" as="f" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 10px; margin: 8px 6px 0">
+<h2 style="margin: 0; font-size: 15px; font-weight: 600">{{f.name}}</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+</div>
+<sc-for list="{{f.rooms}}" as="r" hint-placeholder-count="3">
+<div style="{{r.wrap}}">
+<div style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 6px">
+<span style="{{r.circle}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="flex: 1"><span style="display: block; font-size: 15px; font-weight: 600">{{r.name}}</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">{{r.count}}</span></span>
+<button type="button" aria-label="{{r.name}} umschalten" style="{{r.toggle}}"><span style="{{r.knob}}"></span></button>
+</div>
+<sc-if value="{{r.open}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 0 8px 10px">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{r.scenes}}" as="s" hint-placeholder-count="3">
+<button type="button" style="height: 36px; border-radius: 18px; border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 12px; font-weight: 600">{{s.name}}</button>
+</sc-for>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{r.lights}}" as="l" hint-placeholder-count="6">
+<button type="button" style="{{l.style}}">{{l.name}}</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</sc-for>
+
+<nav aria-label="Bereiche" style="position: absolute; left: 14px; right: 14px; top: 768px; display: flex; gap: 4px; padding: 6px; border-radius: 34px; background: rgba(30,32,40,0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.55)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+<a href="{{n.href}}" aria-label="{{n.name}}" style="{{n.style}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{n.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg><sc-if value="{{n.active}}" hint-placeholder-val="{{ false }}">{{n.name}}</sc-if></a>
+</sc-for>
+</nav>
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 844px; border-top: 2px dashed rgba(255,214,10,0.7)"><span style="position: absolute; right: 8px; top: 4px; font-size: 11px; font-weight: 600; color: #ffd60a">Bildschirmende</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      lamp: 'M9 2h6l3 8H6zM12 10v11M8 21h8',
+      desk: 'M4 5h16v10H4zM9 19h6M12 15v4',
+      bath: 'M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      pot: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2'
+    };
+    var lightChip = function (name, state) {
+      var on = state === 'on'; var na = state === 'na';
+      return { name: na ? name + ' · n. v.' : name,
+        style: 'height: 34px; padding: 0 12px; border-radius: 17px; font-size: 12px; font-weight: 600; ' + (on ? 'border: none; background: #ffd60a; color: #2b2200' : (na ? 'border: 1px dashed rgba(255,255,255,0.3); background: transparent; color: rgba(255,255,255,0.65)' : 'border: none; background: rgba(255,255,255,0.1); color: #fff')) };
+    };
+    var room = function (name, icon, onCount, total, open, lights, scenes) {
+      var on = onCount > 0;
+      return { name: name, icon: icon, open: open, lights: lights || [], scenes: scenes || [],
+        count: onCount + ' von ' + total + ' an',
+        wrap: 'border-radius: 28px; background: ' + (on ? 'linear-gradient(90deg, rgba(255,214,10,0.24), rgba(255,255,255,0.06) 70%)' : 'rgba(255,255,255,0.07)'),
+        circle: 'flex-shrink: 0; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: ' + (on ? '#ffd60a' : 'rgba(255,255,255,0.12)'),
+        stroke: on ? '#2b2200' : '#fff',
+        toggle: 'position: relative; width: 52px; height: 32px; border-radius: 16px; border: none; padding: 0; margin-right: 4px; background: ' + (on ? '#ffd60a' : 'rgba(255,255,255,0.18)'),
+        knob: 'position: absolute; top: 3px; ' + (on ? 'right: 3px' : 'left: 3px') + '; width: 26px; height: 26px; border-radius: 13px; background: #fff' };
+    };
+    var onPill = 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px; border-radius: 25px; border: none; color: #fff; background: linear-gradient(90deg, rgba(255,214,10,0.38), rgba(255,214,10,0.12))';
+    var nav = function (name, icon, href, active) {
+      return { name: name, icon: icon, href: href, active: active, c: active ? '#101218' : 'rgba(255,255,255,0.8)',
+        style: (active ? 'flex: 2; background: #fff; color: #101218' : 'flex: 1') + '; display: flex; align-items: center; justify-content: center; gap: 6px; height: 46px; border-radius: 23px; font-size: 13px; font-weight: 700' };
+    };
+    return {
+      on: [
+        { name: 'Stehlampe', room: 'Wohnzimmer', icon: I.lamp, pill: onPill },
+        { name: 'Sideboard', room: 'Wohnzimmer · 100 %', icon: I.bulb, pill: onPill },
+        { name: 'Couch', room: 'Wohnzimmer', icon: I.bulb, pill: onPill },
+        { name: 'Vase', room: 'Wohnzimmer', icon: I.bulb, pill: onPill },
+        { name: 'Uhr', room: 'Flur EG', icon: I.lamp, pill: onPill }
+      ],
+      floors: [
+        { name: 'Obergeschoss', rooms: [
+          room('Büro Max', I.desk, 0, 6, true,
+            [lightChip('Decke', 'off'), lightChip('Stehlampe', 'off'), lightChip('Stimmung', 'off'), lightChip('Lixhult', 'off'), lightChip('Regale', 'off'), lightChip('Tisch-LED', 'na')],
+            [{ name: 'Work' }, { name: 'Game' }, { name: 'Alles aus' }]),
+          room('Büro Anna', I.desk, 0, 2, false),
+          room('Badezimmer', I.bath, 0, 1, false),
+          room('Flur 1.OG', I.door, 0, 1, false)
+        ] },
+        { name: 'Erdgeschoss', rooms: [
+          room('Wohnzimmer', I.sofa, 4, 4, false),
+          room('Küche & Essen', I.pot, 0, 4, false),
+          room('Flur EG', I.door, 1, 1, false)
+        ] }
+      ],
+      nav: [nav('Übersicht', I.home, 'TUebersicht.dc.html', false), nav('Klima', I.thermo, 'TKlima.dc.html', false), nav('Licht', I.bulb, 'TLicht.dc.html', true), nav('Energie', I.bolt, 'TEnergie.dc.html', false), nav('Schutz', I.shield, 'TSchutz.dc.html', false)]
+    };
+  }
+}
+</script>
+</body>
+</html>

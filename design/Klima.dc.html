@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Klima</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d1220}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 2240px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #ffffff; background-color: #0d1220; background-image: radial-gradient(circle at 15% 6%, rgba(84,118,206,0.42), transparent 40%), radial-gradient(circle at 95% 35%, rgba(214,128,86,0.26), transparent 42%), radial-gradient(circle at 10% 75%, rgba(70,160,170,0.22), transparent 42%); padding: 0 16px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<!-- App bar -->
+<nav aria-label="Ansichten" style="display: flex; align-items: center; justify-content: space-between; height: 64px">
+<span style="font-size: 20px; font-weight: 700">Klima</span>
+<div style="display: flex; gap: 4px; padding: 4px; border-radius: 26px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12)">
+<a href="Main.dc.html" aria-label="Home" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z"></path></svg></a>
+<a href="Klima.dc.html" aria-label="Klima" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.2)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"></path></svg></a>
+<a href="#" aria-label="Sicherheit" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg></a>
+<a href="#" aria-label="Robby" style="width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.75)" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2.5"></circle></svg></a>
+</div>
+</nav>
+
+<!-- Central control -->
+<section aria-label="Zentral" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 26px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 12px">
+<div>
+<div style="font-size: 16px; font-weight: 600">Zentralheizung</div>
+<div style="font-size: 13px; color: rgba(255,255,255,0.72); margin-top: 2px">4 von 8 Räumen heizen</div>
+</div>
+<button type="button" aria-label="Zentralheizung umschalten" aria-pressed="true" style="width: 56px; height: 32px; border-radius: 16px; border: none; background: #ffb067; position: relative; padding: 0">
+<span style="position: absolute; top: 3px; right: 3px; width: 26px; height: 26px; border-radius: 13px; background: #1a1206"></span>
+</button>
+</div>
+<div style="font-size: 12px; color: rgba(255,255,255,0.72)">Alle Räume auf</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 13px; font-weight: 600">Eco</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 13px; font-weight: 600">Komfort</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 13px; font-weight: 600">Boost</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 13px; font-weight: 600">Frost</button>
+</div>
+</section>
+
+<!-- Ventilation -->
+<section aria-labelledby="vent-h" style="background: rgba(124,196,255,0.12); border: 1px solid rgba(124,196,255,0.32); border-radius: 26px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px">
+<div>
+<h2 id="vent-h" style="margin: 0; font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9fd3ff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg>Lüften
+</h2>
+<div style="font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 4px; line-height: 1.4">Außen 10,5 °C · 80 % · Taupunkt 7,2 °C<br>Draußen trockener – Lüften entfeuchtet überall.</div>
+</div>
+<div style="text-align: right; flex-shrink: 0">
+<div style="font-size: 11px; color: rgba(255,255,255,0.72)">Stoßlüften</div>
+<div style="font-size: 22px; font-weight: 700; color: #bfe2ff">15 min</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{ventTop}}" as="v" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; border-radius: 14px; background: rgba(13,18,32,0.35)">
+<span style="font-size: 14px; font-weight: 500">{{v.name}}</span>
+<span style="display: flex; align-items: center; gap: 10px; font-size: 13px">
+<span style="color: rgba(255,255,255,0.75)">{{v.hum}} %</span>
+<span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #7cc4ff; color: #08121c">Jetzt lüften</span>
+</span>
+</div>
+</sc-for>
+</div>
+<div style="font-size: 12px; color: rgba(255,255,255,0.72)">6 weitere Räume: Lüften möglich · Push, sobald ein Fenster wieder zu sollte</div>
+</section>
+
+<!-- Floors -->
+<sc-for list="{{floors}}" as="f" hint-placeholder-count="2">
+<section style="display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 6px 4px 0; font-size: 17px; font-weight: 600">{{f.name}}</h2>
+<sc-for list="{{f.rooms}}" as="r" hint-placeholder-count="4">
+<article style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 24px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<h3 style="margin: 0; font-size: 15px; font-weight: 600">{{r.name}}</h3>
+<span style="{{r.stateStyle}}">{{r.stateLabel}}</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1">{{r.cur}}°</span>
+<div style="display: flex; align-items: center; gap: 4px">
+<button type="button" aria-label="Soll senken" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; font-size: 22px">−</button>
+<div style="min-width: 60px; text-align: center">
+<div style="font-size: 18px; font-weight: 600; color: #ffd2a3">{{r.target}}°</div>
+<div style="font-size: 10px; color: rgba(255,255,255,0.72)">Soll</div>
+</div>
+<button type="button" aria-label="Soll erhöhen" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; font-size: 22px">+</button>
+</div>
+</div>
+<div role="group" aria-label="Preset" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{r.presets}}" as="p" hint-placeholder-count="4">
+<button type="button" style="{{p.style}}"><span style="display: block; font-size: 12px; font-weight: 600">{{p.name}}</span><span style="display: block; font-size: 11px; opacity: 0.75">{{p.temp}}°</span></button>
+</sc-for>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.75)">
+<span>{{r.hum}} % · Taupunkt {{r.tp}}°</span>
+<span style="{{r.ventStyle}}">{{r.ventLabel}}</span>
+</div>
+</article>
+</sc-for>
+<sc-if value="{{f.ac}}" hint-placeholder-val="{{ true }}">
+<article style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 24px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+<h3 style="margin: 0; font-size: 15px; font-weight: 600">Klimaanlage · Flur 1.OG</h3>
+<span style="font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8)">Aus</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1">20,5°</span>
+<div style="display: flex; align-items: center; gap: 4px">
+<button type="button" aria-label="Soll senken" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; font-size: 22px">−</button>
+<div style="min-width: 60px; text-align: center">
+<div style="font-size: 18px; font-weight: 600; color: #a9dcff">24°</div>
+<div style="font-size: 10px; color: rgba(255,255,255,0.72)">Soll</div>
+</div>
+<button type="button" aria-label="Soll erhöhen" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.18); background: rgba(255,255,255,0.08); color: #fff; font-size: 22px">+</button>
+</div>
+</div>
+<div role="group" aria-label="Modus" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 12px; font-weight: 600">Kühlen</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 12px; font-weight: 600">Trocknen</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff; font-size: 12px; font-weight: 600">Auto</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.5); background: rgba(255,255,255,0.18); color: #fff; font-size: 12px; font-weight: 600">Aus</button>
+</div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: rgba(255,255,255,0.75)">
+<span>Außengerät 10,5° · Lüfter auto</span>
+<span>Flüstermodus</span>
+</div>
+</article>
+</sc-if>
+</section>
+</sc-for>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2240}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var outTp = 7.2;
+    var fmt = function (n) { return n.toFixed(1).replace('.', ','); };
+    var short = function (n) { return fmt(n).replace(',0', ''); };
+    var chip = {
+      now: 'font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #7cc4ff; color: #08121c',
+      ok: 'font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(124,196,255,0.7); color: #bfe2ff',
+      no: 'font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #e0904a; color: #1a1006'
+    };
+    var label = { now: 'Jetzt lüften', ok: 'Lüften möglich', no: 'Nicht lüften' };
+    var tier = function (r) {
+      var d = r.tp - outTp;
+      if (d < 1) return 'no';
+      if (r.hum >= 60 && d >= 2) return 'now';
+      return 'ok';
+    };
+    var names = ['Eco', 'Komfort', 'Boost', 'Frost'];
+    var build = function (r) {
+      var t = tier(r);
+      return {
+        name: r.name, cur: fmt(r.cur), target: fmt(r.target), hum: Math.round(r.hum), tp: fmt(r.tp),
+        stateLabel: r.heating ? 'Heizt' : 'Ruht',
+        stateStyle: r.heating
+          ? 'font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: rgba(255,176,103,0.2); color: #ffd2a3'
+          : 'font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 12px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8)',
+        ventLabel: label[t], ventStyle: chip[t],
+        presets: names.map(function (n, i) {
+          return {
+            name: n, temp: short(r.p[i]),
+            style: 'min-height: 44px; padding: 4px 2px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); color: #fff'
+          };
+        })
+      };
+    };
+    var og = [
+      { name: 'Büro Anna', cur: 19.0, target: 19.0, hum: 61.9, tp: 11.5, heating: true, p: [18.5, 19.5, 21.5, 7] },
+      { name: 'Büro Max', cur: 19.2, target: 19.0, hum: 56.8, tp: 10.4, heating: false, p: [18, 19.5, 21.5, 7] },
+      { name: 'Badezimmer', cur: 19.1, target: 19.0, hum: 61.2, tp: 11.4, heating: false, p: [18, 19, 22, 7] },
+      { name: 'Schlafzimmer', cur: 19.1, target: 19.0, hum: 58.0, tp: 10.6, heating: true, p: [18, 19, 20.5, 7] },
+      { name: 'Flur 1.OG', cur: 19.5, target: 19.0, hum: 59.0, tp: 11.3, heating: false, p: [18, 19, 20.5, 7] }
+    ];
+    var eg = [
+      { name: 'Wohnzimmer', cur: 19.9, target: 20.0, hum: 59.7, tp: 11.8, heating: true, p: [18, 19, 20, 7] },
+      { name: 'Küche & Esszimmer', cur: 19.5, target: 19.0, hum: 57.7, tp: 10.9, heating: false, p: [18, 19, 20.5, 7] },
+      { name: 'Flur EG', cur: 18.9, target: 19.0, hum: 57.8, tp: 10.4, heating: true, p: [18, 19, 20.5, 7] }
+    ];
+    return {
+      ventTop: [{ name: 'Badezimmer', hum: 61 }, { name: 'Büro Anna', hum: 62 }],
+      floors: [
+        { name: 'Obergeschoss', ac: true, rooms: og.map(build) },
+        { name: 'Erdgeschoss', ac: false, rooms: eg.map(build) }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

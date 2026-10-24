@@ -1,0 +1,632 @@
+import { css, html, LitElement, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { confirmSheet, icon, sheetStyles, type ConfirmOptions } from './components/ui';
+import { I } from './icons';
+import { bucket, stepTarget, type Point } from './logic/climate';
+import { ent, scriptService } from './logic/entities';
+import { dateLine } from './logic/overview';
+import { resolveRooms, type Room } from './logic/rooms';
+import { num } from './logic/util';
+import { baseStyles } from './styles';
+import { applyHeader, removeHeader, type HeaderMode } from './header';
+import type { CardConfig, HomeAssistant, PageId } from './types';
+import { loadEnergyToday } from './data/series';
+import { energyStatIds, type EnergyPrefs } from './logic/energy';
+import type { SceneConfig } from './logic/devices';
+import type { EnergyInfo, SeriesData } from './pages/context';
+import type { AllRoomsState, ForecastData, HistoryData, HistoryRange, PageContext, SheetState, Target } from './pages/context';
+import { climateStyles, renderClimate } from './pages/climate';
+import { overviewStyles, renderOverview } from './pages/overview';
+import { renderRooms, roomsStyles } from './pages/rooms';
+import { energyStyles, renderEnergy } from './pages/energy';
+import { renderSecurity, securityStyles } from './pages/security';
+import { deviceSheet, deviceStyles } from './sheets/device';
+import { robbySheet, robbyStyles } from './sheets/robby';
+import { weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
+import { trendStyles } from './components/trend';
+import { careSheet, careStyles } from './sheets/care';
+import { acSheet, acStyles } from './sheets/ac';
+import { energyChartSheet } from './sheets/energy-chart';
+import type { ForecastItem } from './logic/weather';
+import { airingSheet, airingStyles } from './sheets/airing';
+import { alarmSheet, alarmStyles } from './sheets/alarm';
+import { allRoomsSheet, allRoomsStyles, DURATIONS } from './sheets/all-rooms';
+import { historySheet, historyStyles } from './sheets/history';
+import { roomSheet, roomStyles } from './sheets/room';
+
+declare const __VERSION__: string;
+const VERSION = typeof __VERSION__ === 'string' ? __VERSION__ : 'dev';
+
+const PAGES: { id: PageId; name: string; icon: string; milestone: number }[] = [
+  { id: 'overview', name: 'Übersicht', icon: I.home, milestone: 1 },
+  { id: 'climate', name: 'Klima', icon: I.thermo, milestone: 2 },
+  { id: 'rooms', name: 'Räume', icon: I.grid, milestone: 3 },
+  { id: 'energy', name: 'Energie', icon: I.bolt, milestone: 4 },
+  { id: 'security', name: 'Schutz', icon: I.shield, milestone: 4 },
+];
+
+const PAGE_GLOW: Record<PageId, string> = {
+  overview: 'radial-gradient(100% 30% at 0% 0%, rgba(110,90,200,0.34), transparent 70%), radial-gradient(80% 30% at 100% 40%, rgba(90,200,250,0.12), transparent 70%)',
+  climate: 'radial-gradient(100% 30% at 50% 0%, rgba(255,140,60,0.26), transparent 70%), radial-gradient(80% 30% at 0% 55%, rgba(90,200,250,0.12), transparent 70%)',
+  rooms: 'radial-gradient(100% 28% at 50% 0%, rgba(255,214,10,0.18), transparent 70%)',
+  energy: 'radial-gradient(100% 28% at 50% 0%, rgba(48,209,88,0.2), transparent 70%)',
+  security: 'radial-gradient(100% 28% at 50% 0%, rgba(191,155,255,0.22), transparent 70%)',
+};
+
+const HOUR = 3600_000;
+const RANGE_SPEC: Record<HistoryRange, { ms: number; bucket: number; period: 'hour' | 'day' }> = {
+  '24h': { ms: 24 * HOUR, bucket: HOUR, period: 'hour' },
+  '7d': { ms: 7 * 24 * HOUR, bucket: HOUR, period: 'hour' },
+  '30d': { ms: 30 * 24 * HOUR, bucket: 24 * HOUR, period: 'day' },
+};
+const TARGET_DEBOUNCE_MS = 700;
+const TARGET_HOLD_MS = 15_000;
+
+function loadFont() {
+  const id = 'ha-start-dashboard-font';
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap';
+  document.head.appendChild(link);
+}
+
+export class HaStartDashboard extends LitElement {
+  static properties = {
+    hass: { attribute: false },
+    _config: { state: true },
+    _page: { state: true },
+    _sheet: { state: true },
+    _confirm: { state: true },
+    _now: { state: true },
+    _roomsFilter: { state: true },
+    _pending: { state: true },
+    _history: { state: true },
+    _allRooms: { state: true },
+    _ui: { state: true },
+    _forecast: { state: true },
+    _hdr: { state: true },
+    _energy: { state: true },
+    _series: { state: true },
+    _scenes: { state: true },
+  };
+
+  hass?: HomeAssistant;
+  private _config?: CardConfig;
+  private _page: PageId = 'overview';
+  private _sheet: SheetState | null = null;
+  private _confirm: Omit<ConfirmOptions, 'onClose'> | null = null;
+  private _now = new Date();
+  private _roomsFilter = 'all';
+  private _tick?: number;
+  private _fastTick?: number;
+  private _rooms: Room[] = [];
+  private _roomsKey?: unknown;
+  /** Optimistic values ("entity|attribute" -> value + time of the last tap), e.g. climate targets. */
+  private _pending: Record<string, { value: number; at: number }> = {};
+  private _ui: Record<string, unknown> = {};
+  /** Header mode actually applied to HA's toolbar ('' when HA's toolbar is untouched). */
+  private _hdr: HeaderMode | '' = '';
+  private _energy: EnergyInfo = {};
+  private _energyAt = 0;
+  private _energyLoading = false;
+  private _series: Record<string, SeriesData & { at: number }> = {};
+  private _scenes: Record<string, SceneConfig | undefined> | null = null;
+  private _forecast: ForecastData = { loading: false, hourly: [], daily: [], at: 0 };
+  private _debounce: Record<string, number> = {};
+  private _history: Record<string, HistoryData> = {};
+  private _allRooms: AllRoomsState = { temp: 19, selected: new Set(), duration: 'Dauerhaft' };
+
+  static getStubConfig(): Partial<CardConfig> {
+    return { page: 'overview' };
+  }
+
+  setConfig(config: CardConfig) {
+    if (!config) throw new Error('Invalid configuration');
+    if (config.page && !PAGES.some((p) => p.id === config.page)) {
+      throw new Error(`Unknown page "${config.page}" (use ${PAGES.map((p) => p.id).join(', ')})`);
+    }
+    this._config = config;
+    this._page = config.page ?? 'overview';
+    this._roomsKey = undefined;
+    if (config.load_font !== false) loadFont();
+  }
+
+  getCardSize() {
+    return 12;
+  }
+
+  getGridOptions() {
+    return { columns: 'full', rows: 'auto' };
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    this._now = new Date();
+    this._tick = window.setInterval(() => (this._now = new Date()), 30_000);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.clearInterval(this._tick);
+    window.clearInterval(this._fastTick);
+    removeHeader(this);
+  }
+
+  protected updated(changed: PropertyValues) {
+    const mode = this._config?.header ?? 'hide';
+    const hdr = applyHeader(this, mode) ? mode : '';
+    if (hdr !== this._hdr) this._hdr = hdr;
+    // 1 s clock while the airing countdown is visible.
+    if (changed.has('_sheet')) {
+      window.clearInterval(this._fastTick);
+      this._fastTick = undefined;
+      if (this._sheet?.id === 'airing') this._fastTick = window.setInterval(() => (this._now = new Date()), 1000);
+    }
+  }
+
+  protected willUpdate(changed: PropertyValues) {
+    // Rooms only depend on the registries and config; recompute when those change.
+    if (this.hass && this._config && (changed.has('hass') || changed.has('_config'))) {
+      const key = [this.hass.areas, this.hass.entities, this.hass.devices, this._config];
+      const prev = this._roomsKey as unknown[] | undefined;
+      if (!prev || key.some((k, i) => k !== prev[i])) {
+        this._rooms = resolveRooms(this.hass, this._config);
+        this._roomsKey = key;
+      }
+    }
+    // Drop optimistic targets once HA reports them, or after a timeout.
+    if (this.hass && changed.has('hass')) {
+      const now = Date.now();
+      let dirty = false;
+      const next = { ...this._pending };
+      for (const [key, p] of Object.entries(next)) {
+        const [id, attr] = key.split('|');
+        const real = Number(this.hass.states[id]?.attributes[attr]);
+        if ((real === p.value && now - p.at > TARGET_DEBOUNCE_MS) || now - p.at > TARGET_HOLD_MS) {
+          delete next[key];
+          dirty = true;
+        }
+      }
+      if (dirty) this._pending = next;
+    }
+  }
+
+  private _target(id: string | undefined): number | undefined {
+    if (!id) return undefined;
+    const p = this._pending[`${id}|temperature`];
+    if (p) return p.value;
+    const t = Number(this.hass?.states[id]?.attributes.temperature);
+    return Number.isFinite(t) ? t : undefined;
+  }
+
+  /** Set an optimistic value and send it once the user stops tapping. */
+  private _setPending(id: string, attr: string, value: number, send: () => void) {
+    const key = `${id}|${attr}`;
+    this._pending = { ...this._pending, [key]: { value, at: Date.now() } };
+    window.clearTimeout(this._debounce[key]);
+    this._debounce[key] = window.setTimeout(send, TARGET_DEBOUNCE_MS);
+  }
+
+  private _stepTarget(id: string, delta: number) {
+    const a = this.hass?.states[id]?.attributes;
+    if (!a) return;
+    const cur = this._target(id) ?? 19;
+    const value = stepTarget(cur, delta, Number(a.min_temp) || 7, Number(a.max_temp) || 30, Number(a.target_temp_step) || 0.5);
+    this._setPending(id, 'temperature', value, () =>
+      this._call('climate', 'set_temperature', { temperature: value }, { entity_id: id }),
+    );
+  }
+
+  private async _call(domain: string, service: string, data?: Record<string, unknown>, target?: Target) {
+    try {
+      await this.hass!.callService(domain, service, data ?? {}, target as Record<string, unknown> | undefined);
+    } catch (err) {
+      console.error('[ha-start-dashboard]', domain, service, err);
+    }
+  }
+
+  private _openSheet(sheet: SheetState) {
+    if (sheet.id === 'allRooms' && this.hass) {
+      const t = num(this.hass, ent(this._config!, 'all_rooms_temperature'));
+      const d = this.hass.states[ent(this._config!, 'all_rooms_duration')]?.state;
+      this._allRooms = {
+        temp: t !== null && t >= 7 ? t : 19,
+        selected: new Set(this._rooms.map((r) => r.slug)),
+        duration: d && DURATIONS.includes(d) ? d : 'Dauerhaft',
+      };
+    }
+    this._ui = {};
+    this._sheet = sheet;
+  }
+
+  private _closeSheet() {
+    this._ui = {};
+    this._sheet = this._sheet?.id === 'device' && this._sheet.back ? this._sheet.back : null;
+  }
+
+  private _historyFor(slug: string, range: HistoryRange): HistoryData {
+    const key = `${slug}:${range}`;
+    const cached = this._history[key];
+    // refresh after 5 minutes
+    if (cached && (cached.loading || Date.now() - cached.end < 5 * 60_000)) return cached;
+    const spec = RANGE_SPEC[range];
+    const end = Date.now();
+    const start = Math.floor((end - spec.ms) / spec.bucket) * spec.bucket;
+    const entry: HistoryData = { loading: true, temp: [], hum: [], start, end };
+    this._history = { ...this._history, [key]: entry };
+    const room = this._rooms.find((r) => r.slug === slug);
+    if (room) this._loadHistory(key, room, start, end, spec).catch(() => undefined);
+    return entry;
+  }
+
+  private async _loadHistory(key: string, room: Room, start: number, end: number, spec: (typeof RANGE_SPEC)[HistoryRange]) {
+    const ids = [room.temperature, room.humidity];
+    const done = (temp: Point[], hum: Point[], error?: string) => {
+      this._history = { ...this._history, [key]: { loading: false, temp, hum, start, end, error } };
+    };
+    try {
+      // Long-term statistics first (hourly/daily means), raw history as fallback.
+      const stats = await this.hass!.callWS<Record<string, { start: number | string; mean?: number | null; state?: number | null }[]>>({
+        type: 'recorder/statistics_during_period',
+        start_time: new Date(start).toISOString(),
+        end_time: new Date(end).toISOString(),
+        statistic_ids: ids,
+        period: spec.period,
+        types: ['mean'],
+      });
+      const fromStats = (id: string): Point[] =>
+        (stats[id] ?? [])
+          .map((r) => ({ t: typeof r.start === 'number' ? r.start : Date.parse(r.start), v: Number(r.mean ?? r.state) }))
+          .filter((p) => Number.isFinite(p.v));
+      let temp = fromStats(ids[0]);
+      let hum = fromStats(ids[1]);
+      if (temp.length < 2 || hum.length < 2) {
+        const hist = await this.hass!.callWS<Record<string, { s: string; lu: number }[]>>({
+          type: 'history/history_during_period',
+          start_time: new Date(start).toISOString(),
+          end_time: new Date(end).toISOString(),
+          entity_ids: ids,
+          minimal_response: true,
+          no_attributes: true,
+        });
+        const raw = (id: string): Point[] =>
+          (hist[id] ?? []).map((r) => ({ t: r.lu * 1000, v: Number(r.s) })).filter((p) => Number.isFinite(p.v));
+        if (temp.length < 2) temp = bucket(raw(ids[0]), start, end, spec.bucket);
+        if (hum.length < 2) hum = bucket(raw(ids[1]), start, end, spec.bucket);
+      }
+      done(temp, hum);
+    } catch (err) {
+      done([], [], (err as { message?: string })?.message ?? String(err));
+    }
+  }
+
+  private _forecastData(): ForecastData {
+    const f = this._forecast;
+    if (!f.loading && Date.now() - f.at > 15 * 60_000) {
+      this._forecast = { ...f, loading: true };
+      this._loadForecast().catch(() => undefined);
+    }
+    return this._forecast;
+  }
+
+  private async _loadForecast() {
+    const entity = ent(this._config!, 'weather');
+    const get = async (type: 'hourly' | 'daily'): Promise<ForecastItem[]> => {
+      const res = await this.hass!.callWS<{ response?: Record<string, { forecast?: ForecastItem[] }> }>({
+        type: 'call_service',
+        domain: 'weather',
+        service: 'get_forecasts',
+        service_data: { type },
+        target: { entity_id: entity },
+        return_response: true,
+      });
+      return res.response?.[entity]?.forecast ?? [];
+    };
+    try {
+      const [hourly, daily] = await Promise.all([get('hourly'), get('daily')]);
+      this._forecast = { loading: false, hourly, daily, at: Date.now() };
+    } catch (err) {
+      // Keep old data; retry after a minute.
+      this._forecast = { ...this._forecast, loading: false, at: Date.now() - 14 * 60_000, error: (err as { message?: string })?.message ?? String(err) };
+    }
+  }
+
+  private _energyInfo(): EnergyInfo {
+    if (!this._energyLoading && Date.now() - this._energyAt > 5 * 60_000) {
+      this._energyLoading = true;
+      this._loadEnergy().finally(() => {
+        this._energyLoading = false;
+        this._energyAt = Date.now();
+      });
+    }
+    return this._energy;
+  }
+
+  private async _loadEnergy() {
+    try {
+      const prefs = this._energy.prefs ?? (await this.hass!.callWS<EnergyPrefs>({ type: 'energy/get_prefs' }));
+      this._energy = { ...this._energy, prefs };
+      const ids = energyStatIds(prefs);
+      if (ids.solar.length + ids.import.length + ids.export.length) {
+        const today = await loadEnergyToday(this.hass!, ids);
+        this._energy = { ...this._energy, today };
+      }
+    } catch (err) {
+      // No energy dashboard or no admin rights: the card falls back to the daily meters.
+      console.warn('[ha-start-dashboard] energy', err);
+    }
+  }
+
+  private _seriesData(key: string, load: () => Promise<import('./data/series').SeriesResult>, maxAgeMs = 5 * 60_000): SeriesData {
+    const cached = this._series[key];
+    if (cached && (cached.loading || Date.now() - cached.at < maxAgeMs)) return cached;
+    const entry = { loading: true, past: cached?.past ?? [], future: cached?.future, start: cached?.start ?? 0, end: cached?.end ?? 0, at: Date.now() };
+    this._series = { ...this._series, [key]: entry };
+    load()
+      .then((r) => (this._series = { ...this._series, [key]: { ...r, loading: false, at: Date.now() } }))
+      .catch((err) => (this._series = {
+        ...this._series,
+        [key]: { ...entry, loading: false, at: Date.now() - maxAgeMs + 60_000, error: (err as { message?: string })?.message ?? String(err) },
+      }));
+    return entry;
+  }
+
+  private _sceneConfigs(): Record<string, SceneConfig | undefined> {
+    if (this._scenes) return this._scenes;
+    this._scenes = {};
+    const hass = this.hass!;
+    if (!hass.callApi) return this._scenes;
+    const ids = Object.keys(hass.states).filter((id) => id.startsWith('scene.') && hass.states[id].attributes.id);
+    Promise.all(ids.map(async (id) => {
+      try {
+        const cfg = await hass.callApi!<{ entities?: SceneConfig }>('GET', `config/scene/config/${hass.states[id].attributes.id}`);
+        return [id, cfg.entities] as const;
+      } catch {
+        return [id, undefined] as const;
+      }
+    })).then((pairs) => (this._scenes = Object.fromEntries(pairs)));
+    return this._scenes;
+  }
+
+  private _ctx(): PageContext {
+    return {
+      hass: this.hass!,
+      config: this._config!,
+      rooms: this._rooms,
+      now: this._now,
+      go: (page, opts) => {
+        this._page = page;
+        this._sheet = null;
+        if (opts?.roomsFilter) this._roomsFilter = opts.roomsFilter;
+        window.scrollTo({ top: 0 });
+      },
+      moreInfo: (entityId) => {
+        this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId }, bubbles: true, composed: true }));
+      },
+      navigate: (path) => {
+        history.pushState(null, '', path);
+        window.dispatchEvent(new CustomEvent('location-changed', { detail: { replace: false } }));
+      },
+      openSheet: (sheet) => this._openSheet(sheet),
+      closeSheet: () => this._closeSheet(),
+      confirm: (opts) => (this._confirm = opts),
+      call: (domain, service, data, target) => this._call(domain, service, data, target),
+      runScript: (id, data) => this._call(...scriptService(id), data),
+      target: (id) => this._target(id),
+      stepTarget: (id, delta) => this._stepTarget(id, delta),
+      history: (slug, range) => this._historyFor(slug, range),
+      forecast: () => this._forecastData(),
+      energy: () => this._energyInfo(),
+      sceneConfigs: () => this._sceneConfigs(),
+      series: (key, load, maxAge) => this._seriesData(key, load, maxAge),
+      allRooms: this._allRooms,
+      setAllRooms: (patch) => (this._allRooms = { ...this._allRooms, ...patch }),
+      roomsFilter: this._roomsFilter,
+      setRoomsFilter: (f) => (this._roomsFilter = f),
+      pending: (id, attr) => this._pending[`${id}|${attr}`]?.value,
+      setPending: (id, attr, value, send) => this._setPending(id, attr, value, send),
+      ui: this._ui,
+      setUi: (patch) => (this._ui = { ...this._ui, ...patch }),
+    };
+  }
+
+  protected render() {
+    if (!this.hass || !this._config) return nothing;
+    const ctx = this._ctx();
+    const showNav = this._config.nav !== false;
+    return html`
+      <div class="wrap ${this._hdr ? `hdr-${this._hdr}` : ''}" style="background-image:${PAGE_GLOW[this._page]}">
+        <main class="content">${this._renderPage(ctx)}</main>
+        ${showNav ? this._renderNav() : nothing}
+      </div>
+      ${this._renderSheets(ctx)}
+    `;
+  }
+
+  private _renderPage(ctx: PageContext): TemplateResult {
+    if (this._page === 'overview') return renderOverview(ctx);
+    if (this._page === 'climate') return renderClimate(ctx);
+    if (this._page === 'rooms') return renderRooms(ctx);
+    if (this._page === 'energy') return renderEnergy(ctx);
+    if (this._page === 'security') return renderSecurity(ctx);
+    const page = PAGES.find((p) => p.id === this._page)!;
+    return html`
+      <header class="page-head">
+        <div class="date">${dateLine(ctx.now)}</div>
+        <h1>${page.name}</h1>
+      </header>
+      <div class="todo">
+        <span class="circle" style="width:42px;height:42px;background:rgba(255,255,255,0.12)">${icon(page.icon, 18, '#fff')}</span>
+        <span>Diese Seite kommt in Etappe ${page.milestone}.</span>
+      </div>
+    `;
+  }
+
+  private _renderNav() {
+    return html`
+      <nav class="nav" aria-label="Bereiche">
+        ${PAGES.map((p) => {
+          const active = p.id === this._page;
+          return html`
+            <button class="tab ${active ? 'active' : ''}" aria-label=${p.name} aria-current=${active ? 'page' : 'false'}
+              @click=${() => {
+                this._page = p.id;
+                if (p.id === 'rooms') this._roomsFilter = 'all';
+              }}>
+              ${icon(p.icon, 20, active ? '#101218' : 'rgba(255,255,255,0.8)')}${active ? p.name : nothing}
+            </button>
+          `;
+        })}
+      </nav>
+    `;
+  }
+
+  private _renderSheets(ctx: PageContext) {
+    if (this._confirm) {
+      return confirmSheet({ ...this._confirm, onClose: () => (this._confirm = null) });
+    }
+    const sh = this._sheet;
+    if (!sh) return nothing;
+    switch (sh.id) {
+      case 'alarm':
+        return alarmSheet(ctx);
+      case 'room':
+        return roomSheet(ctx, sh.slug);
+      case 'history':
+        return historySheet(ctx, sh.slug, sh.range);
+      case 'airing':
+        return airingSheet(ctx);
+      case 'allRooms':
+        return allRoomsSheet(ctx);
+      case 'device':
+        return deviceSheet(ctx, sh.entity);
+      case 'robby':
+        return robbySheet(ctx);
+      case 'weather':
+        return weatherSheet(ctx);
+      case 'care':
+        return careSheet(ctx);
+      case 'ac':
+        return acSheet(ctx);
+      case 'energyChart':
+        return energyChartSheet(ctx, sh.key, sh.range, sh.name);
+      case 'weatherMetric':
+        return weatherMetricSheet(ctx, sh.metric);
+    }
+  }
+
+  static styles = [
+    baseStyles,
+    sheetStyles,
+    overviewStyles,
+    climateStyles,
+    alarmStyles,
+    roomStyles,
+    historyStyles,
+    airingStyles,
+    allRoomsStyles,
+    roomsStyles,
+    deviceStyles,
+    energyStyles,
+    securityStyles,
+    robbyStyles,
+    weatherStyles,
+    careStyles,
+    acStyles,
+    trendStyles,
+    css`
+      .wrap {
+        position: relative;
+        min-height: calc(100vh - var(--header-height, 56px));
+        background-color: var(--sd-bg);
+        background-repeat: no-repeat;
+        display: flex;
+        flex-direction: column;
+      }
+      .wrap.hdr-hide,
+      .wrap.hdr-blend {
+        min-height: 100vh;
+        padding-top: env(safe-area-inset-top);
+      }
+      .wrap.hdr-blend {
+        padding-top: calc(var(--header-height, 56px) + env(safe-area-inset-top));
+      }
+      .content {
+        flex: 1;
+        width: 100%;
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 22px 14px 24px;
+      }
+      .nav {
+        position: sticky;
+        bottom: calc(16px + env(safe-area-inset-bottom));
+        z-index: 10;
+        width: calc(100% - 28px);
+        max-width: 452px;
+        margin: 0 auto calc(16px + env(safe-area-inset-bottom));
+        display: flex;
+        gap: 4px;
+        padding: 6px;
+        border-radius: 34px;
+        background: rgba(30, 32, 40, 0.88);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+      }
+      .tab {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 46px;
+        border-radius: 23px;
+        font-size: 13px;
+        font-weight: 700;
+        transition: flex 0.2s ease;
+      }
+      .tab.active {
+        flex: 2;
+        background: #fff;
+        color: #101218;
+      }
+      .page-head {
+        padding: 0 6px 12px;
+      }
+      .page-head h1 {
+        margin-top: 2px;
+        font-size: 30px;
+        font-weight: 700;
+      }
+      .todo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        height: 58px;
+        padding: 0 8px;
+        border-radius: 29px;
+        background: var(--sd-fill);
+        font-size: 14px;
+        color: var(--sd-muted);
+      }
+    `,
+  ];
+}
+
+if (!customElements.get('ha-start-dashboard')) {
+  customElements.define('ha-start-dashboard', HaStartDashboard);
+}
+
+const w = window as unknown as { customCards?: unknown[] };
+w.customCards = w.customCards ?? [];
+w.customCards.push({
+  type: 'ha-start-dashboard',
+  name: 'Start Dashboard',
+  description: 'Phone-first Start dashboard (Übersicht, Klima, Räume, Energie, Schutz) in one card.',
+  preview: false,
+});
+
+console.info(`%c START-DASHBOARD %c ${VERSION} `, 'background:#bf9bff;color:#1d1030;font-weight:700', 'background:#181a22;color:#fff');

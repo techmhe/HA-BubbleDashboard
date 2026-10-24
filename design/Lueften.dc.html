@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lüften und Push</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d1220}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1200px; box-sizing: border-box; font-family: Inter, system-ui, sans-serif; color: #ffffff; background-color: #0d1220; background-image: radial-gradient(circle at 20% 10%, rgba(70,150,220,0.4), transparent 45%), radial-gradient(circle at 90% 70%, rgba(84,118,206,0.3), transparent 45%); padding: 24px 16px 32px; display: flex; flex-direction: column; gap: 16px">
+
+<div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.72)">Beispielszenario · Werte illustrativ</div>
+<h1 style="margin: 0; font-size: 22px; font-weight: 700; line-height: 1.25">Fenster im Badezimmer offen</h1>
+
+<!-- In-app: window open card -->
+<article style="background: rgba(124,196,255,0.14); border: 1px solid rgba(124,196,255,0.4); border-radius: 24px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center">
+<span style="font-size: 15px; font-weight: 600">Badezimmer · Lüften läuft</span>
+<span style="font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: #7cc4ff; color: #08121c">9 / 15 min</span>
+</div>
+<div style="height: 8px; border-radius: 4px; background: rgba(255,255,255,0.14); overflow: hidden" aria-hidden="true"><div style="height: 8px; width: 60%; border-radius: 4px; background: #7cc4ff"></div></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; font-size: 12px; color: rgba(255,255,255,0.78)">
+<div><div style="font-size: 18px; font-weight: 600; color: #fff">55 %</div>Feuchte, Start 61 %</div>
+<div><div style="font-size: 18px; font-weight: 600; color: #fff">17,8°</div>Raum, Start 19,1°</div>
+<div><div style="font-size: 18px; font-weight: 600; color: #fff">7°</div>Heizung pausiert</div>
+</div>
+</article>
+
+<!-- Push notification mock -->
+<section aria-label="Push-Benachrichtigung" style="display: flex; flex-direction: column; gap: 8px">
+<div style="font-size: 13px; color: rgba(255,255,255,0.72); margin-left: 4px">nach 15 min aufs Handy</div>
+<div style="background: rgba(245,247,252,0.88); color: #11151c; border-radius: 22px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.35)">
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: #4a5260"><span style="font-weight: 600">HOME ASSISTANT</span><span>jetzt</span></div>
+<div style="font-size: 15px; font-weight: 700">Badezimmer: Fenster schließen</div>
+<div style="font-size: 14px; line-height: 1.4; color: #2b313b">15 min gelüftet · Feuchte 61 → 52 %. Heizung startet nach dem Schließen wieder.</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 6px">
+<button type="button" style="min-height: 44px; border-radius: 14px; border: none; background: #11151c; color: #fff; font-size: 14px; font-weight: 600">Ist zu</button>
+<button type="button" style="min-height: 44px; border-radius: 14px; border: 1px solid #b8bfcb; background: transparent; color: #11151c; font-size: 14px; font-weight: 600">+5 min</button>
+</div>
+</div>
+</section>
+
+<!-- Rules -->
+<section aria-labelledby="rules-h" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 24px; backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<h2 id="rules-h" style="margin: 0; font-size: 16px; font-weight: 600">Wann der Push kommt</h2>
+<sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+<div style="display: flex; gap: 12px; align-items: flex-start">
+<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 14px; background: rgba(124,196,255,0.2); color: #bfe2ff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center">{{r.n}}</span>
+<div>
+<div style="font-size: 14px; font-weight: 600">{{r.title}}</div>
+<div style="font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.4; margin-top: 2px">{{r.text}}</div>
+</div>
+</div>
+</sc-for>
+<div style="font-size: 12px; color: rgba(255,255,255,0.72); line-height: 1.4; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.12)">Erinnerung alle 5 min, bis das Fenster zu ist · nur an Personen, die zu Hause sind.</div>
+</section>
+
+<!-- Duration table -->
+<section aria-label="Lüftdauer" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+<h2 style="margin: 0; font-size: 16px; font-weight: 600">Stoßlüften nach Außentemperatur</h2>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; text-align: center">
+<sc-for list="{{table}}" as="t" hint-placeholder-count="5">
+<div style="{{t.style}}"><div style="font-size: 11px; color: rgba(255,255,255,0.75)">{{t.range}}</div><div style="font-size: 16px; font-weight: 700; margin-top: 2px">{{t.min}}′</div></div>
+</sc-for>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1200}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var cell = 'padding: 8px 2px; border-radius: 12px; background: rgba(255,255,255,0.06)';
+    var active = 'padding: 8px 2px; border-radius: 12px; background: rgba(124,196,255,0.25); border: 1px solid rgba(124,196,255,0.6)';
+    return {
+      rules: [
+        { n: 1, title: 'Lüftdauer erreicht', text: 'Fenster länger offen als die empfohlene Stoßlüftzeit für die aktuelle Außentemperatur.' },
+        { n: 2, title: 'Raum kühlt aus', text: 'Raumtemperatur seit dem Öffnen um 2 K gefallen – Wände sollen nicht auskühlen.' },
+        { n: 3, title: 'Lüften bringt nichts mehr', text: 'Taupunkt innen nur noch < 1 K über außen, oder Feuchte unter 50 %.' }
+      ],
+      table: [
+        { range: '< 0°', min: 5, style: cell },
+        { range: '0–10°', min: 10, style: cell },
+        { range: '10–15°', min: 15, style: active },
+        { range: '15–20°', min: 20, style: cell },
+        { range: '> 20°', min: 25, style: cell }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

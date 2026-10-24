@@ -1,0 +1,5 @@
+node_modules/
+.DS_Store
+*.log
+# dist/ is committed on purpose: HACS and direct resource URLs load dist/ha-start-dashboard.js
+CLAUDE.md

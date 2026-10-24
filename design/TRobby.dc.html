@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Popup Robby</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090c}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #08090c">
+<section role="dialog" aria-labelledby="rb-h" style="position: absolute; left: 0; right: 0; top: 10px; bottom: 0; border-radius: 42px 42px 0 0; background: #181a22; padding: 12px 12px 14px; display: flex; flex-direction: column; gap: 8px">
+
+<!-- Header -->
+<header style="display: flex; align-items: center; gap: 8px; height: 56px; padding: 0 6px; border-radius: 28px; background: rgba(255,255,255,0.08)">
+<span style="position: relative; width: 44px; height: 44px; border-radius: 22px; background: radial-gradient(circle at 40% 35%, #4a505c, #23262e); display: flex; align-items: center; justify-content: center"><span style="width: 14px; height: 14px; border-radius: 7px; background: #5a606c"></span><span style="position: absolute; bottom: 6px; width: 6px; height: 6px; border-radius: 3px; background: #30d158"></span></span>
+<span style="flex: 1; min-width: 0"><h1 id="rb-h" style="margin: 0; font-size: 17px; font-weight: 700">Robby</h1><span style="font-size: 12px; color: rgba(255,255,255,0.72)">Lädt · 100 %</span></span>
+<sc-for list="{{controls}}" as="c" hint-placeholder-count="3">
+<button type="button" aria-label="{{c.name}}" title="{{c.name}}" style="width: 40px; height: 40px; border-radius: 20px; border: none; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg></button>
+</sc-for>
+<a href="TUebersicht.dc.html" aria-label="Schließen" style="width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</header>
+
+<!-- Consumables -->
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{stats}}" as="s" hint-placeholder-count="4">
+<button type="button" style="{{s.style}}"><span style="display: block; font-size: 13px; font-weight: 700">{{s.value}}</span><span style="display: block; font-size: 10px; opacity: 0.8">{{s.name}}</span></button>
+</sc-for>
+</div>
+
+<!-- Programs -->
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Programme</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<span style="font-size: 11px; color: rgba(255,255,255,0.6)">Tippen startet</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{programs}}" as="p" hint-placeholder-count="6">
+<button type="button" style="display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px; height: 58px; padding: 6px 10px; box-sizing: border-box; border-radius: 20px; border: none; background: rgba(255,255,255,0.08); color: #fff; text-align: left">
+<span style="{{p.tagStyle}}">{{p.tag}}</span>
+<span style="font-size: 12px; font-weight: 600; line-height: 1.15">{{p.name}}</span>
+</button>
+</sc-for>
+</div>
+
+<!-- Custom -->
+<div style="display: flex; align-items: center; gap: 10px; margin: 4px 6px 0">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Selbst auswählen</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+</div>
+<section aria-label="Individuelle Reinigung" style="display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: 28px; border: 1px solid rgba(48,209,88,0.35); background: rgba(48,209,88,0.06)">
+
+<div role="tablist" aria-label="Karte" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; padding: 3px; border-radius: 19px; background: rgba(0,0,0,0.25)">
+<sc-for list="{{maps}}" as="m" hint-placeholder-count="3">
+<button type="button" role="tab" aria-selected="{{m.sel}}" onClick="{{m.pick}}" style="{{m.style}}">{{m.name}}</button>
+</sc-for>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px">
+<sc-for list="{{rooms}}" as="r" hint-placeholder-count="4">
+<button type="button" aria-pressed="{{r.sel}}" onClick="{{r.toggle}}" style="{{r.style}}">{{r.name}}</button>
+</sc-for>
+</div>
+
+<!-- Mode tiles -->
+<div role="radiogroup" aria-label="Modus" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{m.sel}}" onClick="{{m.pick}}" style="{{m.style}}">
+<span style="display: flex; gap: 2px">
+<sc-for list="{{m.icons}}" as="i" hint-placeholder-count="1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.d}}"></path></svg></sc-for>
+</span>
+<span style="font-size: 12px; font-weight: 700">{{m.name}}</span>
+</button>
+</sc-for>
+</div>
+
+<!-- Suction slider -->
+<sc-if value="{{showSuction}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 0 4px">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#7ee8a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4"></path></svg>
+<span style="font-weight: 600">Saugkraft</span><span style="flex: 1"></span><span style="font-weight: 700; color: #9af0b5">{{suctionName}}</span>
+</div>
+<div role="radiogroup" aria-label="Saugkraft" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; height: 34px">
+<sc-for list="{{suction}}" as="s" hint-placeholder-count="5">
+<button type="button" role="radio" aria-checked="{{s.sel}}" aria-label="{{s.name}}" onClick="{{s.pick}}" style="{{s.style}}"></button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<!-- Mop slider -->
+<sc-if value="{{showMop}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 6px">
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 0 4px">
+<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#8fd8ff" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg>
+<span style="font-weight: 600">Wasser</span><span style="flex: 1"></span><span style="font-weight: 700; color: #bfe8ff">{{mopName}}</span>
+</div>
+<div role="radiogroup" aria-label="Wischintensität" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; height: 34px">
+<sc-for list="{{mop}}" as="s" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{s.sel}}" aria-label="{{s.name}}" onClick="{{s.pick}}" style="{{s.style}}">
+<sc-for list="{{s.drops}}" as="d" hint-placeholder-count="1"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg></sc-for>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<!-- Passes + start -->
+<div style="display: flex; gap: 6px; margin-top: 2px">
+<div role="radiogroup" aria-label="Durchgänge" style="display: flex; gap: 3px; padding: 3px; border-radius: 25px; background: rgba(0,0,0,0.25)">
+<sc-for list="{{passes}}" as="p" hint-placeholder-count="2">
+<button type="button" role="radio" aria-checked="{{p.sel}}" onClick="{{p.pick}}" style="{{p.style}}">{{p.name}}</button>
+</sc-for>
+</div>
+<button type="button" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 50px; border-radius: 25px; border: none; background: #30d158; color: #0b1a10; font-size: 14px; font-weight: 700"><svg width="15" height="15" viewBox="0 0 24 24" fill="#0b1a10" aria-hidden="true"><path d="M7 4l13 8-13 8z"></path></svg>{{startLabel}}</button>
+</div>
+</section>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { map: 0, rooms: [true, false, true, false], mode: 1, suction: 3, mop: 2, passes: 1 };
+  }
+  renderVals() {
+    var self = this, st = this.state;
+    var I = {
+      fan: 'M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4',
+      drop: 'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z'
+    };
+    var stat = function (name, value, due) { return { name: name, value: value, style: 'padding: 7px 2px; border-radius: 16px; border: none; color: ' + (due ? '#ffc061' : '#fff') + '; background: ' + (due ? 'rgba(255,159,10,0.18)' : 'rgba(255,255,255,0.06)') }; };
+    var prog = function (tag, name, color) { return { tag: tag, name: name, tagStyle: 'height: 20px; padding: 0 8px; border-radius: 10px; display: flex; align-items: center; font-size: 11px; font-weight: 700; color: #101010; background: ' + color }; };
+    var mapNames = ['EG', 'OG', 'Schlafzimmer'];
+    var roomSets = [['Küche', 'Wohnen', 'Flur', 'Essen'], ['Büro 1', 'Büro 2', 'Flur', 'WC', 'Bad'], ['Schlafz.']];
+    var roomNames = roomSets[st.map];
+    var modeDefs = [
+      { name: 'Saugen', icons: [{ d: I.fan }] },
+      { name: 'Saugen + Wischen', icons: [{ d: I.fan }, { d: I.drop }] },
+      { name: 'Wischen', icons: [{ d: I.drop }] }
+    ];
+    var suctionNames = ['Leise', 'Normal', 'Turbo', 'Max', 'Max+'];
+    var mopNames = ['Mild', 'Standard', 'Intensiv'];
+    var nSel = roomNames.filter(function (n, i) { return st.rooms[i]; }).length;
+    var seg = function (i, active, n, color) {
+      var first = i === 0, last = i === n - 1;
+      return 'height: 34px; border: none; padding: 0; display: flex; align-items: center; justify-content: center; gap: 1px; ' +
+        'border-radius: ' + (first ? '17px 6px 6px 17px' : (last ? '6px 17px 17px 6px' : '6px')) + '; ' +
+        (i <= active ? 'background: ' + color + '; opacity: ' + (0.55 + 0.45 * (i + 1) / n) + '; color: #08121c' : 'background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5)');
+    };
+    return {
+      controls: [
+        { name: 'Pause', icon: 'M7 4h3v16H7zM14 4h3v16h-3z' },
+        { name: 'Zur Station', icon: 'M3 10.5 12 3l9 7.5V21H3z' },
+        { name: 'Orten', icon: 'M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12zM12 7a2 2 0 1 0 0 4a2 2 0 1 0 0-4' }
+      ],
+      stats: [stat('Filter', 'fällig', true), stat('Sensoren', 'fällig', true), stat('Hauptbürste', '127 h', false), stat('Seitenbürste', '27 h', false)],
+      programs: [
+        prog('EG', 'Saugen', '#64d2ff'), prog('EG', 'Saugen + Wischen', '#5ac8fa'), prog('EG', 'Täglich K/E/F', '#8fd8ff'),
+        prog('OG', 'Saugen', '#bf9bff'), prog('SZ', 'Schlafzimmer', '#ffb340'), prog('Alle', 'Karte komplett', '#7ee8a0')
+      ],
+      maps: mapNames.map(function (n, i) {
+        return { name: n, sel: String(st.map === i), pick: function () { self.setState({ map: i, rooms: i === 2 ? [true] : [] }); },
+          style: 'height: 34px; border-radius: 17px; border: none; font-size: 12px; font-weight: 700; ' + (st.map === i ? 'background: #fff; color: #101218' : 'background: transparent; color: rgba(255,255,255,0.8)') };
+      }),
+      rooms: roomNames.map(function (n, i) {
+        var sel = !!st.rooms[i];
+        return { name: n, sel: String(sel),
+          toggle: function () { var r = st.rooms.slice(); r[i] = !r[i]; self.setState({ rooms: r }); },
+          style: 'height: 38px; padding: 0 2px; border-radius: 19px; font-size: 12px; font-weight: 600; color: ' + (sel ? '#0b1a10' : '#fff') + '; ' + (sel ? 'border: none; background: #30d158' : 'border: 1px solid rgba(255,255,255,0.16); background: transparent') };
+      }),
+      modes: modeDefs.map(function (m, i) {
+        var sel = st.mode === i;
+        return { name: m.name, icons: m.icons, sel: String(sel), pick: function () { self.setState({ mode: i }); },
+          style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 60px; border-radius: 20px; border: none; ' + (sel ? 'background: #30d158; color: #0b1a10' : 'background: rgba(255,255,255,0.07); color: #fff') };
+      }),
+      showSuction: st.mode !== 2,
+      showMop: st.mode !== 0,
+      suctionName: suctionNames[st.suction],
+      mopName: mopNames[st.mop],
+      suction: suctionNames.map(function (n, i) { return { name: n, sel: String(st.suction === i), pick: function () { self.setState({ suction: i }); }, style: seg(i, st.suction, 5, '#30d158') }; }),
+      mop: mopNames.map(function (n, i) {
+        var drops = []; for (var k = 0; k <= i; k++) drops.push({ k: k });
+        return { name: n, drops: drops, sel: String(st.mop === i), pick: function () { self.setState({ mop: i }); }, style: seg(i, st.mop, 3, '#5ac8fa') };
+      }),
+      passes: [1, 2].map(function (p) {
+        var sel = st.passes === p;
+        return { name: p + '×', sel: String(sel), pick: function () { self.setState({ passes: p }); },
+          style: 'width: 44px; height: 44px; border-radius: 22px; border: none; font-size: 13px; font-weight: 700; ' + (sel ? 'background: #fff; color: #101218' : 'background: transparent; color: #fff') };
+      }),
+      startLabel: nSel > 0 ? (nSel === 1 ? '1 Raum starten' : nSel + ' Räume starten') : 'Raum wählen'
+    };
+  }
+}
+</script>
+</body>
+</html>

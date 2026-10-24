@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Popup Raumkarte</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090c}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #08090c">
+<section role="dialog" aria-labelledby="pp-h" style="position: absolute; left: 0; right: 0; top: 44px; bottom: 0; border-radius: 42px 42px 0 0; background: #181a22; background-image: radial-gradient(100% 30% at 50% 0%, rgba(255,159,10,0.2), transparent 70%); padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 10px">
+
+<header style="display: flex; align-items: center; gap: 8px; height: 60px; padding: 0 6px 0 8px; border-radius: 30px; background: rgba(255,255,255,0.08)">
+<span style="width: 44px; height: 44px; border-radius: 22px; background: #ff9f0a; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1a1206" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"></path></svg></span>
+<h1 id="pp-h" style="flex: 1; margin: 0; font-size: 18px; font-weight: 700">Wohnzimmer</h1>
+<a href="TGraph.dc.html" aria-label="Verlauf Temperatur und Luftfeuchte" style="display: flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border-radius: 20px; background: rgba(255,255,255,0.12); font-size: 13px; font-weight: 700">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc061" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"></path></svg>19,9°
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8fd8ff" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg>60 %
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 8-8"></path></svg>
+</a>
+<a href="TKlima.dc.html" aria-label="Schließen" style="width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</header>
+
+<!-- Temperature control -->
+<div style="border-radius: 34px; background: linear-gradient(140deg, rgba(255,159,10,0.3), rgba(255,255,255,0.05) 70%); padding: 18px 16px 14px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<button type="button" aria-label="Soll senken" style="width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 28px">−</button>
+<div style="text-align: center">
+<div style="font-size: 12px; font-weight: 600; color: #ffd29a; display: flex; align-items: center; justify-content: center; gap: 4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffd29a" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1 1.5 2 3 2-1-3 0-5 0-7z"></path></svg>heizt · Ventile 16 %</div>
+<div style="font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05">19,9°</div>
+<div style="font-size: 13px; color: rgba(255,255,255,0.8)">Soll <strong style="color: #ffc061">20,0°</strong></div>
+</div>
+<button type="button" aria-label="Soll erhöhen" style="width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 28px">+</button>
+</div>
+<div role="group" aria-label="Preset" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{presets}}" as="p" hint-placeholder-count="4">
+<button type="button" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); color: #fff">
+<span style="{{p.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600">{{p.name}}</span>
+<span style="font-size: 11px; color: rgba(255,255,255,0.75)">{{p.temp}}°</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<!-- Scenes -->
+<div role="group" aria-label="Szenen" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{scenes}}" as="s" hint-placeholder-count="3">
+<button type="button" style="display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 8px 0 6px; border-radius: 24px; border: none; background: rgba(255,255,255,0.08); color: #fff; text-align: left">
+<span style="{{s.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{s.stroke}}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.icon}}"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{s.name}}</span>
+</button>
+</sc-for>
+</div>
+
+<!-- Status bubbles -->
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{facts}}" as="f" hint-placeholder-count="3">
+<div style="{{f.style}}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{f.c}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{f.icon}}"></path></svg>
+<span style="font-size: 13px; font-weight: 700">{{f.value}}</span>
+<span style="font-size: 11px; color: rgba(255,255,255,0.72)">{{f.label}}</span>
+</div>
+</sc-for>
+</div>
+
+<!-- Vent -->
+<div style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 8px; border-radius: 28px; background: rgba(90,200,250,0.1); border: 1px solid rgba(90,200,250,0.25)">
+<span style="width: 40px; height: 40px; border-radius: 20px; background: rgba(90,200,250,0.25); display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fd8ff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg></span>
+<span style="flex: 1"><span style="display: block; font-size: 14px; font-weight: 600">Lüften möglich</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.75)">Taupunkt 11,8° vs. außen 7,2°</span></span>
+</div>
+
+<!-- Devices -->
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{devices}}" as="d" hint-placeholder-count="2">
+<button type="button" style="{{d.pill}}">
+<span style="{{d.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{d.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{d.icon}}"></path></svg></span>
+<span style="text-align: left"><span style="display: block; font-size: 13px; font-weight: 600">{{d.name}}</span><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.75)">{{d.state}}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      leaf: 'M5 19c8 0 14-6 14-14-8 0-14 6-14 14zM5 19l7-7',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      flame: 'M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1 1.5 2 3 2-1-3 0-5 0-7z',
+      snow: 'M12 2v20M4 6l16 12M20 6 4 18',
+      drop: 'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z',
+      window: 'M4 3h16v18H4zM12 3v18M4 12h16',
+      fan: 'M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4'
+    };
+    var circ = function (bg, s) { return 'flex-shrink: 0; width: ' + s + 'px; height: ' + s + 'px; border-radius: ' + (s / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var fact = function (value, label, icon, c, tint) { return { value: value, label: label, icon: icon, c: c, style: 'display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px; border-radius: 22px; background: ' + tint }; };
+    var dev = function (name, state, icon, on, color) {
+      return { name: name, state: state, icon: icon,
+        pill: 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 6px; border-radius: 25px; border: none; color: #fff; background: ' + (on ? 'rgba(48,209,88,0.14)' : 'rgba(255,255,255,0.06)'),
+        circle: circ(on ? color : 'rgba(255,255,255,0.12)', 38), stroke: on ? '#0b1a10' : '#fff' };
+    };
+    var scene = function (name, icon, color) { return { name: name, icon: icon, circle: circ(color, 36), stroke: color === 'rgba(255,255,255,0.14)' ? '#fff' : '#101010' }; };
+    return {
+      scenes: [
+        scene('Cozy Evening', 'M12 2c1.5 2 1.5 3.5 0 5-1.5-1.5-1.5-3 0-5zM9 9h6v13H9z', '#ffb340'),
+        scene('Heimkino', 'M4 4h16v16H4zM8 4v16M16 4v16M4 9h4M4 15h4M16 9h4M16 15h4', '#64d2ff'),
+        scene('Alles aus', 'M12 3v8M6.4 6.4a8 8 0 1 0 11.2 0', 'rgba(255,255,255,0.14)')
+      ],
+      presets: [
+        { name: 'Eco', temp: '18', icon: I.leaf, circle: circ('#30d158', 32) },
+        { name: 'Komfort', temp: '19', icon: I.sofa, circle: circ('#ff9f0a', 32) },
+        { name: 'Boost', temp: '20', icon: I.flame, circle: circ('#ff6b5e', 32) },
+        { name: 'Frost', temp: '7', icon: I.snow, circle: circ('#64d2ff', 32) }
+      ],
+      facts: [
+        fact('PM2.5 1', 'Luft gut', I.leaf, '#7ee8a0', 'rgba(48,209,88,0.12)'),
+        fact('11,8°', 'Taupunkt', I.drop, '#8fd8ff', 'rgba(255,255,255,0.07)'),
+        fact('3 zu', 'Fenster', I.window, '#7ee8a0', 'rgba(255,255,255,0.07)')
+      ],
+      devices: [
+        dev('Luftreiniger', 'An · auto', I.fan, true, '#30d158'),
+        dev('Entfeuchter', 'Aus', I.drop, false, '')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

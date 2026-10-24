@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>B3 Bubble Eine Seite</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1180px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(100% 40% at 0% 0%, rgba(110,90,200,0.32), transparent 70%), radial-gradient(80% 40% at 100% 50%, rgba(48,209,88,0.14), transparent 70%); padding: 22px 14px 32px; display: flex; flex-direction: column; gap: 12px">
+
+<header style="display: flex; justify-content: space-between; align-items: flex-end; padding: 0 6px">
+<div>
+<div style="font-size: 14px; color: rgba(255,255,255,0.72)">Sa, 24. Okt · 9° Regen</div>
+<h1 style="margin: 2px 0 0; font-size: 28px; font-weight: 700">Guten Abend</h1>
+</div>
+<div style="display: flex; gap: 6px">
+<span style="width: 40px; height: 40px; border-radius: 20px; background: rgba(191,155,255,0.2); display: flex; align-items: center; justify-content: center" title="Alarm unscharf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cdb3ff" stroke-width="2.2" stroke-linejoin="round" aria-label="Alarm unscharf" role="img"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg></span>
+<span style="width: 40px; height: 40px; border-radius: 20px; background: rgba(48,209,88,0.2); display: flex; align-items: center; justify-content: center" title="Fenster zu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7ee8a0" stroke-width="2.2" stroke-linejoin="round" aria-label="Alle Fenster zu" role="img"><path d="M4 3h16v18H4zM12 3v18M4 12h16"></path></svg></span>
+</div>
+</header>
+
+<!-- Climate grid -->
+<section aria-labelledby="k-h" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffb340" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z"></path></svg>
+<h2 id="k-h" style="margin: 0; font-size: 15px; font-weight: 600">Raumklima</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<span style="font-size: 12px; color: rgba(255,255,255,0.72)">außen 10,5° · TP 7,2°</span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{rooms}}" as="r" hint-placeholder-count="8">
+<a href="BubbleRoom.dc.html" style="{{r.pill}}">
+<span style="{{r.circle}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</span><span style="{{r.subStyle}}">{{r.hum}} %{{r.flag}}</span></span>
+<span style="font-size: 15px; font-weight: 700; margin-right: 8px">{{r.temp}}°</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<!-- Vent pill -->
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 8px; border-radius: 26px; background: linear-gradient(90deg, rgba(90,200,250,0.35), rgba(90,200,250,0.1)); border: 1px solid rgba(90,200,250,0.35)">
+<span style="width: 38px; height: 38px; border-radius: 19px; background: #5ac8fa; display: flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06202c" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg></span>
+<span style="flex: 1; font-size: 13px"><strong>Lüften:</strong> Bad, Büro Anna · 15 min</span>
+</a>
+
+<!-- On now -->
+<section aria-labelledby="on-h" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffd60a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg>
+<h2 id="on-h" style="margin: 0; font-size: 15px; font-weight: 600">Gerade an</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<button type="button" style="height: 30px; padding: 0 12px; border-radius: 15px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 12px; font-weight: 600">Alle aus</button>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{on}}" as="o" hint-placeholder-count="6">
+<button type="button" style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 6px; border-radius: 24px; border: none; background: linear-gradient(90deg, rgba(255,214,10,0.35), rgba(255,214,10,0.12)); color: #fff; text-align: left">
+<span style="{{o.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2200" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{o.icon}}"></path></svg></span>
+<span style="min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600">{{o.name}}</span><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.78)">{{o.room}}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<!-- Energy -->
+<section aria-label="Energie" style="display: flex; align-items: center; gap: 10px; height: 64px; padding: 0 8px; border-radius: 32px; background: rgba(255,255,255,0.07)">
+<span style="position: relative; width: 48px; height: 48px; border-radius: 24px; background: conic-gradient(#30d158 0 25%, rgba(255,255,255,0.12) 25% 100%); display: flex; align-items: center; justify-content: center">
+<span style="width: 38px; height: 38px; border-radius: 19px; background: #1c1f27; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700">25%</span>
+</span>
+<span style="flex: 1"><span style="display: block; font-size: 15px; font-weight: 600">Akku 0,52 kWh</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">entlädt 16 W</span></span>
+<span style="display: flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border-radius: 16px; background: rgba(255,214,10,0.18); color: #ffe066; font-size: 12px; font-weight: 600"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffe066" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2"></path></svg>0 W</span>
+<span style="display: flex; align-items: center; gap: 4px; height: 32px; padding: 0 10px; border-radius: 16px; background: rgba(255,159,10,0.18); color: #ffc061; font-size: 12px; font-weight: 600; margin-right: 4px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffc061" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg>92 W</span>
+</section>
+
+<!-- Below fold -->
+<section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 50px">
+<sc-for list="{{more}}" as="m" hint-placeholder-count="3">
+<a href="#" style="display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 6px; border-radius: 26px; background: rgba(255,255,255,0.07)">
+<span style="{{m.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg></span>
+<span style="min-width: 0"><span style="display: block; font-size: 12px; font-weight: 600">{{m.name}}</span><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.72)">{{m.state}}</span></span>
+</a>
+</sc-for>
+</section>
+<div style="display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 8px; border-radius: 26px; background: rgba(255,255,255,0.07); font-size: 13px">
+<span style="width: 38px; height: 38px; border-radius: 19px; background: #30d158; display: flex; align-items: center; justify-content: center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0b1a10" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg></span>
+<span><strong>Luft gut</strong> · PM2.5 1 µg/m³ · 5 Reiniger an</span>
+</div>
+
+<nav aria-label="Bereiche" style="position: absolute; left: 14px; right: 14px; top: 760px; display: flex; gap: 6px; padding: 6px; border-radius: 34px; background: rgba(30,32,40,0.85); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+<a href="#" style="{{n.style}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{n.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>{{n.label}}</a>
+</sc-for>
+</nav>
+
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 844px; border-top: 2px dashed rgba(255,214,10,0.7)"><span style="position: absolute; right: 8px; top: 4px; font-size: 11px; font-weight: 600; color: #ffd60a">Bildschirmende</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      tv: 'M3 6h18v12H3zM8 21h8',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      vacuum: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5',
+      desk: 'M4 5h16v10H4zM9 19h6M12 15v4',
+      bath: 'M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0',
+      bed: 'M3 18V7M3 13h18v5M7 13v-3h5v3',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      pot: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2',
+      trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'
+    };
+    var c = function (bg, s) { return 'flex-shrink: 0; width: ' + s + 'px; height: ' + s + 'px; border-radius: ' + (s / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var room = function (name, icon, temp, hum, heating, vent) {
+      return { name: name, icon: icon, temp: temp, hum: hum, flag: vent ? ' · lüften' : (heating ? ' · heizt' : ''),
+        subStyle: vent ? 'display: block; font-size: 11px; font-weight: 600; color: #8fd8ff' : (heating ? 'display: block; font-size: 11px; color: #ffc061' : 'display: block; font-size: 11px; color: rgba(255,255,255,0.72)'),
+        pill: 'display: flex; align-items: center; gap: 8px; height: 50px; padding: 0 4px 0 6px; border-radius: 25px; background: ' + (vent ? 'rgba(90,200,250,0.14)' : (heating ? 'rgba(255,159,10,0.12)' : 'rgba(255,255,255,0.07)')),
+        circle: c(vent ? '#5ac8fa' : (heating ? '#ff9f0a' : 'rgba(255,255,255,0.12)'), 36),
+        stroke: (vent || heating) ? '#141008' : '#fff' };
+    };
+    var nav = function (label, icon, active) {
+      return { label: label, icon: icon, c: active ? '#101218' : 'rgba(255,255,255,0.85)',
+        style: 'flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; height: 44px; border-radius: 22px; font-size: 13px; font-weight: 600; ' + (active ? 'background: #ffffff; color: #101218' : 'color: rgba(255,255,255,0.85)') };
+    };
+    return {
+      rooms: [
+        room('Büro Anna', I.desk, '19,0', 62, true, true),
+        room('Büro Max', I.desk, '19,2', 57, false, false),
+        room('Badezimmer', I.bath, '19,1', 61, false, true),
+        room('Schlafzimmer', I.bed, '19,1', 58, true, false),
+        room('Flur 1.OG', I.door, '19,5', 59, false, false),
+        room('Wohnzimmer', I.sofa, '19,9', 60, true, false),
+        room('Küche & Essen', I.pot, '19,5', 58, false, false),
+        room('Flur EG', I.door, '18,9', 58, true, false)
+      ],
+      on: [
+        { name: 'Stehlampe', room: 'Wohnzimmer', icon: I.bulb, circle: c('#ffd60a', 36) },
+        { name: 'Sideboard', room: 'Wohnzimmer', icon: I.bulb, circle: c('#ffd60a', 36) },
+        { name: 'Couch', room: 'Wohnzimmer', icon: I.bulb, circle: c('#ffd60a', 36) },
+        { name: 'Vase', room: 'Wohnzimmer', icon: I.bulb, circle: c('#ffd60a', 36) },
+        { name: 'Heimkino', room: 'Wohnzimmer · 18 W', icon: I.tv, circle: c('#ffd60a', 36) },
+        { name: 'Uhr', room: 'Flur EG', icon: I.bulb, circle: c('#ffd60a', 36) }
+      ],
+      more: [
+        { name: 'Haustür', state: 'ruhig', icon: I.door, circle: c('rgba(255,255,255,0.12)', 38) },
+        { name: 'Robby', state: 'angedockt', icon: I.vacuum, circle: c('rgba(255,255,255,0.12)', 38) },
+        { name: 'Müll Mi', state: 'Grün, Rest', icon: I.trash, circle: c('rgba(255,255,255,0.12)', 38) }
+      ],
+      nav: [nav('Home', 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z', true), nav('Klima', I.thermo, false), nav('Energie', I.bolt, false), nav('Schutz', I.shield, false)]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Lampe lange drücken</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090c}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #08090c">
+<section role="dialog" aria-labelledby="lp-h" style="position: absolute; left: 0; right: 0; top: 140px; bottom: 0; border-radius: 42px 42px 0 0; background: #181a22; background-image: radial-gradient(100% 35% at 50% 0%, rgba(255,240,200,0.18), transparent 70%); padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 14px">
+
+<header style="display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 6px 0 8px; border-radius: 30px; background: rgba(255,255,255,0.08)">
+<span style="width: 44px; height: 44px; border-radius: 22px; background: #ffd60a; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b2200" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h18M6 9v6M10 9v6M14 9v6M18 9v6"></path></svg></span>
+<span style="flex: 1"><h1 id="lp-h" style="margin: 0; font-size: 18px; font-weight: 700">Sideboard</h1><span style="font-size: 12px; color: rgba(255,255,255,0.72)">Wohnzimmer · kaltweiß</span></span>
+<button type="button" aria-pressed="true" aria-label="Sideboard ein/aus" style="position: relative; width: 56px; height: 34px; border-radius: 17px; border: none; padding: 0; background: #ffd60a"><span style="position: absolute; top: 3px; right: 3px; width: 28px; height: 28px; border-radius: 14px; background: #fff"></span></button>
+<a href="TRaeume.dc.html" aria-label="Schließen" style="width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</header>
+
+<!-- Brightness bubble slider -->
+<div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 0 8px 6px"><span style="font-weight: 600">Helligkeit</span><span style="font-weight: 700">100 %</span></div>
+<div role="slider" aria-label="Helligkeit" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" tabindex="0" style="position: relative; height: 64px; border-radius: 32px; background: rgba(255,255,255,0.08); overflow: hidden">
+<span style="position: absolute; left: 0; top: 0; bottom: 0; width: 100%; border-radius: 32px; background: linear-gradient(90deg, rgba(255,214,10,0.35), #ffe37a)"></span>
+<span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2b2200" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></span>
+</div>
+</div>
+
+<!-- Color temperature -->
+<div>
+<div style="display: flex; justify-content: space-between; font-size: 13px; padding: 0 8px 6px"><span style="font-weight: 600">Farbtemperatur</span><span style="font-weight: 700">6.535 K</span></div>
+<div role="slider" aria-label="Farbtemperatur" aria-valuemin="2000" aria-valuemax="6666" aria-valuenow="6535" tabindex="0" style="position: relative; height: 44px; border-radius: 22px; background: linear-gradient(90deg, #ffa94d, #fff1d6 50%, #d6ecff)">
+<span style="position: absolute; top: 4px; left: calc(97% - 36px); width: 36px; height: 36px; border-radius: 18px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4)"></span>
+</div>
+<div style="display: flex; justify-content: space-between; font-size: 11px; color: rgba(255,255,255,0.6); padding: 4px 8px 0"><span>warm 2.000 K</span><span>kalt 6.666 K</span></div>
+</div>
+
+<!-- Colors -->
+<div>
+<div style="font-size: 13px; font-weight: 600; padding: 0 8px 8px">Farbe</div>
+<div style="display: flex; justify-content: space-between; padding: 0 4px">
+<sc-for list="{{colors}}" as="c" hint-placeholder-count="7">
+<button type="button" aria-label="{{c.name}}" style="{{c.style}}"></button>
+</sc-for>
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 12px; font-weight: 600">Lesen</button>
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 12px; font-weight: 600">Gemütlich</button>
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 12px; font-weight: 600">Farbschleife</button>
+</div>
+
+<div style="font-size: 11px; color: rgba(255,255,255,0.6); padding: 0 8px; line-height: 1.4">Das Popup passt sich an die Lampe an: Couch-LED zeigt nur Helligkeit, die Stehlampe (nur an/aus) öffnet kein Popup.</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var sw = function (name, c) { return { name: name, style: 'width: 40px; height: 40px; border-radius: 20px; border: 2px solid rgba(255,255,255,0.15); background: ' + c }; };
+    return { colors: [sw('Rot', '#ff453a'), sw('Orange', '#ff9f0a'), sw('Gelb', '#ffd60a'), sw('Grün', '#30d158'), sw('Türkis', '#64d2ff'), sw('Blau', '#0a84ff'), sw('Lila', '#bf5af2')] };
+  }
+}
+</script>
+</body>
+</html>

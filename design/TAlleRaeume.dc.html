@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Popup Alle Räume</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#08090c}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #08090c">
+<section role="dialog" aria-labelledby="ar-h" style="position: absolute; left: 0; right: 0; top: 150px; bottom: 0; border-radius: 42px 42px 0 0; background: #181a22; background-image: radial-gradient(100% 35% at 50% 0%, rgba(255,159,10,0.2), transparent 70%); padding: 14px 14px 24px; display: flex; flex-direction: column; gap: 12px">
+
+<header style="display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 8px; border-radius: 30px; background: rgba(255,255,255,0.08)">
+<span style="width: 44px; height: 44px; border-radius: 22px; background: #fff; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101218" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14.8V5a2 2 0 1 1 4 0v9.8a4 4 0 1 1-4 0zM17 6h4M19 4v4M17 12h4"></path></svg></span>
+<h1 id="ar-h" style="flex: 1; margin: 0; font-size: 18px; font-weight: 700">Alle Räume einstellen</h1>
+<a href="TKlima.dc.html" aria-label="Schließen" style="width: 40px; height: 40px; border-radius: 20px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</header>
+
+<div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 34px; background: linear-gradient(140deg, rgba(255,159,10,0.28), rgba(255,255,255,0.05) 70%)">
+<button type="button" aria-label="Senken" style="width: 60px; height: 60px; border-radius: 30px; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 30px">−</button>
+<div style="text-align: center"><div style="font-size: 60px; font-weight: 700; letter-spacing: -0.03em; line-height: 1">19,0°</div><div style="font-size: 12px; color: rgba(255,255,255,0.75); margin-top: 4px">Soll für 8 Räume</div></div>
+<button type="button" aria-label="Erhöhen" style="width: 60px; height: 60px; border-radius: 30px; border: none; background: rgba(255,255,255,0.14); color: #fff; font-size: 30px">+</button>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Räume</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<button type="button" style="height: 28px; padding: 0 10px; border-radius: 14px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 11px; font-weight: 600">nur OG</button>
+<button type="button" style="height: 28px; padding: 0 10px; border-radius: 14px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 11px; font-weight: 600">nur EG</button>
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<sc-for list="{{rooms}}" as="r" hint-placeholder-count="8">
+<button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 6px; height: 38px; padding: 0 12px 0 8px; border-radius: 19px; border: none; background: rgba(255,159,10,0.22); color: #ffd29a; font-size: 13px; font-weight: 600"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffc061" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg>{{r.name}}</button>
+</sc-for>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<h2 style="margin: 0; font-size: 14px; font-weight: 600">Wie lange</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+</div>
+<div role="radiogroup" aria-label="Dauer" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<button type="button" role="radio" aria-checked="true" style="height: 44px; border-radius: 22px; border: none; background: #fff; color: #101218; font-size: 13px; font-weight: 700">Bis Zeitplan</button>
+<button type="button" role="radio" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 700">2 Stunden</button>
+<button type="button" role="radio" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 700">Dauerhaft</button>
+</div>
+
+<button type="button" style="margin-top: auto; height: 56px; border-radius: 28px; border: none; background: #ff9f0a; color: #1a1206; font-size: 15px; font-weight: 700">Übernehmen</button>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      rooms: [
+        { name: 'Büro Anna' }, { name: 'Büro Max' }, { name: 'Bad' }, { name: 'Schlafzimmer' },
+        { name: 'Flur 1.OG' }, { name: 'Wohnzimmer' }, { name: 'Küche & Essen' }, { name: 'Flur EG' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

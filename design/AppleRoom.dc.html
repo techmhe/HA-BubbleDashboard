@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>A4 Apple Home Raum-Popup</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0a0d14}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; overflow: hidden; font-family: Inter, system-ui, sans-serif; color: #ffffff; background-color: #06080c; background-image: radial-gradient(120% 55% at 0% 0%, rgba(96,116,170,0.35), transparent 60%)">
+
+<section role="dialog" aria-labelledby="room-h" style="position: absolute; left: 0; right: 0; top: 40px; bottom: 0; border-radius: 32px 32px 0 0; background: rgba(30,33,42,0.94); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border-top: 1px solid rgba(255,255,255,0.12); padding: 10px 14px 24px; display: flex; flex-direction: column; gap: 14px">
+<div aria-hidden="true" style="align-self: center; width: 40px; height: 5px; border-radius: 3px; background: rgba(255,255,255,0.3)"></div>
+
+<header style="display: flex; align-items: center; gap: 12px">
+<span style="width: 44px; height: 44px; border-radius: 22px; background: #ffd60a; display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3d3000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z"></path></svg></span>
+<div style="flex: 1">
+<h1 id="room-h" style="margin: 0; font-size: 22px; font-weight: 800">Wohnzimmer</h1>
+<div style="font-size: 12px; color: rgba(255,255,255,0.75)">60 % · Taupunkt 11,8° · PM2.5 1 · 3 Fenster zu</div>
+</div>
+<a href="Main.dc.html" aria-label="Schließen" style="width: 36px; height: 36px; border-radius: 18px; background: rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></a>
+</header>
+
+<!-- Climate -->
+<div style="border-radius: 22px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.08); padding: 14px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between">
+<div>
+<div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #ffb340"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ffb340" stroke-width="2.4" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1 1.5 2 3 2-1-3 0-5 0-7z"></path></svg>Heizt auf 20,0°</div>
+<div style="font-size: 44px; font-weight: 700; letter-spacing: -0.03em; line-height: 1.05">19,9°</div>
+</div>
+<div style="display: flex; align-items: center; gap: 6px">
+<button type="button" aria-label="Soll senken" style="width: 48px; height: 48px; border-radius: 24px; border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 24px">−</button>
+<span style="min-width: 58px; text-align: center; font-size: 20px; font-weight: 700; color: #ffb340">20,0°</span>
+<button type="button" aria-label="Soll erhöhen" style="width: 48px; height: 48px; border-radius: 24px; border: none; background: rgba(255,255,255,0.12); color: #fff; font-size: 24px">+</button>
+</div>
+</div>
+<div role="group" aria-label="Preset" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{presets}}" as="p" hint-placeholder-count="4">
+<button type="button" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border-radius: 16px; border: none; background: rgba(255,255,255,0.08); color: #fff">
+<span style="{{p.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg></span>
+<span style="font-size: 12px; font-weight: 600">{{p.name}}</span>
+<span style="font-size: 11px; color: rgba(255,255,255,0.72)">{{p.temp}}°</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<!-- Tiles -->
+<sc-for list="{{groups}}" as="g" hint-placeholder-count="2">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 0 4px; font-size: 15px; font-weight: 700">{{g.name}}</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{g.items}}" as="t" hint-placeholder-count="3">
+<button type="button" style="{{t.tile}}">
+<span style="{{t.circle}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{t.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"></path></svg></span>
+<span style="display: block; font-size: 13px; font-weight: 700; margin-top: 8px">{{t.name}}</span>
+<span style="{{t.subStyle}}">{{t.state}}</span>
+</button>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      leaf: 'M5 19c8 0 14-6 14-14-8 0-14 6-14 14zM5 19l7-7',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      flame: 'M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1 1.5 2 3 2-1-3 0-5 0-7z',
+      snow: 'M12 2v20M4 6l16 12M20 6 4 18',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      tv: 'M3 6h18v12H3zM8 21h8',
+      fan: 'M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4',
+      drop: 'M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z'
+    };
+    var circ = function (bg, size) { return 'width: ' + size + 'px; height: ' + size + 'px; border-radius: ' + (size / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var tile = function (name, state, icon, on, color) {
+      return { name: name, state: state, icon: icon,
+        tile: on ? 'text-align: left; padding: 10px; border-radius: 18px; border: none; background: rgba(242,242,247,0.94); color: #111' : 'text-align: left; padding: 10px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.07); color: #fff',
+        circle: circ(on ? color : 'rgba(255,255,255,0.14)', 32),
+        stroke: on ? '#1a1a1a' : '#fff',
+        subStyle: on ? 'display: block; font-size: 12px; color: #555' : 'display: block; font-size: 12px; color: rgba(255,255,255,0.72)' };
+    };
+    return {
+      presets: [
+        { name: 'Eco', temp: '18', icon: I.leaf, circle: circ('#30d158', 30) },
+        { name: 'Komfort', temp: '19', icon: I.sofa, circle: circ('#ff9f0a', 30) },
+        { name: 'Boost', temp: '20', icon: I.flame, circle: circ('#ff453a', 30) },
+        { name: 'Frost', temp: '7', icon: I.snow, circle: circ('#64d2ff', 30) }
+      ],
+      groups: [
+        { name: 'Licht', items: [
+          tile('Stehlampe', 'An', I.bulb, true, '#ffd60a'),
+          tile('Sideboard', 'An', I.bulb, true, '#ffd60a'),
+          tile('Couch', 'An', I.bulb, true, '#ffd60a'),
+          tile('Vase', 'An', I.bulb, true, '#ffd60a')
+        ] },
+        { name: 'Geräte', items: [
+          tile('Heimkino', '18 W', I.tv, true, '#64d2ff'),
+          tile('Luftreiniger', 'An · PM 1', I.fan, true, '#30d158'),
+          tile('Entfeuchter', 'Aus', I.drop, false, '')
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

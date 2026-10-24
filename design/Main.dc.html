@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>A1 Apple Home Räume</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0a0d14}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 1180px; box-sizing: border-box; overflow: hidden; font-family: Inter, system-ui, sans-serif; color: #ffffff; background-color: #0a0d14; background-image: radial-gradient(120% 55% at 0% 0%, rgba(96,116,170,0.6), transparent 60%), radial-gradient(90% 45% at 100% 28%, rgba(170,104,74,0.38), transparent 60%), radial-gradient(110% 55% at 40% 100%, rgba(36,86,96,0.55), transparent 62%); padding: 20px 14px 32px; display: flex; flex-direction: column; gap: 14px">
+
+<!-- Header -->
+<header style="display: flex; justify-content: space-between; align-items: flex-start; padding: 0 4px">
+<div>
+<h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.02em">Zuhause</h1>
+<div style="font-size: 13px; color: rgba(255,255,255,0.75); margin-top: 2px">4 Räume heizen · 5 Lichter an · Fenster zu</div>
+</div>
+<div style="display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 18px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1); font-size: 14px; font-weight: 600">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8fd0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7M8 18l-1 3M12 18l-1 3M16 18l-1 3"></path></svg>9°
+</div>
+</header>
+
+<!-- Category chips -->
+<nav aria-label="Bereiche" style="display: flex; gap: 8px; overflow-x: auto; padding: 0 2px">
+<sc-for list="{{cats}}" as="c" hint-placeholder-count="4">
+<a href="#" style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 14px 0 8px; border-radius: 26px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px)">
+<span style="{{c.circle}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg></span>
+<span style="display: flex; flex-direction: column"><span style="font-size: 13px; font-weight: 700">{{c.name}}</span><span style="font-size: 12px; color: rgba(255,255,255,0.75)">{{c.state}}</span></span>
+</a>
+</sc-for>
+</nav>
+
+<!-- Ventilation hint -->
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 48px; padding: 0 14px; border-radius: 16px; background: rgba(90,200,250,0.18); border: 1px solid rgba(90,200,250,0.4)">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8fd8ff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg>
+<span style="flex: 1; font-size: 13px"><strong>Lüften:</strong> Bad &amp; Büro Anna über 60 % · 15 min</span>
+<span aria-hidden="true" style="color: rgba(255,255,255,0.6)">›</span>
+</a>
+
+<!-- Floors with room tiles -->
+<sc-for list="{{floors}}" as="f" hint-placeholder-count="2">
+<section style="display: flex; flex-direction: column; gap: 8px">
+<h2 style="margin: 4px 4px 0; font-size: 18px; font-weight: 700">{{f.name}}</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{f.rooms}}" as="r" hint-placeholder-count="3">
+<a href="AppleRoom.dc.html" style="{{r.tile}}">
+<div style="display: flex; justify-content: space-between; align-items: flex-start">
+<span style="{{r.iconCircle}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{r.iconStroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="font-size: 19px; font-weight: 700; letter-spacing: -0.02em">{{r.temp}}°</span>
+</div>
+<div>
+<div style="font-size: 13px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{r.name}}</div>
+<div style="{{r.subStyle}}">{{r.sub}}</div>
+</div>
+<div style="display: flex; gap: 4px; min-height: 18px">
+<sc-for list="{{r.badges}}" as="b" hint-placeholder-count="2">
+<span style="{{b.style}}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{b.stroke}}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg></span>
+</sc-for>
+</div>
+</a>
+</sc-for>
+</div>
+</section>
+</sc-for>
+
+<!-- Below the fold: energy + extras -->
+<section style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 30px">
+<div style="grid-column: span 2; display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 20px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1)">
+<span style="width: 40px; height: 40px; border-radius: 20px; background: #30d158; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0b1a10" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"></path></svg></span>
+<div style="flex: 1"><div style="font-size: 14px; font-weight: 700">Energie</div><div style="font-size: 12px; color: rgba(255,255,255,0.75)">PV 0 W · Akku 25 % (0,52 kWh) · Verbrauch 92 W</div></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 20px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg>
+<div><div style="font-size: 13px; font-weight: 700">Mi, 28.10.</div><div style="font-size: 12px; color: rgba(255,255,255,0.75)">Grün &amp; Rest</div></div>
+</div>
+<div style="display: flex; align-items: center; gap: 10px; padding: 12px; border-radius: 20px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1)">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true"><path d="M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5"></path></svg>
+<div><div style="font-size: 13px; font-weight: 700">Robby</div><div style="font-size: 12px; color: rgba(255,255,255,0.75)">Angedockt</div></div>
+</div>
+</section>
+
+<!-- Fold marker -->
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 844px; border-top: 2px dashed rgba(255,214,10,0.7)"><span style="position: absolute; right: 8px; top: -22px; font-size: 11px; font-weight: 600; color: #ffd60a">Bildschirmende</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      flame: 'M12 3c1 4 5 5.5 5 10a5 5 0 0 1-10 0c0-2.5 1.5-3.5 2-5 1 1 1.5 2 3 2-1-3 0-5 0-7z',
+      wind: 'M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8',
+      fan: 'M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4',
+      desk: 'M4 5h16v10H4zM9 19h6M12 15v4',
+      bath: 'M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0',
+      bed: 'M3 18V7M3 13h18v5M7 13v-3h5v3',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      pot: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2'
+    };
+    var circle = function (bg) { return 'width: 36px; height: 36px; border-radius: 18px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var badge = function (icon, bg, stroke) { return { icon: icon, stroke: stroke, style: 'width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; background: ' + bg }; };
+    var room = function (r) {
+      var lit = r.lights > 0;
+      var badges = [];
+      if (r.heating) badges.push(badge(I.flame, lit ? '#ff9f0a' : 'rgba(255,159,10,0.25)', lit ? '#fff' : '#ffb340'));
+      if (r.vent) badges.push(badge(I.wind, lit ? '#0a84ff' : 'rgba(90,200,250,0.25)', lit ? '#fff' : '#8fd8ff'));
+      if (r.purifier) badges.push(badge(I.fan, lit ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.12)', lit ? '#333' : 'rgba(255,255,255,0.85)'));
+      if (lit) badges.push(badge(I.bulb, '#ffd60a', '#4a3a00'));
+      return {
+        name: r.name, temp: r.temp, icon: r.icon, badges: badges,
+        sub: r.hum + ' %' + (lit ? ' · ' + r.lights + ' an' : ''),
+        tile: lit
+          ? 'display: flex; flex-direction: column; justify-content: space-between; gap: 6px; height: 118px; box-sizing: border-box; padding: 10px; border-radius: 20px; background: rgba(242,242,247,0.94); color: #111'
+          : 'display: flex; flex-direction: column; justify-content: space-between; gap: 6px; height: 118px; box-sizing: border-box; padding: 10px; border-radius: 20px; background: rgba(40,44,56,0.6); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px)',
+        iconCircle: circle(lit ? '#ffd60a' : (r.heating ? 'rgba(255,159,10,0.9)' : 'rgba(255,255,255,0.14)')),
+        iconStroke: lit ? '#3d3000' : (r.heating ? '#2a1600' : '#ffffff'),
+        subStyle: lit ? 'font-size: 12px; color: #444; margin-top: 2px' : 'font-size: 12px; color: rgba(255,255,255,0.72); margin-top: 2px'
+      };
+    };
+    return {
+      cats: [
+        { name: 'Klima', state: '18,9–19,9°', icon: I.thermo, circle: circle('#ff9f0a') },
+        { name: 'Licht', state: '5 an', icon: I.bulb, circle: circle('#ffd60a') },
+        { name: 'Sicherheit', state: 'Unscharf', icon: I.shield, circle: circle('#64d2ff') },
+        { name: 'Energie', state: 'Akku 25 %', icon: I.bolt, circle: circle('#30d158') }
+      ],
+      floors: [
+        { name: 'Obergeschoss', rooms: [
+          room({ name: 'Büro Anna', temp: '19,0', hum: 62, icon: I.desk, heating: true, vent: true, purifier: true, lights: 0 }),
+          room({ name: 'Büro Max', temp: '19,2', hum: 57, icon: I.desk, heating: false, vent: false, purifier: true, lights: 0 }),
+          room({ name: 'Badezimmer', temp: '19,1', hum: 61, icon: I.bath, heating: false, vent: true, purifier: false, lights: 0 }),
+          room({ name: 'Schlafzimmer', temp: '19,1', hum: 58, icon: I.bed, heating: true, vent: false, purifier: true, lights: 0 }),
+          room({ name: 'Flur 1.OG', temp: '19,5', hum: 59, icon: I.door, heating: false, vent: false, purifier: false, lights: 0 })
+        ] },
+        { name: 'Erdgeschoss', rooms: [
+          room({ name: 'Wohnzimmer', temp: '19,9', hum: 60, icon: I.sofa, heating: true, vent: false, purifier: true, lights: 4 }),
+          room({ name: 'Küche & Essen', temp: '19,5', hum: 58, icon: I.pot, heating: false, vent: false, purifier: true, lights: 0 }),
+          room({ name: 'Flur EG', temp: '18,9', hum: 58, icon: I.door, heating: true, vent: false, purifier: false, lights: 1 })
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
