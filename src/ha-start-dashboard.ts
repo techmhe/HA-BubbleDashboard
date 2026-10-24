@@ -8,6 +8,8 @@ import { resolveRooms, type Room } from './logic/rooms';
 import { num } from './logic/util';
 import { baseStyles } from './styles';
 import { haptic } from './components/hold';
+import { repeat } from 'lit/directives/repeat.js';
+import { sheetKey, sheetParent } from './logic/sheet-stack';
 import { lensBox, tabAt } from './logic/gestures';
 import { applyHeader, removeHeader, type HeaderMode } from './header';
 import type { CardConfig, HomeAssistant, PageId } from './types';
@@ -403,7 +405,7 @@ export class HaStartDashboard extends LitElement {
         this._page = page;
         this._sheet = null;
         if (opts?.roomsFilter) this._roomsFilter = opts.roomsFilter;
-        window.scrollTo({ top: 0 });
+        this._scrollTop('instant');
       },
       moreInfo: (entityId) => {
         this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId }, bubbles: true, composed: true }));
@@ -495,9 +497,20 @@ export class HaStartDashboard extends LitElement {
     `;
   }
 
+  /** A new tab starts at the top; tapping the current tab scrolls it back up smoothly (iOS). */
   private _selectPage(id: PageId) {
+    const same = id === this._page;
     this._page = id;
-    if (id === 'rooms') this._roomsFilter = 'all';
+    if (id === 'rooms' && !same) this._roomsFilter = 'all';
+    this._scrollTop(same ? 'smooth' : 'instant');
+  }
+
+  /** HA scrolls the window or a container around the view, depending on version and layout. */
+  private _scrollTop(behavior: ScrollBehavior) {
+    window.scrollTo({ top: 0, behavior });
+    for (let el: Node | null = this; el; el = el.parentNode ?? (el as ShadowRoot).host ?? null) {
+      if (el instanceof HTMLElement && el.scrollTop > 0) el.scrollTo({ top: 0, behavior });
+    }
   }
 
   private _navStart?: { x: number; id: number; tabs: { left: number; right: number }[]; width: number; barWidth: number; navLeft: number };
@@ -547,12 +560,30 @@ export class HaStartDashboard extends LitElement {
     this._navDrag = null;
   };
 
+  /**
+   * Open sheets as layers: a child sheet (chart, device) sits on top of the sheet it was
+   * opened from, which stays visible underneath. A confirm dialog sits on top of the current
+   * sheet. Layers are keyed so a sheet keeps its DOM (and does not replay its entry
+   * animation) when it moves between underneath and on top.
+   */
   private _renderSheets(ctx: PageContext) {
-    if (this._confirm) {
-      return confirmSheet({ ...this._confirm, onClose: () => (this._confirm = null) });
-    }
+    const layers: { key: string; view: unknown }[] = [];
     const sh = this._sheet;
-    if (!sh) return nothing;
+    if (sh) {
+      const parent = sheetParent(sh);
+      if (parent) layers.push({ key: sheetKey(parent), view: this._sheetView(ctx, parent) });
+      layers.push({ key: sheetKey(sh), view: this._sheetView(ctx, sh) });
+    }
+    if (this._confirm) {
+      layers.push({ key: 'confirm', view: confirmSheet({ ...this._confirm, onClose: () => (this._confirm = null) }) });
+    }
+    if (!layers.length) return nothing;
+    const top = layers.length - 1;
+    return repeat(layers, (l) => l.key, (l, i) => html`
+      <div class="layer ${i < top ? 'under' : ''} ${i > 0 ? 'stacked' : ''}" ?inert=${i < top}>${l.view}</div>`);
+  }
+
+  private _sheetView(ctx: PageContext, sh: SheetState) {
     switch (sh.id) {
       case 'alarm':
         return alarmSheet(ctx);

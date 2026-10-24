@@ -33,6 +33,11 @@ Gestures:
 - **Pop-ups**: close with the ✕, by tapping outside, or by pulling the sheet down at its
   grabber or header (or anywhere when the content is scrolled to the top). A short pull
   springs back; a pull of a quarter of the sheet (80–140 px) or a quick flick closes it.
+- **Stacked pop-ups**: a pop-up opened from another one (weather → chart, room → history
+  or device) sits on top of it; the one underneath stays visible, shrunk and dimmed. Pulling
+  down or tapping outside goes back one level, ✕ closes all.
+- **Scrolling**: switching tabs starts the new page at the top; tapping the current tab
+  scrolls it back up.
 
 ```yaml
 views:

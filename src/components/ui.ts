@@ -38,12 +38,14 @@ export interface SheetOptions {
 
 /** Bottom sheet rendered inside the card (pop-ups do not depend on Bubble Card). */
 export function sheet(o: SheetOptions): TemplateResult {
+  // Pulling down, tapping outside and Escape leave this sheet: back to its parent if it has one.
+  const dismiss = o.onBack ?? o.onClose;
   return html`
-    <div class="backdrop" @click=${o.onClose}></div>
+    <div class="backdrop" @click=${dismiss}></div>
     <section class="sheet" role="dialog" aria-modal="true" aria-label=${o.title}
       style="background-image: radial-gradient(100% 30% at 50% 0%, ${o.glow}, transparent 70%)"
-      ${swipeToClose(o.onClose)}
-      @keydown=${(e: KeyboardEvent) => e.key === 'Escape' && o.onClose()}>
+      ${swipeToClose(dismiss)}
+      @keydown=${(e: KeyboardEvent) => e.key === 'Escape' && dismiss()}>
       <div class="grabber" aria-hidden="true"></div>
       <header class="sheet-head">
         ${o.onBack
@@ -113,6 +115,22 @@ export const sheetStyles = css`
     flex-direction: column;
     gap: 10px;
     animation: rise 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  /* Stacked sheets: the one underneath shrinks back and dims, like iOS. */
+  .layer {
+    display: contents;
+  }
+  .layer.under .sheet {
+    transform: translate(-50%, -12px) scale(0.93);
+    transform-origin: 50% 0;
+    filter: brightness(0.6);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.3s;
+  }
+  .layer .sheet {
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.3s;
+  }
+  .layer.stacked .backdrop {
+    background: rgba(0, 0, 0, 0.3);
   }
   .grabber {
     position: relative;
