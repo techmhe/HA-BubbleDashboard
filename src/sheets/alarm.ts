@@ -2,6 +2,7 @@ import { css, html } from 'lit';
 import { icon, sheet } from '../components/ui';
 import { I } from '../icons';
 import { ent } from '../logic/entities';
+import { alarmIcon } from '../logic/overview';
 import { ALARM_MODES, alarmLabel } from '../logic/security';
 import type { PageContext } from '../pages/context';
 
@@ -13,7 +14,7 @@ export function alarmSheet(ctx: PageContext) {
     title: label,
     color: st === 'triggered' ? '#ff453a' : '#bf9bff',
     glow: 'rgba(191,155,255,0.22)',
-    iconPath: I.shield,
+    iconPath: alarmIcon(st),
     iconStroke: '#1d1030',
     onClose: ctx.closeSheet,
     body: html`

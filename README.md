@@ -272,6 +272,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
   zone's icon (green = home, blue = another zone, grey = away). Tap → *Personen* sheet: HA's
   own map (`ha-map`, loaded via the map card) with persons and zones, plus one row per person
   with zone and *seit* time.
+- The alarm icon (Schutz pill, Übersicht bubble, alarm sheet) shows the armed mode: car =
+  Abwesend, house = Zuhause, moon = Nacht; the shield when disarmed or triggered.
 - Alarm pill with *zuletzt ausgelöst* (Alarmo's `last_triggered`) and buttons for the other
   modes (Abwesend / Zuhause / Nacht / Aus); the shield opens the alarm sheet.
 - Door camera live via HA's `ha-camera-stream` (muted by default; sound and fullscreen

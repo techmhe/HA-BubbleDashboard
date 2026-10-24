@@ -57,6 +57,12 @@ export function weatherInfo(hass: HomeAssistant, entityId: string) {
 
 // ---------- status bubbles ----------
 
+/** Icon of the armed mode (like the mode buttons); the shield when disarmed, triggered or unknown. */
+export function alarmIcon(state: string): string {
+  const icons: Record<string, string> = { armed_away: I.car, armed_vacation: I.car, armed_home: I.home, armed_night: I.moon };
+  return icons[state] ?? I.shield;
+}
+
 export type StatusKey = 'robby' | 'light' | 'energy' | 'alarm';
 
 export interface StatusBubble {
@@ -118,7 +124,7 @@ export function statusBubbles(hass: HomeAssistant, config: CardConfig): StatusBu
     { key: 'robby', value: VACUUM_STATES[vac] ?? vac, label: 'Robby', icon: I.vacuum, color: vac === 'error' ? '#ff453a' : '#ffffff' },
     { key: 'light', value: `${lightsOn(hass).length} an`, label: 'Licht', icon: I.bulb, color: '#ffd60a' },
     { key: 'energy', value: grid.value, label: grid.label, icon: I.bolt, color: grid.label === 'Einspeisung' ? '#30d158' : '#ff9f0a' },
-    { key: 'alarm', value: ALARM_STATES[alarm] ?? alarm, label: 'Alarm', icon: I.shield, color: alarm === 'triggered' ? '#ff453a' : '#bf9bff' },
+    { key: 'alarm', value: ALARM_STATES[alarm] ?? alarm, label: 'Alarm', icon: alarmIcon(alarm), color: alarm === 'triggered' ? '#ff453a' : '#bf9bff' },
   ];
 }
 

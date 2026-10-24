@@ -4,6 +4,7 @@ import { icon } from '../components/ui';
 import { I } from '../icons';
 import { ent } from '../logic/entities';
 import { ALARM_MODES, alarmInfo, openings, openingsSummary } from '../logic/security';
+import { alarmIcon } from '../logic/overview';
 import { persons, presenceLabel } from '../logic/persons';
 import { friendlyName } from '../logic/util';
 import type { PageContext } from './context';
@@ -60,7 +61,7 @@ export function renderSecurity(ctx: PageContext) {
       ${hass.states[alarm.id]
         ? html`<div class="alarmpill" style="background: linear-gradient(90deg, ${accent}42, rgba(255,255,255,0.05) 70%)">
             <button class="circle abtn" style="width:48px;height:48px;background:${accent}" aria-label="Alarm-Details"
-              @click=${() => ctx.openSheet({ id: 'alarm' })}>${icon(I.shield, 22, '#1d1030', 2.2)}</button>
+              @click=${() => ctx.openSheet({ id: 'alarm' })}>${icon(alarmIcon(alarm.state), 22, '#1d1030', 2.2)}</button>
             <span class="atext">
               <span class="atitle">${alarm.label}</span>
               ${alarm.sub ? html`<span class="asub">${alarm.sub}</span>` : nothing}
