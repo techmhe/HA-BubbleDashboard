@@ -23,6 +23,12 @@ function consumerIcon(c: Consumer): string {
 }
 
 /** Line between two flow nodes; `dir` is the direction energy flows (or null when idle). */
+/** Vertical link between house and battery: 'up' = battery feeds the house, 'down' = it charges. */
+function batteryLine(color: string, dir: 'up' | 'down' | null) {
+  if (!dir) return html`<div class="vline idle" style="border-color:${color}4d" aria-hidden="true"></div>`;
+  return html`<div class="vline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
+}
+
 function flowLine(color: string, dir: 'left' | 'right' | null) {
   if (!dir) return html`<div class="fline idle" style="border-color:${color}4d" aria-hidden="true"></div>`;
   return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
@@ -66,11 +72,15 @@ export function renderEnergy(ctx: PageContext) {
           </div>
         </div>
         ${bat
-          ? html`<div class="batrow"><span class="bat">${icon(E.battery, 14, '#7ee8a0', 2.2)}Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}${bat.power > IDLE
-              ? ` · liefert ${watts(bat.power)}`
-              : bat.power < -IDLE
-                ? ` · lädt ${watts(-bat.power)}`
-                : ''}</span></div>`
+          ? html`<div class="bnode">
+              ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
+              <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
+                aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
+                <span class="circle" style="width:44px;height:44px;background:${Math.abs(bat.power) > IDLE ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, Math.abs(bat.power) > IDLE ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
+              </span>
+              <span class="nv">${Math.abs(bat.power) > IDLE ? watts(Math.abs(bat.power)) : '0 W'}</span>
+              <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}</span>
+            </div>`
           : nothing}
         <div class="elink">Energie-Dashboard ›</div>
       </button>
@@ -234,20 +244,75 @@ export const energyStyles = css`
       animation: none;
     }
   }
-  .batrow {
+  .bnode {
     display: flex;
-    justify-content: center;
-  }
-  .bat {
-    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    height: 30px;
-    padding: 0 12px 0 8px;
-    border-radius: 15px;
-    background: rgba(48, 209, 88, 0.14);
-    font-size: 12px;
-    font-weight: 600;
+    gap: 4px;
+    margin-top: -6px;
+  }
+  .bring {
+    display: grid;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 27px;
+    background: conic-gradient(#30d158 var(--soc), rgba(255, 255, 255, 0.12) 0);
+  }
+  .vline {
+    position: relative;
+    width: 4px;
+    height: 26px;
+    margin-bottom: 4px;
+  }
+  .vline.idle {
+    width: 0;
+    border-left: 3px dotted;
+  }
+  .vline.live {
+    border-radius: 2px;
+    background: repeating-linear-gradient(180deg, var(--c) 0 8px, transparent 8px 13px);
+    animation: flow-down 0.8s linear infinite;
+  }
+  .vline.live.up {
+    animation-name: flow-up;
+  }
+  .vline .arrow {
+    position: absolute;
+    left: -6px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+  }
+  .vline.up .arrow {
+    top: -6px;
+    border-bottom: 10px solid var(--c);
+  }
+  .vline.down .arrow {
+    bottom: -6px;
+    border-top: 10px solid var(--c);
+  }
+  @keyframes flow-down {
+    from {
+      background-position: 0 0;
+    }
+    to {
+      background-position: 0 13px;
+    }
+  }
+  @keyframes flow-up {
+    from {
+      background-position: 0 13px;
+    }
+    to {
+      background-position: 0 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .vline.live {
+      animation: none;
+    }
   }
   .elink {
     align-self: flex-end;
