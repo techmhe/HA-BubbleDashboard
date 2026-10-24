@@ -6,31 +6,29 @@ export interface MapEntity {
   focus?: boolean;
 }
 
-/** Card-styled map controls: round glass buttons. ha-map renders MapLibre (HA 2026) or Leaflet (older). */
+/** Card-styled MapLibre controls (ha-map): round glass buttons. */
 const CONTROLS_CSS = `
 .maplibregl-ctrl-top-left .maplibregl-ctrl { margin: 10px 0 0 10px !important; }
-.maplibregl-ctrl-group, .leaflet-bar {
+.maplibregl-ctrl-group {
   background: none !important; box-shadow: none !important; border: none !important;
   display: flex; flex-direction: column; gap: 6px;
 }
-.maplibregl-ctrl-group button, .leaflet-bar a, .leaflet-bar a:hover {
-  width: 36px !important; height: 36px !important; line-height: 36px !important;
+.maplibregl-ctrl-group button {
+  width: 36px !important; height: 36px !important;
   border: none !important; border-radius: 50% !important;
-  background: rgba(20, 22, 28, 0.72) !important; color: #fff !important;
+  background: rgba(20, 22, 28, 0.72) !important;
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12) !important;
 }
 .maplibregl-ctrl-group button + button { border-top: none !important; }
 .maplibregl-ctrl-group button .maplibregl-ctrl-icon { filter: brightness(0) invert(1); }
 .maplibregl-ctrl-group button:disabled .maplibregl-ctrl-icon { opacity: 0.35; }
-.leaflet-bar a.leaflet-disabled { color: rgba(255, 255, 255, 0.35) !important; }
-.leaflet-control-zoom { margin: 10px !important; }
-.maplibregl-ctrl-attrib, .leaflet-control-attribution {
+.maplibregl-ctrl-attrib {
   background: rgba(20, 22, 28, 0.72) !important; color: rgba(255, 255, 255, 0.7) !important;
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-radius: 14px !important; margin: 0 8px 8px 0 !important;
 }
-.maplibregl-ctrl-attrib a, .leaflet-control-attribution a { color: rgba(255, 255, 255, 0.8) !important; }
+.maplibregl-ctrl-attrib a { color: rgba(255, 255, 255, 0.8) !important; }
 .maplibregl-ctrl-attrib-button { background-color: transparent !important; filter: brightness(0) invert(1); opacity: 0.7; }
 `;
 
