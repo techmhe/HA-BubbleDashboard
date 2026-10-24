@@ -270,3 +270,15 @@ export function shareSeries(
   const total = share(sp, si, se, so, sn);
   return { points, total: total === null ? null : Math.round(Math.min(1, total) * 100) };
 }
+
+/** House consumption (kWh) per bucket: PV + import + battery out − export − battery in. */
+export function consumptionSeries(parts: {
+  pv: SharePoint[]; import: SharePoint[]; export: SharePoint[]; batteryOut?: SharePoint[]; batteryIn?: SharePoint[];
+}): SharePoint[] {
+  const all = [parts.pv, parts.import, parts.export, parts.batteryOut ?? [], parts.batteryIn ?? []].map((p) => new Map(p.map((x) => [x.t, x.v])));
+  const ts = [...new Set(all.flatMap((m) => [...m.keys()]))].sort((a, b) => a - b);
+  return ts.map((t) => {
+    const [p, i, e, o, n] = all.map((m) => m.get(t) ?? 0);
+    return { t, v: consumption(p, i, e, o, n).consumed };
+  });
+}

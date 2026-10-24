@@ -34,12 +34,16 @@ function flowLine(color: string, dir: 'left' | 'right' | null) {
   return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
 }
 
+/** Consumers shown before "Alle anzeigen". */
+const SHOWN = 6;
+
 export function renderEnergy(ctx: PageContext) {
   const { hass, config } = ctx;
   const energy = ctx.energy();
   const now = energyNow(hass, config, energy.prefs);
   const today = energyToday(hass, config, energy.today);
-  const top = consumers(hass, config, 6, energy.prefs);
+  const all = consumers(hass, config, 100, energy.prefs);
+  const top = ctx.consumersAll ? all : all.slice(0, SHOWN);
   const chart = (key: string, name?: string) => ctx.openSheet({ id: 'energyChart', key, range: '24h', name });
   const max = Math.max(1, ...top.map((c) => c.value));
   const exporting = now.export > now.import;
@@ -54,25 +58,25 @@ export function renderEnergy(ctx: PageContext) {
         <h1>Energie</h1>
       </header>
 
-      <button class="flow" aria-label="Energie-Dashboard öffnen" @click=${() => ctx.navigate('/energy')}>
+      <div class="flow">
         <div class="frow">
-          <div class="node">
+          <button class="node" aria-label="PV ${watts(now.pv)}, Verlauf anzeigen" @click=${() => chart('pv')}>
             <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 22, '#ffd60a', 2)}</span>
             <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
-          </div>
+          </button>
           ${flowLine('#ffd60a', now.pv > IDLE ? 'right' : null)}
-          <div class="node">
+          <button class="node" aria-label="Haus ${watts(now.house)}, Verbrauch anzeigen" @click=${() => chart('house')}>
             <span class="house">${icon(I.home, 22, '#101218', 2.2)}<span>${watts(now.house)}</span></span>
             <span class="nl">Haus</span>
-          </div>
+          </button>
           ${flowLine(gridColor, gridW > IDLE ? (exporting ? 'right' : 'left') : null)}
-          <div class="node">
+          <button class="node" aria-label="Netz ${watts(gridW)}, Verlauf anzeigen" @click=${() => chart(exporting ? 'export' : 'import')}>
             <span class="circle" style="width:48px;height:48px;background:${gridW > IDLE ? gridColor : 'rgba(255,255,255,0.12)'}">${icon(E.pylon, 22, gridW > IDLE ? '#1a1206' : '#fff', 2.2)}</span>
             <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
-          </div>
+          </button>
         </div>
         ${bat
-          ? html`<div class="bnode">
+          ? html`<button class="bnode" aria-label="Akku, Ladestand-Verlauf anzeigen" @click=${() => chart('battery')}>
               ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
               <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
                 aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
@@ -80,10 +84,10 @@ export function renderEnergy(ctx: PageContext) {
               </span>
               <span class="nv">${Math.abs(bat.power) > IDLE ? watts(Math.abs(bat.power)) : '0 W'}</span>
               <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}</span>
-            </div>`
+            </button>`
           : nothing}
-        <div class="elink">Energie-Dashboard ›</div>
-      </button>
+        <button class="elink" @click=${() => ctx.navigate('/energy')}>Energie-Dashboard ›</button>
+      </div>
 
       <div class="section-head">
         <h2>Heute</h2><span class="rule" aria-hidden="true"></span>
@@ -111,7 +115,7 @@ export function renderEnergy(ctx: PageContext) {
           </div>`
         : nothing}
 
-      <div class="section-head"><h2>Verbraucher jetzt</h2><span class="rule" aria-hidden="true"></span></div>
+      <div class="section-head"><h2>Aktuell</h2><span class="rule" aria-hidden="true"></span></div>
       ${top.length
         ? top.map((c) => html`
             <button class="cons" aria-label="${c.name} ${watts(c.value)}, Verlauf anzeigen" @click=${() => chart(c.id, c.name)}>
@@ -121,6 +125,10 @@ export function renderEnergy(ctx: PageContext) {
               <span class="cval">${watts(c.value)}</span>
             </button>`)
         : html`<div class="nopv">Keine Messwerte.</div>`}
+      ${all.length > SHOWN
+        ? html`<button class="cmore" @click=${() => ctx.setConsumersAll(!ctx.consumersAll)}>
+            ${ctx.consumersAll ? 'Weniger anzeigen' : `Alle anzeigen (${all.length})`}</button>`
+        : nothing}
     </div>
   `;
 }
@@ -245,6 +253,7 @@ export const energyStyles = css`
     }
   }
   .bnode {
+    align-self: center;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -314,8 +323,18 @@ export const energyStyles = css`
       animation: none;
     }
   }
+  .cmore {
+    align-self: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+    font-weight: 600;
+  }
   .elink {
     align-self: flex-end;
+    height: 32px;
     font-size: 12px;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.7);

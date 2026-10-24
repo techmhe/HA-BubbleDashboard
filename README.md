@@ -239,7 +239,9 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - Live flow PV — Haus — Netz (animated dashes in the direction of flow; import orange,
   export blue) with the battery as a node below the house: a ring shows the charge level, a
   vertical line runs up while it feeds the house and down while it charges (*Akku liefert* /
-  *Akku lädt*). Tap → HA's `/energy`.
+  *Akku lädt*). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
+  (PV + import + battery out − export − battery in), Akku = charge level. *Energie-Dashboard ›*
+  opens HA's `/energy`.
 - PV now = `pv_power` plus the solar power sensors of HA's energy dashboard.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since
   midnight), falling back to the daily utility meters: PV, Netzbezug, Eingespeist,
@@ -247,11 +249,11 @@ explicitly; a configured room still auto-fills the fields you leave out.
   from the energy dashboard's battery source), autarky and PV self-use. Tiles open a chart (kWh per
   hour for 24 h, per day for 7 / 30 days); the two split bars open autarky / self-use in
   percent per hour or day.
-- *Verbraucher jetzt*: every `*_power` sensor that sits in an area, one per device (measured
+- *Aktuell*: every `*_power` sensor that sits in an area, one per device (measured
   before Powercalc), without the grid meter, PV, battery and house devices, phase and PoE
   readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → chart from the
   device's energy statistic (energy dashboard entry or the device's energy sensor), else
-  mean power.
+  mean power. The top six are shown; *Alle anzeigen* lists every consumer above 1 W.
 
 ### What Schutz shows
 
@@ -278,9 +280,11 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - **Weather** (weather pill, storm item): now with today's range and rain, chips (humidity,
   wind + direction, pressure, UV, visibility; tap → chart of the last 24 h from history and
   the next 24 h from the hourly forecast), DWD warnings (current and advance, from the core
-  `dwd_weather_warnings` integration; repeats of one type are merged into one card with the
-  highest level and the full time span) or else a storm hint (gusts ≥ 60 km/h now or the first
-  forecast day), 6 slots every 2 h, 7 days on a shared temperature scale, pollen.
+  `dwd_weather_warnings` integration; repeats of one type are merged into one row with the
+  highest level and the full time span; compact rows, tap shows the DWD text) or else a storm
+  hint (gusts ≥ 60 km/h now or the first forecast day), 6 slots every 2 h, 7 days on a shared
+  temperature scale (tap a day → its rain, sunshine, wind and gusts, humidity, UV, 3-hourly
+  slots and temperature curve as far as the hourly forecast reaches), pollen.
   Forecasts come from `weather.get_forecasts` (hourly + daily), cached for 15 minutes.
 
 Room card: −/+ target, *heizt · Ventile x %* (`valve_open_percent`), presets with

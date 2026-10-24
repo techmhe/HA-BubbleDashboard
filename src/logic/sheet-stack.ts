@@ -4,6 +4,7 @@ import type { SheetState } from '../pages/context';
 export function sheetParent(sh: SheetState): SheetState | null {
   switch (sh.id) {
     case 'weatherMetric':
+    case 'weatherDay':
       return { id: 'weather' };
     case 'history':
       return { id: 'room', slug: sh.slug };
@@ -23,6 +24,8 @@ export function sheetKey(sh: SheetState): string {
       return `${sh.id}:${sh.slug}`;
     case 'weatherMetric':
       return `${sh.id}:${sh.metric}`;
+    case 'weatherDay':
+      return `${sh.id}:${sh.date}`;
     case 'energyChart':
       return `${sh.id}:${sh.key}`;
     case 'device':

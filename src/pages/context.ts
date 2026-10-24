@@ -25,7 +25,9 @@ export type SheetState =
   | { id: 'care' }
   | { id: 'ac' }
   | { id: 'weatherMetric'; metric: WeatherMetric }
-  /** Energy chart: 'pv' | 'import' | 'export' | 'autarky' | 'selfuse' or a consumer's power sensor. */
+  /** One forecast day; `date` is the daily forecast item's datetime. */
+  | { id: 'weatherDay'; date: string }
+  /** Energy chart: 'pv' | 'import' | 'export' | 'house' | 'battery' | 'autarky' | 'selfuse' or a consumer's power sensor. */
   | { id: 'energyChart'; key: string; range: ChartRange; name?: string; back?: SheetState }
   /** Long-press sheet for a device; `back` returns to the sheet it was opened from. */
   | { id: 'device'; entity: string; back?: SheetState };
@@ -100,6 +102,9 @@ export interface PageContext {
   /** Räume filter: 'all', 'on' or a floor id. */
   roomsFilter: string;
   setRoomsFilter(filter: string): void;
+  /** Energie: all current consumers instead of the top six. */
+  consumersAll: boolean;
+  setConsumersAll(all: boolean): void;
   /** Optimistic attribute value (e.g. humidifier target) while a debounced call is pending. */
   pending(entityId: string, attr: string): number | undefined;
   setPending(entityId: string, attr: string, value: number, send: () => void): void;

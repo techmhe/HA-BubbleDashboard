@@ -1,5 +1,5 @@
 import { bucket, type Point } from '../logic/climate';
-import { shareSeries, statChanges, type EnergyTotals, type ShareKind } from '../logic/energy';
+import { consumptionSeries, shareSeries, statChanges, type EnergyTotals, type ShareKind } from '../logic/energy';
 import { weatherSeries, type ForecastItem, type HistoryRow, type WeatherMetric } from '../logic/weather';
 import type { HomeAssistant } from '../types';
 
@@ -73,6 +73,21 @@ export async function loadEnergyShare(
   const base = [pv, imp, exp].find((r) => r.start) ?? pv;
   const share = shareSeries(kind, { pv: pv.past, import: imp.past, export: exp.past, batteryOut: bOut?.past, batteryIn: bIn?.past });
   return { past: share.points, start: base.start, end: base.end, step: base.step, total: share.total };
+}
+
+/** House consumption in kWh per hour/day from the energy dashboard's PV, grid and battery statistics. */
+export async function loadConsumption(
+  hass: HomeAssistant,
+  ids: { solar: string[]; import: string[]; export: string[]; batteryOut: string[]; batteryIn: string[] },
+  range: ChartRange,
+): Promise<SeriesResult> {
+  const none = (): Promise<SeriesResult> => Promise.resolve({ past: [], start: 0, end: 0 });
+  const [pv, imp, exp, bOut, bIn] = await Promise.all(
+    [ids.solar, ids.import, ids.export, ids.batteryOut, ids.batteryIn].map((l) => (l.length ? loadEnergy(hass, l, range) : none())),
+  );
+  const base = [pv, imp, exp].find((r) => r.start) ?? pv;
+  const past = consumptionSeries({ pv: pv.past, import: imp.past, export: exp.past, batteryOut: bOut.past, batteryIn: bIn.past });
+  return { past, start: base.start, end: base.end, step: base.step };
 }
 
 /** Mean power per hour/day for sensors without an energy statistic. */

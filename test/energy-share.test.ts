@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { energyToday, shareSeries } from '../src/logic/energy';
+import { consumptionSeries, energyToday, shareSeries } from '../src/logic/energy';
 
 const H = 3600_000;
 const pts = (vals: number[]) => vals.map((v, i) => ({ t: i * H, v }));
@@ -39,5 +39,14 @@ describe('battery in autarky', () => {
   it('uses the battery in the "Heute" numbers too', () => {
     const t = energyToday({} as never, { type: 'x' } as never, { pv: 3, import: 0.1, export: 1, batteryOut: 0.4, batteryIn: 1 });
     expect([t.consumed, t.local, t.autarky, t.selfUse]).toEqual([1.5, 1.4, 93, 67]);
+  });
+});
+
+describe('house consumption per bucket', () => {
+  it('is PV + import + battery out − export − battery in, per bucket', () => {
+    const r = consumptionSeries({
+      pv: pts([0, 3]), import: pts([0.4, 0]), export: pts([0, 1]), batteryOut: pts([0.1, 0]), batteryIn: pts([0, 1]),
+    });
+    expect(r).toEqual([{ t: 0, v: 0.5 }, { t: H, v: 1 }]);
   });
 });

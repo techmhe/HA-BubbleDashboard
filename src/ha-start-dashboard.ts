@@ -25,7 +25,7 @@ import { energyStyles, renderEnergy } from './pages/energy';
 import { renderSecurity, securityStyles } from './pages/security';
 import { deviceSheet, deviceStyles } from './sheets/device';
 import { robbySheet, robbyStyles } from './sheets/robby';
-import { weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
+import { weatherDaySheet, weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
 import { trendStyles } from './components/trend';
 import { careSheet, careStyles } from './sheets/care';
 import { acSheet, acStyles } from './sheets/ac';
@@ -84,6 +84,7 @@ export class HaStartDashboard extends LitElement {
     _confirm: { state: true },
     _now: { state: true },
     _roomsFilter: { state: true },
+    _consumersAll: { state: true },
     _pending: { state: true },
     _history: { state: true },
     _allRooms: { state: true },
@@ -103,6 +104,7 @@ export class HaStartDashboard extends LitElement {
   private _confirm: Omit<ConfirmOptions, 'onClose'> | null = null;
   private _now = new Date();
   private _roomsFilter = 'all';
+  private _consumersAll = false;
   private _tick?: number;
   private _fastTick?: number;
   private _rooms: Room[] = [];
@@ -430,6 +432,8 @@ export class HaStartDashboard extends LitElement {
       setAllRooms: (patch) => (this._allRooms = { ...this._allRooms, ...patch }),
       roomsFilter: this._roomsFilter,
       setRoomsFilter: (f) => (this._roomsFilter = f),
+      consumersAll: this._consumersAll,
+      setConsumersAll: (v) => (this._consumersAll = v),
       pending: (id, attr) => this._pending[`${id}|${attr}`]?.value,
       setPending: (id, attr, value, send) => this._setPending(id, attr, value, send),
       ui: this._ui,
@@ -609,6 +613,8 @@ export class HaStartDashboard extends LitElement {
         return energyChartSheet(ctx, sh.key, sh.range, sh.name, sh.back);
       case 'weatherMetric':
         return weatherMetricSheet(ctx, sh.metric);
+      case 'weatherDay':
+        return weatherDaySheet(ctx, sh.date);
     }
   }
 

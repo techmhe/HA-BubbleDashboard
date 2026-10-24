@@ -12,6 +12,11 @@ export interface ForecastItem {
   precipitation_probability?: number;
   wind_speed?: number;
   wind_gust_speed?: number;
+  wind_bearing?: number;
+  humidity?: number;
+  uv_index?: number;
+  /** Seconds of sunshine (DWD). */
+  sun_duration?: number;
 }
 
 export const CONDITIONS: Record<string, string> = {
@@ -106,6 +111,8 @@ export function hourlySlots(hourly: ForecastItem[], now: Date, count = 6, step =
 }
 
 export interface DayRow {
+  /** The forecast item's datetime; identifies the day for the detail sheet. */
+  date: string;
   day: string;
   min: number;
   max: number;
@@ -128,6 +135,7 @@ export function dailyRows(daily: ForecastItem[], count = 7): DayRow[] {
     const min = Math.round(mins[i]);
     const max = Math.round(d.temperature!);
     return {
+      date: d.datetime,
       day: new Date(d.datetime).toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', ''),
       min,
       max,
@@ -137,6 +145,60 @@ export function dailyRows(daily: ForecastItem[], count = 7): DayRow[] {
       width: r2(Math.max(((d.temperature! - mins[i]) / span) * 100, 4)),
     };
   });
+}
+
+export interface DayDetail {
+  title: string;
+  label: string;
+  condition: string;
+  max: number | null;
+  min: number | null;
+  facts: { key: string; label: string }[];
+  /** Every third hour of the day from the hourly forecast (empty beyond its reach). */
+  hours: HourSlot[];
+  temps: { t: number; v: number }[];
+  start: number;
+  end: number;
+}
+
+/** One forecast day for the detail sheet: facts from the daily item, curve and slots from the hourly forecast. */
+export function dayDetail(day: ForecastItem, hourly: ForecastItem[]): DayDetail {
+  const date = new Date(day.datetime);
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+  const end = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1).getTime();
+  const hours = hourly.filter((h) => {
+    const t = new Date(h.datetime).getTime();
+    return t >= start && t < end;
+  });
+  const facts: DayDetail['facts'] = [];
+  if (day.precipitation !== undefined) facts.push({ key: 'rain', label: `Regen ${mm(day.precipitation)} mm` });
+  if (day.sun_duration !== undefined) facts.push({ key: 'sun', label: `Sonne ${fmt(day.sun_duration / 3600, 1)} h` });
+  if (day.wind_speed !== undefined) {
+    const dir = day.wind_bearing !== undefined ? ` ${compass(day.wind_bearing)}` : '';
+    const gust = day.wind_gust_speed !== undefined ? ` · Böen ${Math.round(day.wind_gust_speed)}` : '';
+    facts.push({ key: 'wind', label: `Wind ${Math.round(day.wind_speed)} km/h${dir}${gust}` });
+  }
+  if (day.humidity !== undefined) facts.push({ key: 'humidity', label: `Feuchte ${Math.round(day.humidity)} %` });
+  if (day.uv_index !== undefined) facts.push({ key: 'uv', label: `UV ${Math.round(day.uv_index)}` });
+  return {
+    title: date.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }),
+    label: CONDITIONS[day.condition ?? ''] ?? day.condition ?? '',
+    condition: day.condition ?? '',
+    max: day.temperature !== undefined ? Math.round(day.temperature) : null,
+    min: day.templow !== undefined ? Math.round(day.templow) : null,
+    facts,
+    hours: hours
+      .filter((h) => new Date(h.datetime).getHours() % 3 === 0)
+      .map((h) => ({
+        t: String(new Date(h.datetime).getHours()).padStart(2, '0'),
+        temp: h.temperature !== undefined ? Math.round(h.temperature) : null,
+        rain: h.precipitation ? mm(h.precipitation) : '',
+        condition: h.condition ?? '',
+      })),
+    temps: hours.filter((h) => h.temperature !== undefined).map((h) => ({ t: new Date(h.datetime).getTime(), v: h.temperature! })),
+    start,
+    end,
+  };
 }
 
 export const STORM_GUST = 60;

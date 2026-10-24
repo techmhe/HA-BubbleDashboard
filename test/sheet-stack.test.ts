@@ -4,6 +4,7 @@ import { sheetKey, sheetParent } from '../src/logic/sheet-stack';
 describe('sheet stack', () => {
   it('knows which sheet a child sheet was opened from', () => {
     expect(sheetParent({ id: 'weatherMetric', metric: 'humidity' })).toEqual({ id: 'weather' });
+    expect(sheetParent({ id: 'weatherDay', date: '2026-10-25T00:00:00Z' })).toEqual({ id: 'weather' });
     expect(sheetParent({ id: 'history', slug: 'bad', range: '7d' })).toEqual({ id: 'room', slug: 'bad' });
     expect(sheetParent({ id: 'device', entity: 'light.a', back: { id: 'room', slug: 'bad' } })).toEqual({ id: 'room', slug: 'bad' });
     expect(sheetParent({ id: 'device', entity: 'light.a' })).toBeNull();

@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon, sheet } from '../components/ui';
 import { I, IC, weatherIcon } from '../icons';
 import { ent } from '../logic/entities';
-import { dailyRows, hourlySlots, pollenInfo, stormHint, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
+import { dailyRows, dayDetail, hourlySlots, pollenInfo, stormHint, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
 import { loadWeatherMetric } from '../data/series';
 import { trendFigure } from '../components/trend';
 import { fmt, num } from '../logic/util';
@@ -16,6 +16,8 @@ const CHIP_ICONS: Record<string, string> = {
   uv: I.sun,
   visibility: 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6',
 };
+const DAY_ICONS: Record<string, string> = { rain: IC.drop, sun: I.sun, wind: I.wind, humidity: IC.drop, uv: I.sun };
+const CHEVRON = 'M6 9l6 6 6-6';
 const WET = ['rainy', 'pouring', 'snowy', 'snowy-rainy', 'hail', 'lightning-rainy'];
 
 export function weatherSheet(ctx: PageContext) {
@@ -52,15 +54,22 @@ export function weatherSheet(ctx: PageContext) {
           </div>`
         : nothing}
 
-      ${warnings.map((w) => html`
-        <div class="w-alert" style="border-color:${w.color}66;background:linear-gradient(90deg, ${w.color}38, ${w.color}0d)">
-          <div class="w-ah">
-            <span class="circle" style="width:40px;height:40px;background:${w.color}">${icon(I.storm, 18, '#1d1030', 2.2)}</span>
-            <span><span class="w-wt">${w.current ? (w.level >= 3 ? 'Unwetterwarnung' : 'Warnung') : 'Vorabwarnung'}: ${w.title}</span>
-              <span class="w-ws">${w.when} · Stufe ${w.level} von 4</span></span>
-          </div>
-          ${w.text ? html`<p class="w-at">${w.text}</p>` : nothing}
-        </div>`)}
+      ${warnings.map((w, i) => {
+        // Compact rows; tap shows the DWD text.
+        const open = ctx.ui[`warn${i}`] === true;
+        return html`
+          <button class="w-alert" aria-expanded=${open} ?disabled=${!w.text}
+            style="border-color:${w.color}66;background:linear-gradient(90deg, ${w.color}38, ${w.color}0d)"
+            @click=${() => ctx.setUi({ [`warn${i}`]: !open })}>
+            <span class="w-ah">
+              <span class="circle" style="width:32px;height:32px;background:${w.color}">${icon(I.storm, 15, '#1d1030', 2.2)}</span>
+              <span class="grow"><span class="w-wt">${w.current ? (w.level >= 3 ? 'Unwetterwarnung' : 'Warnung') : 'Vorabwarnung'}: ${w.title}</span>
+                <span class="w-ws">${w.when} · Stufe ${w.level} von 4</span></span>
+              ${w.text ? html`<span class="w-chev ${open ? 'open' : ''}">${icon(CHEVRON, 16, 'rgba(255,255,255,0.7)', 2.4)}</span>` : nothing}
+            </span>
+            ${open ? html`<span class="w-at">${w.text}</span>` : nothing}
+          </button>`;
+      })}
 
       ${storm
         ? html`<div class="w-warn">
@@ -88,7 +97,8 @@ export function weatherSheet(ctx: PageContext) {
 
       ${days.length
         ? html`<div class="w-days">
-            ${days.map((d) => html`<div class="w-day">
+            ${days.map((d) => html`<button class="w-day" aria-label="${d.day}, Details anzeigen"
+              @click=${() => ctx.openSheet({ id: 'weatherDay', date: d.date })}>
               <span class="w-dn">${d.day}</span>
               ${icon(weatherIcon(d.condition), 20, WET.includes(d.condition) ? BLUE : 'rgba(255,255,255,0.8)', 2)}
               <span class="w-dr">${d.rain}</span>
@@ -97,7 +107,7 @@ export function weatherSheet(ctx: PageContext) {
                 <span class="w-lo" style="left:${d.left}%">${d.min}°</span>
               </span>
               <span class="w-dmax">${d.max}°</span>
-            </div>`)}
+            </button>`)}
           </div>`
         : nothing}
 
@@ -112,6 +122,59 @@ export function weatherSheet(ctx: PageContext) {
 }
 
 const HOUR = 3600_000;
+
+/** One forecast day: facts, 3-hourly slots and the temperature curve (where the hourly forecast reaches). */
+export function weatherDaySheet(ctx: PageContext, date: string) {
+  const fc = ctx.forecast();
+  const item = fc.daily.find((d) => d.datetime === date);
+  const back = () => ctx.openSheet({ id: 'weather' });
+  if (!item) {
+    return sheet({
+      title: 'Vorhersage', color: BLUE, glow: 'rgba(90,140,220,0.35)', iconPath: I.sun, iconStroke: '#0a1a2a',
+      onClose: ctx.closeSheet, onBack: back,
+      body: html`<div class="w-msg">${fc.loading ? 'Vorhersage wird geladen …' : 'Für diesen Tag gibt es keine Vorhersage mehr.'}</div>`,
+    });
+  }
+  const d = dayDetail(item, fc.hourly);
+  const at = (h: number) => `${String(h).padStart(2, '0')} Uhr`;
+  return sheet({
+    title: d.title,
+    subtitle: d.label || undefined,
+    color: BLUE,
+    glow: 'rgba(90,140,220,0.35)',
+    iconPath: weatherIcon(d.condition),
+    iconStroke: '#0a1a2a',
+    onClose: ctx.closeSheet,
+    onBack: back,
+    body: html`
+      <div class="w-now">
+        <span class="w-temp">${d.max ?? '–'}°</span>
+        <span><span class="w-cond">${d.label}</span>${d.min !== null ? html`<span class="w-today">Tiefstwert ${d.min}°</span>` : nothing}</span>
+      </div>
+      ${d.facts.length
+        ? html`<div class="w-chips">${d.facts.map((f) => html`<span class="w-chip">${icon(DAY_ICONS[f.key], 14, BLUE, 2.2)}${f.label}</span>`)}</div>`
+        : nothing}
+      ${d.hours.length
+        ? html`<div class="w-hours" style="grid-template-columns: repeat(${d.hours.length}, minmax(0, 1fr))">
+            ${d.hours.map((h) => html`<div class="w-hour">
+              <span class="w-ht">${h.t}</span>
+              ${icon(weatherIcon(h.condition), 20, WET.includes(h.condition) ? BLUE : 'rgba(255,255,255,0.85)', 2)}
+              <span class="w-hv">${h.temp ?? '–'}°</span>
+              <span class="w-hr">${h.rain}</span>
+            </div>`)}
+          </div>`
+        : html`<div class="w-msg">Stündliche Werte gibt es erst näher am Tag.</div>`}
+      ${d.temps.length > 1
+        ? trendFigure({
+            title: 'Temperatur', color: '#ffc061', unit: '°C', digits: 1, snap: 2,
+            data: { loading: false, past: d.temps, start: d.start, end: d.end },
+            caption: `${fmt(Math.min(...d.temps.map((p) => p.v)), 1)} – ${fmt(Math.max(...d.temps.map((p) => p.v)), 1)} °C`,
+            labels: [at(0), at(5), at(10), at(14), at(19)],
+          })
+        : nothing}
+    `,
+  });
+}
 
 /** Chart of one weather value: last 24 h from history, next 24 h from the forecast. */
 export function weatherMetricSheet(ctx: PageContext, metric: WeatherMetric) {
@@ -149,9 +212,21 @@ export const weatherStyles = css`
     display: flex;
     flex-direction: column;
     gap: 6px;
-    padding: 8px 8px 10px;
-    border-radius: 28px;
+    width: 100%;
+    padding: 6px 12px 6px 6px;
+    border-radius: 24px;
     border: 1px solid;
+    text-align: left;
+  }
+  .w-alert:disabled {
+    opacity: 1;
+  }
+  .w-chev {
+    display: flex;
+    transition: transform 0.2s;
+  }
+  .w-chev.open {
+    transform: rotate(180deg);
   }
   .w-ah {
     display: flex;
@@ -159,8 +234,9 @@ export const weatherStyles = css`
     gap: 10px;
   }
   .w-at {
+    display: block;
     margin: 0;
-    padding: 0 8px;
+    padding: 2px 6px 6px;
     font-size: 12px;
     line-height: 1.4;
     color: rgba(255, 255, 255, 0.85);
@@ -265,6 +341,8 @@ export const weatherStyles = css`
     padding: 4px 14px;
   }
   .w-day {
+    width: 100%;
+    text-align: left;
     display: grid;
     grid-template-columns: 30px 24px 52px 1fr 30px;
     align-items: center;
