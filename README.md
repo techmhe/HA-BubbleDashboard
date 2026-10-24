@@ -267,7 +267,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - **Weather** (weather pill, storm item): now with today's range and rain, chips (humidity,
   wind + direction, pressure, UV, visibility; tap → chart of the last 24 h from history and
   the next 24 h from the hourly forecast), DWD warnings (current and advance, from the core
-  `dwd_weather_warnings` integration) or else a storm hint (gusts ≥ 60 km/h now or the first
+  `dwd_weather_warnings` integration; repeats of one type are merged into one card with the
+  highest level and the full time span) or else a storm hint (gusts ≥ 60 km/h now or the first
   forecast day), 6 slots every 2 h, 7 days on a shared temperature scale, pollen.
   Forecasts come from `weather.get_forecasts` (hourly + daily), cached for 15 minutes.
 

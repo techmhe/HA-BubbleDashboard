@@ -222,9 +222,14 @@ function warningWhen(start: Date | null, end: Date | null, current: boolean, now
 
 const titleCase = (s: string) => s.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_, a: string, b: string) => a + b.toUpperCase());
 
-/** Current warnings first, then advance warnings; each group most severe first. */
+/**
+ * Current warnings first, then advance warnings; each group most severe first.
+ * DWD issues the same type several times for different time windows; those are merged
+ * into one warning with the highest level (its text and colour) and the full time span.
+ */
 export function weatherWarnings(hass: HomeAssistant, config: CardConfig, now: Date): WeatherWarning[] {
-  const out: WeatherWarning[] = [];
+  type Raw = Omit<WeatherWarning, 'when' | 'start'> & { from: Date | null; to: Date | null };
+  const merged = new Map<string, Raw>();
   for (const id of warningSensors(hass, config)) {
     const a = hass.states[id]?.attributes;
     if (!a) continue;
@@ -235,24 +240,35 @@ export function weatherWarnings(hass: HomeAssistant, config: CardConfig, now: Da
       if (!g('headline') && !g('name')) continue;
       const level = Number(g('level')) || 0;
       if (level < 1) continue;
-      const start = g('start') ? new Date(String(g('start'))) : null;
-      const end = g('end') ? new Date(String(g('end'))) : null;
-      if (end && end < now) continue;
-      const startIso = start?.toISOString();
-      if (out.some((w) => w.headline === g('headline') && w.start === startIso)) continue;
-      out.push({
+      const from = g('start') ? new Date(String(g('start'))) : null;
+      const to = g('end') ? new Date(String(g('end'))) : null;
+      if (to && to < now) continue;
+      const w: Raw = {
         title: g('name') ? titleCase(String(g('name'))) : String(g('headline')),
         headline: String(g('headline') ?? g('name')),
         text: String(g('description') ?? ''),
         level,
         color: typeof g('color') === 'string' && g('color') ? String(g('color')) : LEVEL_COLORS[Math.min(level, 4)],
         current,
-        when: warningWhen(start, end, current, now),
-        start: startIso,
-      });
+        from,
+        to,
+      };
+      const key = `${current}|${w.title}`;
+      const prev = merged.get(key);
+      if (!prev) {
+        merged.set(key, w);
+        continue;
+      }
+      const span = {
+        from: prev.from && w.from ? (w.from < prev.from ? w.from : prev.from) : null,
+        to: prev.to && w.to ? (w.to > prev.to ? w.to : prev.to) : null,
+      };
+      merged.set(key, { ...(w.level > prev.level ? w : prev), ...span });
     }
   }
-  return out.sort((x, y) => Number(y.current) - Number(x.current) || y.level - x.level);
+  return [...merged.values()]
+    .map(({ from, to, ...w }) => ({ ...w, when: warningWhen(from, to, w.current, now), start: from?.toISOString() }))
+    .sort((x, y) => Number(y.current) - Number(x.current) || y.level - x.level);
 }
 
 // ---------- metric charts (chips in the weather sheet) ----------

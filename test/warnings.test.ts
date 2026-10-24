@@ -33,6 +33,27 @@ describe('DWD weather warnings', () => {
     expect(w[0]).toMatchObject({ color: '#ffaa00', text: 'Es treten Sturmböen mit Geschwindigkeiten um 70 km/h auf.' });
   });
 
+  it('merges warnings of the same type into one with the highest level and the full span', () => {
+    const h = makeHass({}, NOW, {
+      'sensor.musterstadt_aktuelle_warnstufe': ['2', {
+        warning_count: 4,
+        warning_1_name: 'WINDBÖEN', warning_1_level: 1, warning_1_headline: 'Amtliche WARNUNG vor WINDBÖEN',
+        warning_1_description: 'Windböen bis 60 km/h.', warning_1_start: iso(18), warning_1_end: iso(22), warning_1_color: '#ffeb3b',
+        warning_2_name: 'STURMBÖEN', warning_2_level: 2, warning_2_headline: 'Amtliche WARNUNG vor STURMBÖEN',
+        warning_2_description: 'Sturmböen bis 80 km/h.', warning_2_start: iso(22), warning_2_end: iso(14, 25), warning_2_color: '#fb8c00',
+        warning_3_name: 'WINDBÖEN', warning_3_level: 1, warning_3_headline: 'Amtliche WARNUNG vor WINDBÖEN',
+        warning_3_description: 'Windböen bis 60 km/h, später Südwest.', warning_3_start: iso(22), warning_3_end: iso(17, 25), warning_3_color: '#ffeb3b',
+        warning_4_name: 'STURMBÖEN', warning_4_level: 3, warning_4_headline: 'Amtliche UNWETTERWARNUNG vor STURMBÖEN',
+        warning_4_description: 'Schwere Sturmböen bis 90 km/h.', warning_4_start: iso(23), warning_4_end: iso(5, 25), warning_4_color: '#e53935',
+      }, 10, { platform: 'dwd_weather_warnings' }],
+    });
+    const w = weatherWarnings(h, config, NOW);
+    expect(w.map((x) => [x.title, x.level, x.when, x.color, x.text])).toEqual([
+      ['Sturmböen', 3, 'bis morgen 14:00', '#e53935', 'Schwere Sturmböen bis 90 km/h.'],
+      ['Windböen', 1, 'bis morgen 17:00', '#ffeb3b', 'Windböen bis 60 km/h.'],
+    ]);
+  });
+
   it('is empty without the integration or without warnings', () => {
     expect(weatherWarnings(makeHass(), config, NOW)).toEqual([]);
     const calm = makeHass({ 'sensor.musterstadt_aktuelle_warnstufe': { state: '0', attributes: { warning_count: 0 } }, 'sensor.musterstadt_vorwarnstufe': { state: '0', attributes: { warning_count: 0 } } }, NOW, WARN);

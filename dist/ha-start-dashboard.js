@@ -29,7 +29,7 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 	let t = "";
 	for (let n of e.cssRules) t += n.cssText;
 	return a(t);
-})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: f, getOwnPropertySymbols: p, getPrototypeOf: m } = Object, h = globalThis, g = h.trustedTypes, _ = g ? g.emptyScript : "", ee = h.reactiveElementPolyfillSupport, v = (e, t) => e, te = {
+})(e) : e, { is: l, defineProperty: u, getOwnPropertyDescriptor: d, getOwnPropertyNames: f, getOwnPropertySymbols: p, getPrototypeOf: m } = Object, h = globalThis, g = h.trustedTypes, _ = g ? g.emptyScript : "", ee = h.reactiveElementPolyfillSupport, v = (e, t) => e, y = {
 	toAttribute(e, t) {
 		switch (t) {
 			case Boolean:
@@ -58,23 +58,23 @@ var e = globalThis, t = e.ShadowRoot && (e.ShadyCSS === void 0 || e.ShadyCSS.nat
 		}
 		return n;
 	}
-}, ne = (e, t) => !l(e, t), re = {
+}, te = (e, t) => !l(e, t), ne = {
 	attribute: !0,
 	type: String,
-	converter: te,
+	converter: y,
 	reflect: !1,
 	useDefault: !1,
-	hasChanged: ne
+	hasChanged: te
 };
 Symbol.metadata ??= Symbol("metadata"), h.litPropertyMetadata ??= /* @__PURE__ */ new WeakMap();
-var y = class extends HTMLElement {
+var b = class extends HTMLElement {
 	static addInitializer(e) {
 		this._$Ei(), (this.l ??= []).push(e);
 	}
 	static get observedAttributes() {
 		return this.finalize(), this._$Eh && [...this._$Eh.keys()];
 	}
-	static createProperty(e, t = re) {
+	static createProperty(e, t = ne) {
 		if (t.state && (t.attribute = !1), this._$Ei(), this.prototype.hasOwnProperty(e) && ((t = Object.create(t)).wrapped = !0), this.elementProperties.set(e, t), !t.noAccessor) {
 			let n = Symbol(), r = this.getPropertyDescriptor(e, n, t);
 			r !== void 0 && u(this.prototype, e, r);
@@ -100,7 +100,7 @@ var y = class extends HTMLElement {
 		};
 	}
 	static getPropertyOptions(e) {
-		return this.elementProperties.get(e) ?? re;
+		return this.elementProperties.get(e) ?? ne;
 	}
 	static _$Ei() {
 		if (this.hasOwnProperty(v("elementProperties"))) return;
@@ -171,14 +171,14 @@ var y = class extends HTMLElement {
 	_$ET(e, t) {
 		let n = this.constructor.elementProperties.get(e), r = this.constructor._$Eu(e, n);
 		if (r !== void 0 && !0 === n.reflect) {
-			let i = (n.converter?.toAttribute === void 0 ? te : n.converter).toAttribute(t, n.type);
+			let i = (n.converter?.toAttribute === void 0 ? y : n.converter).toAttribute(t, n.type);
 			this._$Em = e, i == null ? this.removeAttribute(r) : this.setAttribute(r, i), this._$Em = null;
 		}
 	}
 	_$AK(e, t) {
 		let n = this.constructor, r = n._$Eh.get(e);
 		if (r !== void 0 && this._$Em !== r) {
-			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? te : e.converter;
+			let e = n.getPropertyOptions(r), i = typeof e.converter == "function" ? { fromAttribute: e.converter } : e.converter?.fromAttribute === void 0 ? y : e.converter;
 			this._$Em = r;
 			let a = i.fromAttribute(t, e.type);
 			this[r] = a ?? this._$Ej?.get(r) ?? a, this._$Em = null;
@@ -187,7 +187,7 @@ var y = class extends HTMLElement {
 	requestUpdate(e, t, n, r = !1, i) {
 		if (e !== void 0) {
 			let a = this.constructor;
-			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? ne)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
+			if (!1 === r && (i = this[e]), n ??= a.getPropertyOptions(e), !((n.hasChanged ?? te)(i, t) || n.useDefault && n.reflect && i === this._$Ej?.get(e) && !this.hasAttribute(a._$Eu(e, n)))) return;
 			this.C(e, t, n);
 		}
 		!1 === this.isUpdatePending && (this._$ES = this._$EP());
@@ -251,88 +251,88 @@ var y = class extends HTMLElement {
 	updated(e) {}
 	firstUpdated(e) {}
 };
-y.elementStyles = [], y.shadowRootOptions = { mode: "open" }, y[v("elementProperties")] = /* @__PURE__ */ new Map(), y[v("finalized")] = /* @__PURE__ */ new Map(), ee?.({ ReactiveElement: y }), (h.reactiveElementVersions ??= []).push("2.1.2");
+b.elementStyles = [], b.shadowRootOptions = { mode: "open" }, b[v("elementProperties")] = /* @__PURE__ */ new Map(), b[v("finalized")] = /* @__PURE__ */ new Map(), ee?.({ ReactiveElement: b }), (h.reactiveElementVersions ??= []).push("2.1.2");
 // node_modules/lit-html/lit-html.js
-var ie = globalThis, ae = (e) => e, oe = ie.trustedTypes, se = oe ? oe.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, ce = "$lit$", b = `lit$${Math.random().toFixed(9).slice(2)}$`, le = "?" + b, ue = `<${le}>`, x = document, de = () => x.createComment(""), fe = (e) => e === null || typeof e != "object" && typeof e != "function", pe = Array.isArray, me = (e) => pe(e) || typeof e?.[Symbol.iterator] == "function", he = "[ 	\n\f\r]", ge = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, _e = /-->/g, ve = />/g, S = RegExp(`>|${he}(?:([^\\s"'>=/]+)(${he}*=${he}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ye = /'/g, be = /"/g, xe = /^(?:script|style|textarea|title)$/i, Se = (e) => (t, ...n) => ({
+var re = globalThis, ie = (e) => e, ae = re.trustedTypes, oe = ae ? ae.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, se = "$lit$", x = `lit$${Math.random().toFixed(9).slice(2)}$`, ce = "?" + x, le = `<${ce}>`, S = document, ue = () => S.createComment(""), de = (e) => e === null || typeof e != "object" && typeof e != "function", fe = Array.isArray, pe = (e) => fe(e) || typeof e?.[Symbol.iterator] == "function", me = "[ 	\n\f\r]", he = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ge = /-->/g, _e = />/g, C = RegExp(`>|${me}(?:([^\\s"'>=/]+)(${me}*=${me}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ve = /'/g, ye = /"/g, be = /^(?:script|style|textarea|title)$/i, xe = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}), C = Se(1), w = Se(2), T = Symbol.for("lit-noChange"), E = Symbol.for("lit-nothing"), Ce = /* @__PURE__ */ new WeakMap(), D = x.createTreeWalker(x, 129);
-function we(e, t) {
-	if (!pe(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
-	return se === void 0 ? t : se.createHTML(t);
+}), w = xe(1), T = xe(2), E = Symbol.for("lit-noChange"), D = Symbol.for("lit-nothing"), Se = /* @__PURE__ */ new WeakMap(), O = S.createTreeWalker(S, 129);
+function Ce(e, t) {
+	if (!fe(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+	return oe === void 0 ? t : oe.createHTML(t);
 }
-var Te = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = ge;
+var we = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = he;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === ge ? c[1] === "!--" ? o = _e : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = S) : (xe.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = S) : o = ve : o === S ? c[0] === ">" ? (o = i ?? ge, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? S : c[3] === "\"" ? be : ye) : o === be || o === ye ? o = S : o === _e || o === ve ? o = ge : (o = S, i = void 0);
-		let d = o === S && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === ge ? n + ue : l >= 0 ? (r.push(s), n.slice(0, l) + ce + n.slice(l) + b + d) : n + b + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === he ? c[1] === "!--" ? o = ge : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = C) : (be.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = C) : o = _e : o === C ? c[0] === ">" ? (o = i ?? he, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? C : c[3] === "\"" ? ye : ve) : o === ye || o === ve ? o = C : o === ge || o === _e ? o = he : (o = C, i = void 0);
+		let d = o === C && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === he ? n + le : l >= 0 ? (r.push(s), n.slice(0, l) + se + n.slice(l) + x + d) : n + x + (l === -2 ? t : d);
 	}
-	return [we(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, Ee = class e {
+	return [Ce(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, Te = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = Te(t, n);
-		if (this.el = e.createElement(l, r), D.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = we(t, n);
+		if (this.el = e.createElement(l, r), O.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = D.nextNode()) !== null && c.length < s;) {
+		for (; (i = O.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
-				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(ce)) {
-					let t = u[o++], n = i.getAttribute(e).split(b), r = /([.?@])?(.*)/.exec(t);
+				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(se)) {
+					let t = u[o++], n = i.getAttribute(e).split(x), r = /([.?@])?(.*)/.exec(t);
 					c.push({
 						type: 1,
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? Ae : r[1] === "?" ? je : r[1] === "@" ? Me : ke
+						ctor: r[1] === "." ? ke : r[1] === "?" ? Ae : r[1] === "@" ? je : Oe
 					}), i.removeAttribute(e);
-				} else e.startsWith(b) && (c.push({
+				} else e.startsWith(x) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (xe.test(i.tagName)) {
-					let e = i.textContent.split(b), t = e.length - 1;
+				if (be.test(i.tagName)) {
+					let e = i.textContent.split(x), t = e.length - 1;
 					if (t > 0) {
-						i.textContent = oe ? oe.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], de()), D.nextNode(), c.push({
+						i.textContent = ae ? ae.emptyScript : "";
+						for (let n = 0; n < t; n++) i.append(e[n], ue()), O.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], de());
+						i.append(e[t], ue());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === le) c.push({
+				if (i.data === ce) c.push({
 					type: 2,
 					index: a
 				});
 				else {
 					let e = -1;
-					for (; (e = i.data.indexOf(b, e + 1)) !== -1;) c.push({
+					for (; (e = i.data.indexOf(x, e + 1)) !== -1;) c.push({
 						type: 7,
 						index: a
-					}), e += b.length - 1;
+					}), e += x.length - 1;
 				}
 			}
 			a++;
 		}
 	}
 	static createElement(e, t) {
-		let n = x.createElement("template");
+		let n = S.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function O(e, t, n = e, r) {
-	if (t === T) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = fe(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = O(e, i._$AS(e, t.values), i, r)), t;
+function k(e, t, n = e, r) {
+	if (t === E) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = de(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = k(e, i._$AS(e, t.values), i, r)), t;
 }
-var De = class {
+var Ee = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -343,28 +343,28 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? x).importNode(t, !0);
-		D.currentNode = r;
-		let i = D.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? S).importNode(t, !0);
+		O.currentNode = r;
+		let i = O.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new Oe(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Ne(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new De(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new Me(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = D.nextNode(), a++);
+			a !== s?.index && (i = O.nextNode(), a++);
 		}
-		return D.currentNode = x, r;
+		return O.currentNode = S, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, Oe = class e {
+}, De = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = E, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = D, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -377,7 +377,7 @@ var De = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = O(this, e, t), fe(e) ? e === E || e == null || e === "" ? (this._$AH !== E && this._$AR(), this._$AH = E) : e !== this._$AH && e !== T && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? me(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = k(this, e, t), de(e) ? e === D || e == null || e === "" ? (this._$AH !== D && this._$AR(), this._$AH = D) : e !== this._$AH && e !== E && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? pe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -386,36 +386,36 @@ var De = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== E && fe(this._$AH) ? this._$AA.nextSibling.data = e : this.T(x.createTextNode(e)), this._$AH = e;
+		this._$AH !== D && de(this._$AH) ? this._$AA.nextSibling.data = e : this.T(S.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = Ee.createElement(we(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = Te.createElement(Ce(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new De(r, this), n = e.u(this.options);
+			let e = new Ee(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = Ce.get(e.strings);
-		return t === void 0 && Ce.set(e.strings, t = new Ee(e)), t;
+		let t = Se.get(e.strings);
+		return t === void 0 && Se.set(e.strings, t = new Te(e)), t;
 	}
 	k(t) {
-		pe(this._$AH) || (this._$AH = [], this._$AR());
+		fe(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(de()), this.O(de()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(ue()), this.O(ue()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
 		for (this._$AP?.(!1, !0, t); e !== this._$AB;) {
-			let t = ae(e).nextSibling;
-			ae(e).remove(), e = t;
+			let t = ie(e).nextSibling;
+			ie(e).remove(), e = t;
 		}
 	}
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, ke = class {
+}, Oe = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -423,47 +423,47 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = E, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = E;
+		this.type = 1, this._$AH = D, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = D;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = O(this, e, t, 0), a = !fe(e) || e !== this._$AH && e !== T, a && (this._$AH = e);
+		if (i === void 0) e = k(this, e, t, 0), a = !de(e) || e !== this._$AH && e !== E, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = O(this, r[n + o], t, o), s === T && (s = this._$AH[o]), a ||= !fe(s) || s !== this._$AH[o], s === E ? e = E : e !== E && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = k(this, r[n + o], t, o), s === E && (s = this._$AH[o]), a ||= !de(s) || s !== this._$AH[o], s === D ? e = D : e !== D && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === E ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === D ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, Ae = class extends ke {
+}, ke = class extends Oe {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === E ? void 0 : e;
+		this.element[this.name] = e === D ? void 0 : e;
 	}
-}, je = class extends ke {
+}, Ae = class extends Oe {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== E);
+		this.element.toggleAttribute(this.name, !!e && e !== D);
 	}
-}, Me = class extends ke {
+}, je = class extends Oe {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = O(this, e, t, 0) ?? E) === T) return;
-		let n = this._$AH, r = e === E && n !== E || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== E && (n === E || r);
+		if ((e = k(this, e, t, 0) ?? D) === E) return;
+		let n = this._$AH, r = e === D && n !== D || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== D && (n === D || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, Ne = class {
+}, Me = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -471,18 +471,18 @@ var De = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		O(this, e);
+		k(this, e);
 	}
-}, Pe = ie.litHtmlPolyfillSupport;
-Pe?.(Ee, Oe), (ie.litHtmlVersions ??= []).push("3.3.3");
-var Fe = (e, t, n) => {
+}, Ne = re.litHtmlPolyfillSupport;
+Ne?.(Te, De), (re.litHtmlVersions ??= []).push("3.3.3");
+var Pe = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new Oe(t.insertBefore(de(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new De(t.insertBefore(ue(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, Ie = globalThis, k = class extends y {
+}, Fe = globalThis, A = class extends b {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -492,7 +492,7 @@ var Fe = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Fe(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = Pe(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -501,14 +501,14 @@ var Fe = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return T;
+		return E;
 	}
 };
-k._$litElement$ = !0, k.finalized = !0, Ie.litElementHydrateSupport?.({ LitElement: k });
-var Le = Ie.litElementPolyfillSupport;
-Le?.({ LitElement: k }), (Ie.litElementVersions ??= []).push("4.2.2");
+A._$litElement$ = !0, A.finalized = !0, Fe.litElementHydrateSupport?.({ LitElement: A });
+var Ie = Fe.litElementPolyfillSupport;
+Ie?.({ LitElement: A }), (Fe.litElementVersions ??= []).push("4.2.2");
 // src/icons.ts
-var A = {
+var j = {
 	home: "M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z",
 	thermo: "M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z",
 	bulb: "M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z",
@@ -542,26 +542,26 @@ var A = {
 	fog: "M4 10h16M3 14h18M6 18h12",
 	tree: "M12 2l6 9h-3l4 6H5l4-6H6zM12 17v5"
 };
-function Re(e, t) {
-	if (t && t in A) return A[t];
+function Le(e, t) {
+	if (t && t in j) return j[t];
 	let n = e.toLowerCase();
-	return /büro|arbeits/.test(n) ? A.desk : /bad|wc/.test(n) ? A.bath : /schlaf/.test(n) ? A.bed : /flur|diele|treppe/.test(n) ? A.door : /wohn/.test(n) ? A.sofa : /küche|kuche|ess/.test(n) ? A.pot : /garten|terrasse|balkon/.test(n) ? A.tree : A.home;
+	return /büro|arbeits/.test(n) ? j.desk : /bad|wc/.test(n) ? j.bath : /schlaf/.test(n) ? j.bed : /flur|diele|treppe/.test(n) ? j.door : /wohn/.test(n) ? j.sofa : /küche|kuche|ess/.test(n) ? j.pot : /garten|terrasse|balkon/.test(n) ? j.tree : j.home;
 }
-function j(e) {
+function Re(e) {
 	switch (e) {
 		case "sunny":
-		case "clear-night": return A.sun;
+		case "clear-night": return j.sun;
 		case "rainy":
-		case "pouring": return A.rain;
+		case "pouring": return j.rain;
 		case "lightning":
 		case "lightning-rainy":
 		case "windy":
-		case "windy-variant": return A.storm;
+		case "windy-variant": return j.storm;
 		case "snowy":
 		case "snowy-rainy":
-		case "hail": return A.snow;
-		case "fog": return A.fog;
-		default: return A.cloud;
+		case "hail": return j.snow;
+		case "fog": return j.fog;
+		default: return j.cloud;
 	}
 }
 var M = {
@@ -581,11 +581,11 @@ var M = {
 	stop: "M6 6h12v12H6z"
 }, ze = {
 	eco: M.leaf,
-	comfort: A.sofa,
+	comfort: j.sofa,
 	boost: M.flame,
 	frost: M.snowflake
 }, N = {
-	bulb: A.bulb,
+	bulb: j.bulb,
 	lamp: "M9 2h6l3 8H6zM12 10v11M8 21h8",
 	strip: "M3 12h18M6 9v6M10 9v6M14 9v6M18 9v6",
 	tv: "M3 6h18v12H3zM8 21h8",
@@ -728,7 +728,7 @@ var nt = Ve(class extends He {
 		if (super(e), e.type !== Be.ELEMENT) throw Error("swipeToClose() must be used as an element directive");
 	}
 	render(e) {
-		return T;
+		return E;
 	}
 	update(e, [t]) {
 		let n = e.element, r = Je.get(n);
@@ -741,12 +741,12 @@ var nt = Ve(class extends He {
 			fromHead: !1,
 			samples: [],
 			dy: 0
-		}), tt(n)), T;
+		}), tt(n)), E;
 	}
 });
 // src/components/ui.ts
 function F(e, t, n, r = 2.2) {
-	return C`<svg width=${t} height=${t} viewBox="0 0 24 24" fill="none" stroke=${n} stroke-width=${r}
+	return w`<svg width=${t} height=${t} viewBox="0 0 24 24" fill="none" stroke=${n} stroke-width=${r}
     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${e}></path></svg>`;
 }
 var rt = [
@@ -758,10 +758,10 @@ var rt = [
 	"#ff6b5e"
 ];
 function it(e, t, n, r = 18) {
-	return e && customElements.get("ha-icon") ? C`<ha-icon .icon=${e} style="--mdc-icon-size:${r}px;color:${n}"></ha-icon>` : F(t, r - 2, n, 2.1);
+	return e && customElements.get("ha-icon") ? w`<ha-icon .icon=${e} style="--mdc-icon-size:${r}px;color:${n}"></ha-icon>` : F(t, r - 2, n, 2.1);
 }
 function I(e) {
-	return C`
+	return w`
     <div class="backdrop" @click=${e.onClose}></div>
     <section class="sheet" role="dialog" aria-modal="true" aria-label=${e.title}
       style="background-image: radial-gradient(100% 30% at 50% 0%, ${e.glow}, transparent 70%)"
@@ -769,13 +769,13 @@ function I(e) {
       @keydown=${(t) => t.key === "Escape" && e.onClose()}>
       <div class="grabber" aria-hidden="true"></div>
       <header class="sheet-head">
-        ${e.onBack ? C`<button class="close back" aria-label="Zurück" @click=${e.onBack}>${F("M15 5l-7 7 7 7", 18, "#fff", 2.4)}</button>` : C`<span class="circle" style="width:44px;height:44px;background:${e.color}">${F(e.iconPath, 20, e.iconStroke ?? "#141008", 2)}</span>`}
+        ${e.onBack ? w`<button class="close back" aria-label="Zurück" @click=${e.onBack}>${F("M15 5l-7 7 7 7", 18, "#fff", 2.4)}</button>` : w`<span class="circle" style="width:44px;height:44px;background:${e.color}">${F(e.iconPath, 20, e.iconStroke ?? "#141008", 2)}</span>`}
         <span class="sheet-title">
           <h1 class="ellipsis">${e.title}</h1>
-          ${e.subtitle ? C`<span class="sheet-sub">${e.subtitle}</span>` : ""}
+          ${e.subtitle ? w`<span class="sheet-sub">${e.subtitle}</span>` : ""}
         </span>
         ${e.headerExtra ?? ""}
-        ${e.noClose ? "" : C`<button class="close" aria-label="Schließen" @click=${e.onClose}>${F(A.close, 16, "#fff", 2.4)}</button>`}
+        ${e.noClose ? "" : w`<button class="close" aria-label="Schließen" @click=${e.onClose}>${F(j.close, 16, "#fff", 2.4)}</button>`}
       </header>
       ${e.body}
     </section>
@@ -788,7 +788,7 @@ function at(e) {
 		glow: e.color + "33",
 		iconPath: e.iconPath,
 		onClose: e.onClose,
-		body: C`
+		body: w`
       <p class="confirm-text">${e.text}</p>
       <div class="confirm-row">
         <button class="btn" @click=${e.onClose}>Abbrechen</button>
@@ -1160,7 +1160,7 @@ function At(e, t, n, r) {
 }
 var jt = (e) => e.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (e, t, n) => t + n.toUpperCase());
 function Mt(e, t, n) {
-	let r = [];
+	let r = /* @__PURE__ */ new Map();
 	for (let i of Dt(e, t)) {
 		let t = e.states[i]?.attributes;
 		if (!t) continue;
@@ -1172,20 +1172,35 @@ function Mt(e, t, n) {
 			if (o < 1) continue;
 			let s = i("start") ? new Date(String(i("start"))) : null, c = i("end") ? new Date(String(i("end"))) : null;
 			if (c && c < n) continue;
-			let l = s?.toISOString();
-			r.some((e) => e.headline === i("headline") && e.start === l) || r.push({
+			let l = {
 				title: i("name") ? jt(String(i("name"))) : String(i("headline")),
 				headline: String(i("headline") ?? i("name")),
 				text: String(i("description") ?? ""),
 				level: o,
 				color: typeof i("color") == "string" && i("color") ? String(i("color")) : Et[Math.min(o, 4)],
 				current: a,
-				when: At(s, c, a, n),
-				start: l
+				from: s,
+				to: c
+			}, u = `${a}|${l.title}`, d = r.get(u);
+			if (!d) {
+				r.set(u, l);
+				continue;
+			}
+			let f = {
+				from: d.from && l.from ? l.from < d.from ? l.from : d.from : null,
+				to: d.to && l.to ? l.to > d.to ? l.to : d.to : null
+			};
+			r.set(u, {
+				...l.level > d.level ? l : d,
+				...f
 			});
 		}
 	}
-	return r.sort((e, t) => Number(t.current) - Number(e.current) || t.level - e.level);
+	return [...r.values()].map(({ from: e, to: t, ...r }) => ({
+		...r,
+		when: At(e, t, r.current, n),
+		start: e?.toISOString()
+	})).sort((e, t) => Number(t.current) - Number(e.current) || t.level - e.level);
 }
 var Nt = {
 	humidity: {
@@ -1279,7 +1294,7 @@ function Gt(e, t) {
 	return {
 		temp: Number.isFinite(r) ? `${B(Math.round(r))}°` : "–",
 		label: n ? Wt[n.state] ?? n.state : "Wetter",
-		icon: j(n?.state ?? "")
+		icon: Re(n?.state ?? "")
 	};
 }
 var Kt = {
@@ -1326,28 +1341,28 @@ function Zt(e, t) {
 			key: "robby",
 			value: Kt[n] ?? n,
 			label: "Robby",
-			icon: A.vacuum,
+			icon: j.vacuum,
 			color: n === "error" ? "#ff453a" : "#ffffff"
 		},
 		{
 			key: "light",
 			value: `${Yt(e).length} an`,
 			label: "Licht",
-			icon: A.bulb,
+			icon: j.bulb,
 			color: "#ffd60a"
 		},
 		{
 			key: "energy",
 			value: i.value,
 			label: i.label,
-			icon: A.bolt,
+			icon: j.bolt,
 			color: i.label === "Einspeisung" ? "#30d158" : "#ff9f0a"
 		},
 		{
 			key: "alarm",
 			value: qt[r] ?? r,
 			label: "Alarm",
-			icon: A.shield,
+			icon: j.shield,
 			color: r === "triggered" ? "#ff453a" : "#bf9bff"
 		}
 	];
@@ -1375,14 +1390,14 @@ function G(e, t, n, r, i, a, o) {
 var Qt = (e, t) => !!t && z(e, t) === "on";
 function $t(e, t, n, r) {
 	let i = [], a = e.states, o = L(t, "front_door");
-	z(e, L(t, "alarm")) === "triggered" && i.push(G("alarm", "Alarm ausgelöst", "Jetzt prüfen", A.shield, W.red, "alarm")), Qt(e, o) && pt(e, o, r) >= zt && i.push(G("door", "Haustür offen", `seit ${mt(pt(e, o, r))}`, A.door, W.red, { moreInfo: o }));
+	z(e, L(t, "alarm")) === "triggered" && i.push(G("alarm", "Alarm ausgelöst", "Jetzt prüfen", j.shield, W.red, "alarm")), Qt(e, o) && pt(e, o, r) >= zt && i.push(G("door", "Haustür offen", `seit ${mt(pt(e, o, r))}`, j.door, W.red, { moreInfo: o }));
 	let s = Mt(e, t, r).filter((e) => e.current), c = R(e, L(t, "gusts"));
 	if (s.length) {
 		let [e, ...t] = s, n = [e.when, ...t.map((e) => `${e.title} ${e.when}`)].filter(Boolean).join(" · ");
-		i.push(G("warn", `${e.level >= 3 ? "Unwetterwarnung" : "Warnung"}: ${e.title}`, n, A.storm, [e.color, `${e.color}44`], "weather"));
-	} else c !== null && c >= Lt && i.push(G("storm", "Sturmböen", `Böen bis ${B(Math.round(c))} km/h`, A.storm, W.purple, "weather"));
+		i.push(G("warn", `${e.level >= 3 ? "Unwetterwarnung" : "Warnung"}: ${e.title}`, n, j.storm, [e.color, `${e.color}44`], "weather"));
+	} else c !== null && c >= Lt && i.push(G("storm", "Sturmböen", `Böen bis ${B(Math.round(c))} km/h`, j.storm, W.purple, "weather"));
 	let l = a[L(t, "airing_timer")];
-	if (l && l.state === "active") i.push(G("airing", "Lüften läuft", "Fenster nach Ablauf schließen", A.wind, W.blue, "airing"));
+	if (l && l.state === "active") i.push(G("airing", "Lüften läuft", "Fenster nach Ablauf schließen", j.wind, W.blue, "airing"));
 	else {
 		let r = n.filter((t) => z(e, t.airing) === "Jetzt lüften");
 		if (r.length) {
@@ -1390,7 +1405,7 @@ function $t(e, t, n, r) {
 				let n = R(e, t.humidity);
 				return n === null ? t.name : `${t.name} ${B(Math.round(n))} %`;
 			}), a = R(e, L(t, "airing_duration"));
-			a !== null && n.push(`${B(Math.round(a))} min`), i.push(G("airing", "Jetzt lüften", n.join(" · "), A.wind, W.blue, "airing", {
+			a !== null && n.push(`${B(Math.round(a))} min`), i.push(G("airing", "Jetzt lüften", n.join(" · "), j.wind, W.blue, "airing", {
 				kind: "service",
 				label: "Start",
 				domain: dt(L(t, "airing_start"))[0],
@@ -1405,12 +1420,12 @@ function $t(e, t, n, r) {
 	})).filter((e) => e.min >= Rt);
 	if (u.length) {
 		let e = u.length === 1 ? "Fenster offen" : `${u.length} Fenster offen`, t = u.map((e) => `${e.r.name} ${mt(e.min)}`).join(" · ");
-		i.push(G("windows", e, t, A.window, W.blue, "airing"));
+		i.push(G("windows", e, t, j.window, W.blue, "airing"));
 	}
 	for (let t of Object.keys(a).filter((e) => /^input_boolean\..+_fertig$/.test(e))) {
 		if (a[t].state !== "on") continue;
 		let n = H(e, t).replace(/\s*fertig$/i, "");
-		i.push(G(t, `${n} fertig`, "Bitte ausräumen", A.washer, W.green, null, {
+		i.push(G(t, `${n} fertig`, "Bitte ausräumen", j.washer, W.green, null, {
 			kind: "service",
 			label: "OK",
 			domain: "input_boolean",
@@ -1422,16 +1437,16 @@ function $t(e, t, n, r) {
 	let d = L(t, "vacuum"), f = z(e, d), p = z(e, L(t, "vacuum_status"));
 	if (f === "error" || p === "error") {
 		let e = a[d]?.attributes.error ?? a[d]?.attributes.status ?? "Bitte prüfen";
-		i.push(G("robby-error", "Robby: Fehler", String(e), A.vacuum, W.red, "robby"));
+		i.push(G("robby-error", "Robby: Fehler", String(e), j.vacuum, W.red, "robby"));
 	}
 	let m = tn(e, d);
-	m.length && i.push(G("robby-due", "Robby: Wartung fällig", `${en(m)} reinigen`, A.vacuum, W.orange, "robby"));
+	m.length && i.push(G("robby-due", "Robby: Wartung fällig", `${en(m)} reinigen`, j.vacuum, W.orange, "robby"));
 	let h = rn(e, t, r);
 	h && i.push(h);
 	let g = an(e, t);
-	g.length && i.push(G("filter", "Filter prüfen", g.join(" · "), A.filter, W.yellow, "care"));
+	g.length && i.push(G("filter", "Filter prüfen", g.join(" · "), j.filter, W.yellow, "care"));
 	let _ = on(e);
-	return _.length && i.push(G("battery", _.length === 1 ? "Batterie schwach" : `${_.length} Batterien schwach`, _.map((e) => `${e.name} ${B(e.level)} %`).join(" · "), A.battery, W.orange, "care")), i;
+	return _.length && i.push(G("battery", _.length === 1 ? "Batterie schwach" : `${_.length} Batterien schwach`, _.map((e) => `${e.name} ${B(e.level)} %`).join(" · "), j.battery, W.orange, "care")), i;
 }
 function en(e) {
 	return e.length <= 1 ? e.join("") : `${e.slice(0, -1).join(", ")} & ${e[e.length - 1]}`;
@@ -1470,7 +1485,7 @@ function rn(e, t, n) {
 	let o = new Date(n);
 	o.setDate(o.getDate() + a);
 	let s = i.attributes[nn(o)];
-	return G("waste", a === 0 ? "Müll heute" : "Müll morgen", typeof s == "string" ? s : "Abfuhr", A.trash, W.green, { moreInfo: r });
+	return G("waste", a === 0 ? "Müll heute" : "Müll morgen", typeof s == "string" ? s : "Abfuhr", j.trash, W.green, { moreInfo: r });
 }
 function an(e, t) {
 	let n = [];
@@ -1505,7 +1520,7 @@ function cn(e, t) {
 		let n = R(e, t.temperature) ?? (t.climate ? Number(e.states[t.climate]?.attributes.current_temperature) : NaN), r = R(e, t.humidity);
 		return {
 			room: t,
-			icon: Re(t.name, t.icon),
+			icon: Le(t.name, t.icon),
 			temp: n !== null && Number.isFinite(n) ? B(n, 1) : "–",
 			hum: r === null ? "–" : B(Math.round(r)),
 			heating: !!t.climate && e.states[t.climate]?.attributes.hvac_action === "heating",
@@ -1872,7 +1887,7 @@ var Rn = Ve(class extends He {
 		if (super(e), e.type !== Be.ELEMENT) throw Error("hold() must be used as an element directive");
 	}
 	render(e) {
-		return T;
+		return E;
 	}
 	update(e, [t]) {
 		let n = e.element, r = Fn.get(n);
@@ -1881,7 +1896,7 @@ var Rn = Ve(class extends He {
 			held: !1,
 			x: 0,
 			y: 0
-		}), Ln(n)), T;
+		}), Ln(n)), E;
 	}
 }), zn = "ha-start-dashboard-header";
 function Bn(e) {
@@ -2396,30 +2411,30 @@ async function Rr(e, t, n, r) {
 // src/pages/climate.ts
 function zr(e, t) {
 	let n = dn(e.hass, t, e.target(t.climate)), r = n.heating ? "heat" : n.vent ? "vent" : "", i = t.climate;
-	return C`
+	return w`
     <div class="kroom ${r}">
       <button class="kroom-main" @click=${() => e.openSheet({
 		id: "room",
 		slug: t.slug
 	})}>
-        <span class="circle kroom-circle">${F(Re(t.name, t.icon), 19, r ? "#141008" : "#fff", 2)}</span>
+        <span class="circle kroom-circle">${F(Le(t.name, t.icon), 19, r ? "#141008" : "#fff", 2)}</span>
         <span class="kroom-text">
           <span class="kroom-name">
             <span class="ellipsis">${t.name}</span>
-            ${n.aq || n.fanOn ? C`<span class="aqchip" title=${n.pm25 === null ? "Luftreiniger an" : `PM2.5 ${B(n.pm25)} µg/m³`}
+            ${n.aq || n.fanOn ? w`<span class="aqchip" title=${n.pm25 === null ? "Luftreiniger an" : `PM2.5 ${B(n.pm25)} µg/m³`}
                   style="background:${n.aq ? n.aq + "2e" : "rgba(48,209,88,0.18)"}">
-                  ${n.aq ? C`<span class="dot" style="width:6px;height:6px;background:${n.aq}"></span>` : E}
-                  ${n.fanOn ? F(M.fan, 11, "#7ee8a0", 2.6) : E}
-                </span>` : E}
+                  ${n.aq ? w`<span class="dot" style="width:6px;height:6px;background:${n.aq}"></span>` : D}
+                  ${n.fanOn ? F(M.fan, 11, "#7ee8a0", 2.6) : D}
+                </span>` : D}
           </span>
           <span class="kroom-sub">${K(n.cur)}° · ${n.hum ?? "–"} % · ${n.label}</span>
         </span>
       </button>
-      ${i ? C`<span class="stepper">
+      ${i ? w`<span class="stepper">
             <button class="step" aria-label="Soll senken" @click=${() => e.stepTarget(i, -.5)}>−</button>
             <span class="target">${K(n.target)}°</span>
             <button class="step" aria-label="Soll erhöhen" @click=${() => e.stepTarget(i, .5)}>+</button>
-          </span>` : E}
+          </span>` : D}
     </div>
   `;
 }
@@ -2453,13 +2468,13 @@ var Br = [
 };
 function Hr(e, t) {
 	let n = e.hass.states[t];
-	if (!n) return E;
+	if (!n) return D;
 	let r = n.attributes, i = [
 		Vr[n.state] ?? n.state,
 		r.current_temperature == null ? "" : `${B(Number(r.current_temperature), 1)}° innen`,
 		r.temperature == null ? "" : `Soll ${B(Number(r.temperature), 1)}°`
 	].filter(Boolean).join(" · ");
-	return C`
+	return w`
     <div class="ac">
       <button class="ac-main" aria-label="Klimaanlage öffnen" @click=${() => e.openSheet({ id: "ac" })}>
         <span class="circle" style="width:44px;height:44px;background:rgba(100,210,255,0.18)">${F(M.snowflake, 19, "#8fd8ff", 2)}</span>
@@ -2468,7 +2483,7 @@ function Hr(e, t) {
       <span class="ac-modes">
         ${Br.map((r) => {
 		let i = n.state === r.mode;
-		return C`<button class="ac-mode ${i ? "active" : ""}" aria-label=${r.name} title=${r.name} aria-pressed=${i}
+		return w`<button class="ac-mode ${i ? "active" : ""}" aria-label=${r.name} title=${r.name} aria-pressed=${i}
             @click=${() => e.call("climate", "set_hvac_mode", { hvac_mode: r.mode }, { entity_id: t })}>
             ${F(r.icon, 16, i ? "#101218" : r.stroke, 2.2)}</button>`;
 	})}
@@ -2478,7 +2493,7 @@ function Hr(e, t) {
 }
 function Ur(e, t, n, r) {
 	let i = gn(t.rooms.map((t) => dn(e.hass, t).cur));
-	return C`
+	return w`
     <section class="section">
       <div class="section-head" style="margin-top:8px">
         <h2>${t.name}</h2>
@@ -2486,35 +2501,35 @@ function Ur(e, t, n, r) {
         <span class="meta">${i === null ? "" : `Ø ${B(i, 1)}°`}</span>
       </div>
       ${t.rooms.map((t) => zr(e, t))}
-      ${r === t.id ? Hr(e, n) : E}
+      ${r === t.id ? Hr(e, n) : D}
     </section>
   `;
 }
 function Wr(e) {
 	let { hass: t, rooms: n } = e, r = L(e.config, "heating"), i = z(t, r) === "on", a = vn(t, n, e.config), o = L(e.config, "ac"), s = t.states[o] ? hn(t, o) : void 0, c = mn(t, n), l = t.states[L(e.config, "weather")]?.state ?? "";
-	return C`
+	return w`
     <div class="climate">
       <header class="khead">
         <div>
           <div class="date">${_n(t, n)}</div>
           <h1>Klima</h1>
         </div>
-        ${t.states[r] ? C`<button class="heat-toggle ${i ? "on" : ""}" aria-pressed=${i}
+        ${t.states[r] ? w`<button class="heat-toggle ${i ? "on" : ""}" aria-pressed=${i}
               aria-label="Zentralheizung ${i ? "an" : "aus"}" title="Zentralheizung"
               @click=${() => e.call("input_boolean", "toggle", {}, { entity_id: r })}>
               <span class="track"><span class="knob">${F(M.flame, 14, i ? "#ff9f0a" : "#888", 2.6)}</span></span>
-            </button>` : E}
+            </button>` : D}
       </header>
 
       <button class="pill outdoor" @click=${() => e.openSheet({ id: "airing" })}>
-        <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${F(j(l), 20, "#8fd0ff", 2)}</span>
+        <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${F(Re(l), 20, "#8fd0ff", 2)}</span>
         <span class="grow"><span class="t1">${a.title}</span><span class="t2">${a.sub}</span></span>
-        ${a.minutes === null ? E : C`<span class="air-badge">${F(A.wind, 14, "#06202c", 2.4)}${B(Math.round(a.minutes))} min</span>`}
+        ${a.minutes === null ? D : w`<span class="air-badge">${F(j.wind, 14, "#06202c", 2.4)}${B(Math.round(a.minutes))} min</span>`}
       </button>
 
       <div class="pill allrooms">
         <span class="grow" style="font-size:14px;font-weight:600">Alle Räume</span>
-        ${ln.map((t) => C`
+        ${ln.map((t) => w`
           <button class="preset" style="background:${t.color}" aria-label="Alle auf ${t.name}" title=${t.name}
             @click=${() => e.runScript(L(e.config, "preset_all"), { preset: t.id })}>
             ${F(ze[t.id], 18, "#101010", 2.3)}
@@ -2763,7 +2778,7 @@ function Kr(e, t) {
 				text: "EG jetzt saugen?",
 				confirm: "Starten",
 				color: "#ffffff",
-				iconPath: A.vacuum,
+				iconPath: j.vacuum,
 				onConfirm: () => e.call("button", "press", {}, { entity_id: L(n, "vacuum_quick") })
 			})
 		};
@@ -2776,7 +2791,7 @@ function Kr(e, t) {
 					text: `Alle ${t.length} Lichter ausschalten?`,
 					confirm: "Alle aus",
 					color: "#ffd60a",
-					iconPath: A.bulb,
+					iconPath: j.bulb,
 					onConfirm: () => e.call("light", "turn_off", {}, { entity_id: t })
 				});
 			}
@@ -2789,7 +2804,7 @@ function Kr(e, t) {
 				text: "Alarm scharf schalten (Abwesend)?",
 				confirm: "Scharf",
 				color: "#bf9bff",
-				iconPath: A.shield,
+				iconPath: j.shield,
 				onConfirm: () => e.call("alarm_control_panel", "alarm_arm_away", {}, { entity_id: L(n, "alarm") })
 			})
 		};
@@ -2811,7 +2826,7 @@ function qr(e, t) {
 }
 function Jr(e, t) {
 	let n = qr(e, t), r = t.action;
-	return C`
+	return w`
     <div class="now" style="background: linear-gradient(90deg, ${t.tint}, rgba(255,255,255,0.05) 75%)">
       <button class="now-main" ?disabled=${!n} @click=${() => n?.()}>
         <span class="circle" style="width:42px;height:42px;background:${t.color}">${F(t.icon, 18, "#101010")}</span>
@@ -2820,14 +2835,14 @@ function Jr(e, t) {
           <span class="now-sub ellipsis">${t.text}</span>
         </span>
       </button>
-      ${r ? C`<button class="now-action" style="background:${t.color}"
-            @click=${() => e.call(r.domain, r.service, r.data, r.target)}>${r.label}</button>` : E}
+      ${r ? w`<button class="now-action" style="background:${t.color}"
+            @click=${() => e.call(r.domain, r.service, r.data, r.target)}>${r.label}</button>` : D}
     </div>
   `;
 }
 function Yr(e) {
 	let { hass: t, config: n, now: r } = e, i = Gt(t, L(n, "weather")), a = Zt(t, n), o = $t(t, n, e.rooms, r), s = cn(t, e.rooms);
-	return C`
+	return w`
     <div class="overview">
       <header class="head">
         <div>
@@ -2844,7 +2859,7 @@ function Yr(e) {
       </header>
 
       <div class="status">
-        ${a.map((t) => C`
+        ${a.map((t) => w`
           <button class="bubble" aria-label="${t.label}: ${t.value}" ${Rn(Kr(e, t))}>
             <span class="circle" style="width:34px;height:34px;background:${t.color}">${F(t.icon, 17, "#111")}</span>
             <span class="b-value ellipsis">${t.value}</span>
@@ -2859,9 +2874,9 @@ function Yr(e) {
           <span class="rule" aria-hidden="true"></span>
           <span class="meta">${o.length || ""}</span>
         </div>
-        ${o.length ? o.map((t) => Jr(e, t)) : C`
+        ${o.length ? o.map((t) => Jr(e, t)) : w`
             <div class="now calm">
-              <span class="circle" style="width:42px;height:42px;background:#30d158">${F(A.check, 18, "#101010", 2.4)}</span>
+              <span class="circle" style="width:42px;height:42px;background:#30d158">${F(j.check, 18, "#101010", 2.4)}</span>
               <span class="now-text">
                 <span class="now-title">Alles ruhig</span>
                 <span class="now-sub">Gerade gibt es nichts zu tun</span>
@@ -2873,14 +2888,14 @@ function Yr(e) {
         <div class="section-head">
           <h2 id="rk-h">Zusammenfassung</h2>
           <span class="rule" aria-hidden="true"></span>
-          ${s.some((e) => e.aq) ? C`<span class="meta" style="font-size:11px">
+          ${s.some((e) => e.aq) ? w`<span class="meta" style="font-size:11px">
                 <span class="dot" style="background:#30d158"></span><span class="dot" style="background:#ffd60a"></span><span class="dot" style="background:#ff453a;margin-right:3px"></span>Luftqualität
-              </span>` : E}
+              </span>` : D}
         </div>
         <div class="sum-grid">
           ${s.map((t) => {
 		let n = t.vent ? "vent" : t.heating ? "heat" : "";
-		return C`
+		return w`
               <button class="room ${n}" @click=${() => e.openSheet({
 			id: "room",
 			slug: t.room.slug
@@ -2888,7 +2903,7 @@ function Yr(e) {
                 aria-label="${t.room.name}: ${t.temp} Grad, ${t.hum} Prozent">
                 <span class="circle room-circle">${F(t.icon, 16, n ? "#141008" : "#fff", 2)}</span>
                 <span class="room-text">
-                  <span class="room-name"><span class="ellipsis">${t.room.name}</span>${t.aq ? C`<span class="dot" style="background:${t.aq}"></span>` : E}</span>
+                  <span class="room-name"><span class="ellipsis">${t.room.name}</span>${t.aq ? w`<span class="dot" style="background:${t.aq}"></span>` : D}</span>
                   <span class="room-sub">${t.hum} %${t.vent ? " · lüften" : t.heating ? " · heizt" : ""}</span>
                 </span>
                 <span class="room-temp">${t.temp}°</span>
@@ -3077,7 +3092,7 @@ var Xr = o`
     font-weight: 700;
     margin-right: 8px;
   }
-`, Zr, Qr = class extends k {
+`, Zr, Qr = class extends A {
 	constructor(...e) {
 		super(...e), this.value = 0, this.min = 0, this.max = 100, this.step = 1, this.variant = "bubble", this.label = "", this.track = "rgba(255,255,255,0.08)", this.fill = "linear-gradient(90deg, rgba(255,214,10,0.35), #ffe37a)", this.format = (e) => String(e), this._local = null, this._localAt = 0, this._dragging = !1;
 	}
@@ -3118,15 +3133,15 @@ var Xr = o`
 	}
 	render() {
 		let e = this._shown, t = (e - this.min) / (this.max - this.min || 1);
-		return C`
+		return w`
       <div class="head"><span class="lbl">${this.label}</span><span class="val">${this.format(e)}</span></div>
       <div class="track v-${this.variant}" role="slider" tabindex="0" aria-label=${this.label}
         aria-valuemin=${this.min} aria-valuemax=${this.max} aria-valuenow=${e} aria-valuetext=${this.format(e)}
         style="background:${this.track}"
         @pointerdown=${this._down} @pointermove=${this._move} @pointerup=${this._up}
         @pointercancel=${this._cancel} @lostpointercapture=${this._up} @keydown=${this._key}>
-        ${this.variant === "bubble" ? C`<span class="fill" style="width:max(64px, ${t * 100}%);background:${this.fill};opacity:${e <= this.min ? 0 : 1}"></span>
-              <slot></slot>` : C`<span class="knob" style="left:calc(${t * 100}% - ${t * 44}px + 4px)"></span>`}
+        ${this.variant === "bubble" ? w`<span class="fill" style="width:max(64px, ${t * 100}%);background:${this.fill};opacity:${e <= this.min ? 0 : 1}"></span>
+              <slot></slot>` : w`<span class="knob" style="left:calc(${t * 100}% - ${t * 44}px + 4px)"></span>`}
       </div>
     `;
 	}
@@ -3255,11 +3270,11 @@ function ai(e, t, n) {
 	return r ? e.hass.areas[r]?.name ?? r : "";
 }
 function oi(e, t, n, r, i) {
-	return C`<button class="tgl ${n ? "on" : ""}" aria-pressed=${n} aria-label="${i} ein/aus"
+	return w`<button class="tgl ${n ? "on" : ""}" aria-pressed=${n} aria-label="${i} ein/aus"
     style=${n ? `background:${r}` : ""} @click=${() => ri(e, t)}><span></span></button>`;
 }
 function si(e, t) {
-	if (!e.hass.states[t]) return E;
+	if (!e.hass.states[t]) return D;
 	switch (Kn(e.hass, t)) {
 		case "light": return ci(e, t);
 		case "purifier": return di(e, t);
@@ -3278,32 +3293,32 @@ function ci(e, t) {
 		iconPath: P(t, s),
 		headerExtra: oi(e, t, a, $r, s),
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <start-dashboard-slider variant="bubble" label="Helligkeit" .min=${0} .max=${100} .step=${1} .value=${l}
         .format=${(e) => `${e} %`}
         @slide-change=${(n) => n.detail.value <= 0 ? e.call("light", "turn_off", {}, { entity_id: t }) : p({ brightness_pct: n.detail.value })}>
         ${F(N.brightness, 22, l > 8 ? "#2b2200" : "#fff", 2.2)}
       </start-dashboard-slider>
 
-      ${d ? C`<div>
+      ${d ? w`<div>
             <start-dashboard-slider variant="knob" label="Farbtemperatur" .min=${d.min} .max=${d.max} .step=${50}
               .value=${Number.isFinite(f) ? f : Math.round((d.min + d.max) / 2)}
               .track=${"linear-gradient(90deg, #ffa94d, #fff1d6 50%, #d6ecff)"}
               .format=${(e) => `${B(e)} K`}
               @slide-change=${(e) => p({ color_temp_kelvin: e.detail.value })}></start-dashboard-slider>
             <div class="ends"><span>warm ${B(d.min)} K</span><span>kalt ${B(d.max)} K</span></div>
-          </div>` : E}
+          </div>` : D}
 
-      ${c.color ? C`<div>
+      ${c.color ? w`<div>
             <div class="sublabel">Farbe</div>
             <div class="swatches">
-              ${ni.map(([e, t, n]) => C`<button class="swatch" aria-label=${e} style="background:${t}" @click=${() => p({ hs_color: n })}></button>`)}
+              ${ni.map(([e, t, n]) => w`<button class="swatch" aria-label=${e} style="background:${t}" @click=${() => p({ hs_color: n })}></button>`)}
             </div>
-          </div>` : E}
+          </div>` : D}
 
-      ${c.brightness ? C`<div class="grid3">
-            ${tr(c).map((e) => C`<button class="dchip" @click=${() => p(e.data)}>${e.name}</button>`)}
-          </div>` : E}
+      ${c.brightness ? w`<div class="grid3">
+            ${tr(c).map((e) => w`<button class="dchip" @click=${() => p(e.data)}>${e.name}</button>`)}
+          </div>` : D}
     `
 	});
 }
@@ -3320,24 +3335,24 @@ function li(e, t, n) {
 			timeInput: void 0
 		});
 	}, s = a?.id === t && a.at > e.now.getTime() ? new Date(a.at) : void 0;
-	return C`
+	return w`
     <div class="sublabel">Ausschalten in</div>
     <div class="grid4 ${r ? "" : "disabled"}">
-      ${n.map(([e, t]) => C`<button class="dchip sm" ?disabled=${!r} @click=${() => o(t)}>${e}</button>`)}
+      ${n.map(([e, t]) => w`<button class="dchip sm" ?disabled=${!r} @click=${() => o(t)}>${e}</button>`)}
       <button class="dchip sm ${i ? "sel" : ""}" ?disabled=${!r} aria-expanded=${i}
         @click=${() => e.setUi({ timeInput: i ? void 0 : t })}>Zeit…</button>
     </div>
-    ${i && r ? C`<div class="timerow">
+    ${i && r ? w`<div class="timerow">
           <input type="time" class="time" aria-label="Ausschalten um" .value=${e.ui.timeValue ?? ""}
             @input=${(t) => e.setUi({ timeValue: t.target.value })} />
           <button class="dchip sm sel" ?disabled=${!e.ui.timeValue}
             @click=${() => e.ui.timeValue && o(vr(e.now, e.ui.timeValue))}>Starten</button>
-        </div>` : E}
-    ${s && r ? C`<div class="hint">${F(M.clock, 13, "rgba(255,255,255,0.6)", 2.2)}Schaltet um
+        </div>` : D}
+    ${s && r ? w`<div class="hint">${F(M.clock, 13, "rgba(255,255,255,0.6)", 2.2)}Schaltet um
           ${s.toLocaleTimeString("de-DE", {
 		hour: "2-digit",
 		minute: "2-digit"
-	})} Uhr aus</div>` : E}
+	})} Uhr aus</div>` : D}
   `;
 }
 function ui(e, t) {
@@ -3351,12 +3366,12 @@ function ui(e, t) {
 		iconPath: P(t, o),
 		headerExtra: oi(e, t, i, s, o),
 		onClose: e.closeSheet,
-		body: C`
-      ${c ? C`<button class="powerrow" @click=${() => e.moreInfo(c.id)}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${A.bolt}></path></svg>
+		body: w`
+      ${c ? w`<button class="powerrow" @click=${() => e.moreInfo(c.id)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${j.bolt}></path></svg>
             <span class="grow">${c.value === null ? "Leistung nicht verfügbar" : `verbraucht gerade ${J(c.value)}`}</span>
             <span class="more">Verlauf ›</span>
-          </button>` : E}
+          </button>` : D}
       ${li(e, t, [
 			["30 min", 30],
 			["1 h", 60],
@@ -3385,22 +3400,22 @@ function di(e, t) {
 		iconStroke: c ? "#0b1a10" : "#fff",
 		glow: c ? "rgba(48,209,88,0.16)" : "rgba(255,255,255,0.05)",
 		iconPath: N.fan,
-		headerExtra: C`
-      ${d === null ? E : C`<span class="pmchip" style="background:${sn(d)}2e;color:${sn(d)}">
+		headerExtra: w`
+      ${d === null ? D : w`<span class="pmchip" style="background:${sn(d)}2e;color:${sn(d)}">
             <span class="dot" style="background:${sn(d)}"></span>PM2.5 ${B(d)}</span>`}
       ${oi(e, t, c, ei, o)}`,
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="grid3" role="radiogroup" aria-label="Modus">
         ${p.map(([e, t]) => {
 			let n = s.mode === e;
-			return C`<button class="dchip lg ${n ? "selg" : ""}" role="radio" aria-checked=${n} @click=${() => m(e)}>${t}</button>`;
+			return w`<button class="dchip lg ${n ? "selg" : ""}" role="radio" aria-checked=${n} @click=${() => m(e)}>${t}</button>`;
 		})}
       </div>
       <div class="levelrow">
         <span class="lvl">Stufe</span>
         <div class="levels ${s.mode === "manual" ? "" : "disabled"}" style="grid-template-columns: repeat(${s.levels}, minmax(0, 1fr))">
-          ${Array.from({ length: s.levels }, (e, t) => t + 1).map((n) => C`
+          ${Array.from({ length: s.levels }, (e, t) => t + 1).map((n) => w`
             <button class="dchip md ${s.mode === "manual" && s.level === n ? "selg" : ""}" ?disabled=${s.mode !== "manual"}
               aria-pressed=${s.level === n}
               @click=${() => e.call("fan", "set_percentage", { percentage: Math.round(n * u) }, { entity_id: t })}>${n}</button>`)}
@@ -3428,7 +3443,7 @@ function fi(e, t) {
 		iconPath: N.drop,
 		headerExtra: oi(e, t, a, ti, s),
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="humrow">
         <button class="hstep" aria-label="Zielfeuchte senken" ?disabled=${d <= c} @click=${() => m(-1)}>−</button>
         <span class="hval"><span class="big">${B(d)} %</span><span class="small">Zielfeuchte · ${c}–${l} %</span></span>
@@ -3437,7 +3452,7 @@ function fi(e, t) {
       <div class="modes" role="radiogroup" aria-label="Modus" style="grid-template-columns: repeat(${p.length}, minmax(0, 1fr))">
         ${p.map((n) => {
 			let r = i.mode === n;
-			return C`<button class="dchip sm ${r ? "selb" : ""}" role="radio" aria-checked=${r}
+			return w`<button class="dchip sm ${r ? "selb" : ""}" role="radio" aria-checked=${r}
             @click=${() => e.call("humidifier", "set_mode", { mode: n }, { entity_id: t })}>${rr[n] ?? n}</button>`;
 		})}
       </div>
@@ -3659,7 +3674,7 @@ var pi = o`
 `, mi = (e, t) => `width:${t}px;height:${t}px;background:${e}`;
 function hi(e) {
 	let { hass: t } = e, n = dr(t, e.config, e.rooms), r = gr(t, n), i = r.some((t) => t.id === e.roomsFilter) ? e.roomsFilter : "all", a = _r(n, i), o = n.flatMap((e) => e.devices.filter((e) => e.on && e.kind === "light").map((e) => e.id));
-	return C`
+	return w`
     <div class="rooms">
       <header class="rhead">
         <div>
@@ -3673,53 +3688,53 @@ function hi(e) {
       </header>
 
       <div class="rfilter" role="tablist" aria-label="Filter" style="grid-template-columns: repeat(${r.length}, minmax(0, 1fr))">
-        ${r.map((t) => C`<button role="tab" aria-selected=${t.id === i} class=${t.id === i ? "sel" : ""}
+        ${r.map((t) => w`<button role="tab" aria-selected=${t.id === i} class=${t.id === i ? "sel" : ""}
           @click=${() => e.setRoomsFilter(t.id)}>${t.label}</button>`)}
       </div>
       <div class="rhint">Tippen schaltet · lange drücken öffnet Helligkeit &amp; Farbe</div>
 
-      ${a.length ? a.map((t) => gi(e, t)) : C`<div class="rempty">Gerade ist nichts an.</div>`}
+      ${a.length ? a.map((t) => gi(e, t)) : w`<div class="rempty">Gerade ist nichts an.</div>`}
     </div>
   `;
 }
 function gi(e, t) {
 	let n = cr(e.hass, t.scenes.map((e) => e.id), e.sceneConfigs(), e.now), { hass: r } = e, { room: i } = t, a = R(r, i.temperature), o = R(r, i.humidity), s = !!i.climate;
-	return C`
+	return w`
     <article class="rcard ${t.active ? "active" : ""}">
       <div class="rtop">
         <span class="circle" style=${mi(t.active ? "#ffd60a" : "rgba(255,255,255,0.12)", 40)}>
-          ${F(Re(i.name, i.icon), 18, t.active ? "#2b2200" : "#fff", 2)}
+          ${F(Le(i.name, i.icon), 18, t.active ? "#2b2200" : "#fff", 2)}
         </span>
         <span class="rname">
           <h2 class="ellipsis">${i.name}</h2>
           <span class="rsub ellipsis">${t.sub}</span>
         </span>
-        ${a !== null || t.power !== null ? C`<button class="rpill" ?disabled=${!s} aria-label="${i.name}: Raumkarte öffnen"
+        ${a !== null || t.power !== null ? w`<button class="rpill" ?disabled=${!s} aria-label="${i.name}: Raumkarte öffnen"
               @click=${() => s && e.openSheet({
 		id: "room",
 		slug: i.slug
 	})}>
-              ${a === null ? E : C`<span>${K(a)}°</span>`}
-              ${o === null ? E : C`<span class="muted">${Math.round(o)} %</span>`}
-              ${t.power === null ? E : C`<span class="pw"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${A.bolt}></path></svg>${J(t.power)}</span>`}
-            </button>` : E}
+              ${a === null ? D : w`<span>${K(a)}°</span>`}
+              ${o === null ? D : w`<span class="muted">${Math.round(o)} %</span>`}
+              ${t.power === null ? D : w`<span class="pw"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${j.bolt}></path></svg>${J(t.power)}</span>`}
+            </button>` : D}
       </div>
 
-      ${t.scenes.length ? C`<div class="rgrid" role="group" aria-label="Szenen ${i.name}">
+      ${t.scenes.length ? w`<div class="rgrid" role="group" aria-label="Szenen ${i.name}">
             ${t.scenes.map((t, r) => {
 		let i = t.off ? "rgba(255,255,255,0.14)" : rt[r % rt.length], a = t.off ? "#fff" : "#101010", o = n.has(t.id);
-		return C`<button class="rscene" aria-pressed=${o} style=${o ? `background:${t.off ? "rgba(255,255,255,0.2)" : i + "33"};box-shadow:0 0 18px ${t.off ? "rgba(255,255,255,0.08)" : i + "40"}` : ""}
+		return w`<button class="rscene" aria-pressed=${o} style=${o ? `background:${t.off ? "rgba(255,255,255,0.2)" : i + "33"};box-shadow:0 0 18px ${t.off ? "rgba(255,255,255,0.08)" : i + "40"}` : ""}
                 @click=${() => e.call("scene", "turn_on", {}, { entity_id: t.id })}>
                 <span class="circle" style=${mi(i, 34)}>${t.off ? F(M.power, 16, a, 2.1) : it(t.icon, M.scene, a)}</span>
                 <span class="ellipsis">${t.off ? "Aus" : t.name}</span>
               </button>`;
 	})}
-          </div>` : E}
+          </div>` : D}
 
-      ${t.devices.length ? C`<div class="rgrid">
+      ${t.devices.length ? w`<div class="rgrid">
             ${t.devices.map((t) => {
 		let n = t.kind === "light", r = n ? "#ffd60a" : "#30d158", i = n ? "rgba(255,214,10,0.16)" : "rgba(48,209,88,0.14)", a = t.on ? "#151005" : t.unavailable ? "rgba(255,255,255,0.45)" : "#fff";
-		return C`<button class="rdev ${t.on ? "on" : ""} ${t.unavailable ? "na" : ""}" style=${t.on ? `background:${i}` : ""}
+		return w`<button class="rdev ${t.on ? "on" : ""} ${t.unavailable ? "na" : ""}" style=${t.on ? `background:${i}` : ""}
                 aria-label="${t.name}: ${t.tileState}"
                 ${Rn({
 			tap: () => ri(e, t.id),
@@ -3735,7 +3750,7 @@ function gi(e, t) {
                 </span>
               </button>`;
 	})}
-          </div>` : E}
+          </div>` : D}
     </article>
   `;
 }
@@ -3913,7 +3928,7 @@ function yi(e) {
 	return e.untracked ? vi.question : /netzwerk|nas|server|router|switch|rack/i.test(e.name) ? vi.server : P(e.id, e.name);
 }
 function bi(e, t) {
-	return t ? C`<div class="fline live ${t}" style="--c:${e}" aria-hidden="true"><span class="arrow"></span></div>` : C`<div class="fline idle" style="border-color:${e}4d" aria-hidden="true"></div>`;
+	return t ? w`<div class="fline live ${t}" style="--c:${e}" aria-hidden="true"><span class="arrow"></span></div>` : w`<div class="fline idle" style="border-color:${e}4d" aria-hidden="true"></div>`;
 }
 function xi(e) {
 	let { hass: t, config: n } = e, r = e.energy(), i = wr(t, n, r.prefs), a = Or(t, n, r.today), o = jr(t, n, 6, r.prefs), s = (t, n) => e.openSheet({
@@ -3922,7 +3937,7 @@ function xi(e) {
 		range: "24h",
 		name: n
 	}), c = Math.max(1, ...o.map((e) => e.value)), l = i.export > i.import, u = l ? i.export : i.import, d = l ? "#64d2ff" : "#ff9f0a", f = i.battery;
-	return C`
+	return w`
     <div class="energy">
       <header class="ehead">
         <div class="date">${Er(e.now, i)}</div>
@@ -3932,12 +3947,12 @@ function xi(e) {
       <button class="flow" aria-label="Energie-Dashboard öffnen" @click=${() => e.navigate("/energy")}>
         <div class="frow">
           <div class="node">
-            <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${i.pv > X ? .32 : .18})">${F(A.sun, 22, "#ffd60a", 2)}</span>
+            <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${i.pv > X ? .32 : .18})">${F(j.sun, 22, "#ffd60a", 2)}</span>
             <span class="nv">${J(i.pv)}</span><span class="nl">PV</span>
           </div>
           ${bi("#ffd60a", i.pv > X ? "right" : null)}
           <div class="node">
-            <span class="house">${F(A.home, 22, "#101218", 2.2)}<span>${J(i.house)}</span></span>
+            <span class="house">${F(j.home, 22, "#101218", 2.2)}<span>${J(i.house)}</span></span>
             <span class="nl">Haus</span>
           </div>
           ${bi(d, u > X ? l ? "right" : "left" : null)}
@@ -3946,7 +3961,7 @@ function xi(e) {
             <span class="nv">${J(u)}</span><span class="nl">${l ? "Einspeisung" : "Bezug"}</span>
           </div>
         </div>
-        ${f ? C`<div class="batrow"><span class="bat">${F(vi.battery, 14, "#7ee8a0", 2.2)}Akku${f.soc === null ? "" : ` ${B(f.soc)} %`}${f.power > X ? ` · liefert ${J(f.power)}` : f.power < -5 ? ` · lädt ${J(-f.power)}` : ""}</span></div>` : E}
+        ${f ? w`<div class="batrow"><span class="bat">${F(vi.battery, 14, "#7ee8a0", 2.2)}Akku${f.soc === null ? "" : ` ${B(f.soc)} %`}${f.power > X ? ` · liefert ${J(f.power)}` : f.power < -5 ? ` · lädt ${J(-f.power)}` : ""}</span></div>` : D}
         <div class="elink">Energie-Dashboard ›</div>
       </button>
 
@@ -3974,11 +3989,11 @@ function xi(e) {
 			l: "Eingespeist",
 			c: "#64d2ff"
 		}
-	].map((e) => C`<button class="tile" aria-label="${e.l} ${Z(e.v)}, Verlauf anzeigen" @click=${() => s(e.k)}>
+	].map((e) => w`<button class="tile" aria-label="${e.l} ${Z(e.v)}, Verlauf anzeigen" @click=${() => s(e.k)}>
           <span class="tdot" style="background:${e.c}"></span><span class="tv">${Z(e.v)}</span><span class="tl">${e.l}</span></button>`)}
       </div>
 
-      ${a.consumed > 0 ? C`<div class="split">
+      ${a.consumed > 0 ? w`<div class="split">
             ${Si("Woher kam der Strom?", a.autarky === null ? "" : `${a.autarky} % autark`, "#7ee8a0", [
 		a.local,
 		"#ffd60a",
@@ -3996,23 +4011,23 @@ function xi(e) {
 		a.export,
 		"#64d2ff",
 		`Eingespeist ${Z(a.export)}`
-	]) : C`<div class="nopv">Heute noch kein Solarstrom.</div>`}
-          </div>` : E}
+	]) : w`<div class="nopv">Heute noch kein Solarstrom.</div>`}
+          </div>` : D}
 
       <div class="section-head"><h2>Verbraucher jetzt</h2><span class="rule" aria-hidden="true"></span></div>
-      ${o.length ? o.map((e) => C`
+      ${o.length ? o.map((e) => w`
             <button class="cons" aria-label="${e.name} ${J(e.value)}, Verlauf anzeigen" @click=${() => s(e.id, e.name)}>
               <span class="cbar" style="width:${Math.round(e.value / c * 100)}%" aria-hidden="true"></span>
               <span class="circle" style="width:36px;height:36px;background:rgba(255,255,255,0.12)">${F(yi(e), 16, "#fff", 2)}</span>
               <span class="cname ellipsis">${e.name}</span>
               <span class="cval">${J(e.value)}</span>
-            </button>`) : C`<div class="nopv">Keine Messwerte.</div>`}
+            </button>`) : w`<div class="nopv">Keine Messwerte.</div>`}
     </div>
   `;
 }
 function Si(e, t, n, r, i) {
 	let a = r[0] + i[0] || 1, o = Math.round(r[0] / a * 100);
-	return C`<div>
+	return w`<div>
     <div class="shead"><span>${e}</span><span style="color:${n}">${t}</span></div>
     <div class="sbar" role="img" aria-label="${r[2]}, ${i[2]}"><span style="width:${o}%;background:${r[1]}"></span><span style="width:${100 - o}%;background:${i[1]}"></span></div>
     <div class="slegend"><span>${r[2]}</span><span>${i[2]}</span></div>
@@ -4381,31 +4396,31 @@ function Li(e, t, n) {
 }
 function Ri(e) {
 	let { hass: t, config: n } = e, r = Ei(t, n, e.now), i = Ni(t, n, e.rooms), a = r.state === "triggered" ? "#ff453a" : "#bf9bff", o = L(n, "camera"), s = t.states[o], c = t.states[L(n, "camera_motion")], l = t.states[L(n, "camera_person")], u = e.ui.camSound !== !0, d = !!s && s.state !== "unavailable" && !!customElements.get("ha-camera-stream");
-	return C`
+	return w`
     <div class="security">
       <header class="shead2">
         <div class="date">${Pi(i, r.state)}</div>
         <h1>Schutz</h1>
       </header>
 
-      ${t.states[r.id] ? C`<div class="alarmpill" style="background: linear-gradient(90deg, ${a}42, rgba(255,255,255,0.05) 70%)">
+      ${t.states[r.id] ? w`<div class="alarmpill" style="background: linear-gradient(90deg, ${a}42, rgba(255,255,255,0.05) 70%)">
             <button class="circle abtn" style="width:48px;height:48px;background:${a}" aria-label="Alarm-Details"
-              @click=${() => e.openSheet({ id: "alarm" })}>${F(A.shield, 22, "#1d1030", 2.2)}</button>
+              @click=${() => e.openSheet({ id: "alarm" })}>${F(j.shield, 22, "#1d1030", 2.2)}</button>
             <span class="atext">
               <span class="atitle">${r.label}</span>
-              ${r.sub ? C`<span class="asub">${r.sub}</span>` : E}
+              ${r.sub ? w`<span class="asub">${r.sub}</span>` : D}
             </span>
-            ${wi.filter((e) => e.state !== r.state).map((t) => C`
+            ${wi.filter((e) => e.state !== r.state).map((t) => w`
               <button class="amode" aria-label=${t.name} title=${t.name}
                 @click=${() => e.call("alarm_control_panel", t.service, {}, { entity_id: r.id })}>
-                ${F(A[t.icon], 18, "#e2d3ff", 2.1)}
+                ${F(j[t.icon], 18, "#e2d3ff", 2.1)}
               </button>`)}
-          </div>` : E}
+          </div>` : D}
 
-      ${s ? C`<section class="camcard" aria-label="${Ii(e, o)}-Kamera">
+      ${s ? w`<section class="camcard" aria-label="${Ii(e, o)}-Kamera">
             <div class="cam">
-              ${d ? C`<ha-camera-stream class="stream" .hass=${t} .stateObj=${s} .muted=${u} .controls=${!1}
-                    allow-exoplayer></ha-camera-stream>` : C`<span class="camph">${F(Fi.camera, 40, "rgba(255,255,255,0.4)", 1.6)}</span>`}
+              ${d ? w`<ha-camera-stream class="stream" .hass=${t} .stateObj=${s} .muted=${u} .controls=${!1}
+                    allow-exoplayer></ha-camera-stream>` : w`<span class="camph">${F(Fi.camera, 40, "rgba(255,255,255,0.4)", 1.6)}</span>`}
               <span class="camlive"><span class="dot" style="background:${d ? "#ff453a" : "#888"}"></span>${d ? "Live" : "Offline"} · ${Ii(e, o)}</span>
               <span class="camtools">
                 <button aria-label=${u ? "Ton an" : "Ton aus"} @click=${() => e.setUi({ camSound: u })}>${F(u ? Fi.muted : Fi.sound, 15, "#fff", 2.2)}</button>
@@ -4413,36 +4428,36 @@ function Ri(e) {
               </span>
             </div>
             <div class="camchips">
-              ${c ? C`<span class="cchip ${c.state === "on" ? "hot" : ""}">${c.state === "on" ? "Bewegung erkannt" : "Keine Bewegung"}</span>` : E}
-              ${l ? C`<span class="cchip ${l.state === "on" ? "hot" : ""}">${l.state === "on" ? "Person erkannt" : "Keine Person"}</span>` : E}
+              ${c ? w`<span class="cchip ${c.state === "on" ? "hot" : ""}">${c.state === "on" ? "Bewegung erkannt" : "Keine Bewegung"}</span>` : D}
+              ${l ? w`<span class="cchip ${l.state === "on" ? "hot" : ""}">${l.state === "on" ? "Person erkannt" : "Keine Person"}</span>` : D}
               <span class="grow"></span>
               <button class="cchip btn2" @click=${() => e.moreInfo(c ? c.entity_id : o)}>Verlauf</button>
             </div>
-          </section>` : E}
+          </section>` : D}
 
-      ${i.length ? C`
+      ${i.length ? w`
             <div class="section-head">
               <h2>Fenster &amp; Türen</h2><span class="rule" aria-hidden="true"></span>
               <span class="meta legend"><span><span class="dot" style="background:#30d158"></span>zu</span><span><span class="dot" style="background:#ff453a"></span>offen</span></span>
             </div>
-            ${i.map((t) => C`
+            ${i.map((t) => w`
               <div class="flabel">${t.name}</div>
               <div class="ogrid">
-                ${t.areas.map((t) => C`
+                ${t.areas.map((t) => w`
                   <div class="opill ${t.items.length > 3 ? "wide" : ""}">
                     <span class="ellipsis oname">${t.name}</span>
                     <span class="oicons">
                       ${t.items.map((t) => {
 		let n = `${t.title} ${t.unavailable ? "nicht erreichbar" : t.open ? "offen" : "zu"}`;
-		return C`<button class="oicon ${t.open ? "open" : ""} ${t.unavailable ? "na" : ""}" title=${n} aria-label=${n}
+		return w`<button class="oicon ${t.open ? "open" : ""} ${t.unavailable ? "na" : ""}" title=${n} aria-label=${n}
                           @click=${() => e.moreInfo(t.id)}>
-                          ${F(t.kind === "door" ? A.door : A.window, 15, t.unavailable ? "rgba(255,255,255,0.45)" : t.open ? "#ffd1cf" : "#7ee8a0", 2.2)}
+                          ${F(t.kind === "door" ? j.door : j.window, 15, t.unavailable ? "rgba(255,255,255,0.45)" : t.open ? "#ffd1cf" : "#7ee8a0", 2.2)}
                         </button>`;
 	})}
                     </span>
                   </div>`)}
               </div>`)}
-          ` : E}
+          ` : D}
     </div>
   `;
 }
@@ -4880,102 +4895,102 @@ function oa(e, t, n, r) {
 	return e <= t ? `border-radius:${i};background:${r};opacity:${.55 + .45 * (e + 1) / n};color:#08121c` : `border-radius:${i};background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5)`;
 }
 function sa(e) {
-	let { hass: t, config: n } = e, r = L(n, "vacuum"), i = qi(t, n), a = Yi(t, n), o = Zi(t, n), s = z(t, L(n, "vacuum_map")) ?? o[0]?.name, c = o.find((e) => e.name === s) ?? o[0], l = Qi(t, n), u = c ? c.rooms.filter((e) => l.includes(e.segment)).length : 0, d = L(n, "vacuum_mode"), f = z(t, d) ?? "vacuum", p = String(t.states[r]?.attributes.fan_speed ?? ""), m = ra.findIndex((e) => e.id === p), h = L(n, "vacuum_mop"), g = ia.findIndex((e) => e.id === z(t, h)), _ = L(n, "vacuum_passes"), ee = Math.round(R(t, _) ?? 1), v = (t, n = {}) => e.call("vacuum", t, n, { entity_id: r }), te = (t, n) => e.call("select", "select_option", { option: n }, { entity_id: t }), ne = i.error ? "#ff453a" : i.cleaning ? "#64d2ff" : "#30d158";
+	let { hass: t, config: n } = e, r = L(n, "vacuum"), i = qi(t, n), a = Yi(t, n), o = Zi(t, n), s = z(t, L(n, "vacuum_map")) ?? o[0]?.name, c = o.find((e) => e.name === s) ?? o[0], l = Qi(t, n), u = c ? c.rooms.filter((e) => l.includes(e.segment)).length : 0, d = L(n, "vacuum_mode"), f = z(t, d) ?? "vacuum", p = String(t.states[r]?.attributes.fan_speed ?? ""), m = ra.findIndex((e) => e.id === p), h = L(n, "vacuum_mop"), g = ia.findIndex((e) => e.id === z(t, h)), _ = L(n, "vacuum_passes"), ee = Math.round(R(t, _) ?? 1), v = (t, n = {}) => e.call("vacuum", t, n, { entity_id: r }), y = (t, n) => e.call("select", "select_option", { option: n }, { entity_id: t }), te = i.error ? "#ff453a" : i.cleaning ? "#64d2ff" : "#30d158";
 	return I({
 		title: "Robby",
 		subtitle: i.label,
 		color: "radial-gradient(circle at 40% 35%, #4a505c, #23262e)",
 		glow: i.error ? "rgba(255,69,58,0.18)" : "rgba(48,209,88,0.1)",
-		iconPath: A.vacuum,
-		iconStroke: ne,
+		iconPath: j.vacuum,
+		iconStroke: te,
 		onClose: e.closeSheet,
-		headerExtra: C`
-      ${i.cleaning ? C`<button class="rb-ctl" aria-label="Pause" title="Pause" @click=${() => v("pause")}>${F(aa.pause, 16, "#fff", 2.2)}</button>` : C`<button class="rb-ctl" aria-label="Start" title="Start" @click=${() => v("start")}>${F(M.play, 16, "#fff", 2.2)}</button>`}
+		headerExtra: w`
+      ${i.cleaning ? w`<button class="rb-ctl" aria-label="Pause" title="Pause" @click=${() => v("pause")}>${F(aa.pause, 16, "#fff", 2.2)}</button>` : w`<button class="rb-ctl" aria-label="Start" title="Start" @click=${() => v("start")}>${F(M.play, 16, "#fff", 2.2)}</button>`}
       <button class="rb-ctl" aria-label="Zur Station" title="Zur Station" @click=${() => v("return_to_base")}>${F(aa.dock, 16, "#fff", 2.2)}</button>
       <button class="rb-ctl" aria-label="Orten" title="Orten" @click=${() => v("locate")}>${F(aa.locate, 16, "#fff", 2.2)}</button>
     `,
-		body: C`
-      ${a.length ? C`<div class="rb-stats" style="grid-template-columns: repeat(${a.length}, minmax(0, 1fr))">
-            ${a.map((t) => C`<button class="rb-stat ${t.due ? "due" : ""}" aria-label="${t.name}: ${t.value}${t.reset ? ", tippen zum Zurücksetzen" : ""}"
+		body: w`
+      ${a.length ? w`<div class="rb-stats" style="grid-template-columns: repeat(${a.length}, minmax(0, 1fr))">
+            ${a.map((t) => w`<button class="rb-stat ${t.due ? "due" : ""}" aria-label="${t.name}: ${t.value}${t.reset ? ", tippen zum Zurücksetzen" : ""}"
               @click=${() => t.reset ? e.confirm({
 			title: t.name,
 			text: `${t.name} gereinigt oder getauscht? Der Zähler wird zurückgesetzt.`,
 			confirm: "Zurücksetzen",
 			color: "#ff9f0a",
-			iconPath: A.vacuum,
+			iconPath: j.vacuum,
 			onConfirm: () => e.call("button", "press", {}, { entity_id: t.reset })
 		}) : e.moreInfo(t.id)}>
               <span class="rb-sv">${t.value}</span><span class="rb-sn">${t.name}</span>
             </button>`)}
-          </div>` : E}
+          </div>` : D}
 
       <div class="section-head"><h2>Programme</h2><span class="rule" aria-hidden="true"></span><span class="meta">Tippen startet</span></div>
       <div class="rb-progs">
-        ${ea(n).map((t) => C`
+        ${ea(n).map((t) => w`
           <button class="rb-prog" @click=${() => t.button ? e.call("button", "press", {}, { entity_id: t.button }) : v("start")}>
             <span class="rb-tag" style="background:${t.color ?? "#7ee8a0"}">${t.tag}</span>
             <span class="rb-pn">${t.name}</span>
           </button>`)}
       </div>
 
-      ${c ? C`
+      ${c ? w`
             <div class="section-head"><h2>Selbst auswählen</h2><span class="rule" aria-hidden="true"></span></div>
             <section class="rb-custom" aria-label="Individuelle Reinigung">
               <div class="rb-tabs" role="tablist" aria-label="Karte" style="grid-template-columns: repeat(${o.length}, minmax(0, 1fr))">
-                ${o.map((t) => C`<button role="tab" aria-selected=${t.name === c.name} class=${t.name === c.name ? "sel" : ""}
+                ${o.map((t) => w`<button role="tab" aria-selected=${t.name === c.name} class=${t.name === c.name ? "sel" : ""}
                   @click=${() => t.name !== c.name && e.runScript(L(n, "vacuum_map_script"), { karte: t.name })}>${t.name}</button>`)}
               </div>
-              ${c.rooms.length ? C`<div class="rb-rooms">
+              ${c.rooms.length ? w`<div class="rb-rooms">
                     ${c.rooms.map((t) => {
 			let r = l.includes(t.segment);
-			return C`<button class="rb-room ${r ? "sel" : ""}" aria-pressed=${r}
+			return w`<button class="rb-room ${r ? "sel" : ""}" aria-pressed=${r}
                         @click=${() => e.runScript(L(n, "vacuum_room_script"), { segment: t.segment })}>${t.name}</button>`;
 		})}
-                  </div>` : E}
+                  </div>` : D}
 
               <div class="rb-modes" role="radiogroup" aria-label="Modus">
                 ${na.map((e) => {
 			let t = f === e.id;
-			return C`<button class="rb-mode ${t ? "sel" : ""}" role="radio" aria-checked=${t} @click=${() => te(d, e.id)}>
+			return w`<button class="rb-mode ${t ? "sel" : ""}" role="radio" aria-checked=${t} @click=${() => y(d, e.id)}>
                     <span class="rb-mi">
-                      ${e.id === "mop" ? E : F(M.fan, 18, "currentColor", 2.1)}
-                      ${e.id === "vacuum" ? E : F(M.drop, 18, "currentColor", 2.1)}
+                      ${e.id === "mop" ? D : F(M.fan, 18, "currentColor", 2.1)}
+                      ${e.id === "vacuum" ? D : F(M.drop, 18, "currentColor", 2.1)}
                     </span>
                     <span class="rb-mn">${e.name}</span>
                   </button>`;
 		})}
               </div>
 
-              ${f === "mop" ? E : C`<div class="rb-slider">
+              ${f === "mop" ? D : w`<div class="rb-slider">
                     <div class="rb-sh">${F(M.fan, 15, "#7ee8a0", 2.2)}<span>Saugkraft</span><span class="grow"></span>
                       <strong style="color:#9af0b5">${ra[m]?.name ?? p}</strong></div>
                     <div class="rb-segs" role="radiogroup" aria-label="Saugkraft" style="grid-template-columns: repeat(${ra.length}, minmax(0, 1fr))">
-                      ${ra.map((e, t) => C`<button role="radio" aria-checked=${t === m} aria-label=${e.name} title=${e.name}
+                      ${ra.map((e, t) => w`<button role="radio" aria-checked=${t === m} aria-label=${e.name} title=${e.name}
                         style=${oa(t, m, ra.length, "#30d158")} @click=${() => v("set_fan_speed", { fan_speed: e.id })}></button>`)}
                     </div>
                   </div>`}
 
-              ${f === "vacuum" ? E : C`<div class="rb-slider">
+              ${f === "vacuum" ? D : w`<div class="rb-slider">
                     <div class="rb-sh">${F(M.drop, 15, "#8fd8ff", 2.2)}<span>Wasser</span><span class="grow"></span>
                       <strong style="color:#bfe8ff">${ia[g]?.name ?? "–"}</strong></div>
                     <div class="rb-segs" role="radiogroup" aria-label="Wischintensität" style="grid-template-columns: repeat(${ia.length}, minmax(0, 1fr))">
-                      ${ia.map((e, t) => C`<button role="radio" aria-checked=${t === g} aria-label=${e.name} title=${e.name}
-                        style=${oa(t, g, ia.length, "#5ac8fa")} @click=${() => te(h, e.id)}>
-                        ${Array.from({ length: t + 1 }, () => C`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d=${M.drop}></path></svg>`)}
+                      ${ia.map((e, t) => w`<button role="radio" aria-checked=${t === g} aria-label=${e.name} title=${e.name}
+                        style=${oa(t, g, ia.length, "#5ac8fa")} @click=${() => y(h, e.id)}>
+                        ${Array.from({ length: t + 1 }, () => w`<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d=${M.drop}></path></svg>`)}
                       </button>`)}
                     </div>
                   </div>`}
 
               <div class="rb-start">
                 <div class="rb-passes" role="radiogroup" aria-label="Durchgänge">
-                  ${[1, 2].map((t) => C`<button role="radio" aria-checked=${ee === t} class=${ee === t ? "sel" : ""}
+                  ${[1, 2].map((t) => w`<button role="radio" aria-checked=${ee === t} class=${ee === t ? "sel" : ""}
                     @click=${() => e.call("input_number", "set_value", { value: t }, { entity_id: _ })}>${t}×</button>`)}
                 </div>
                 <button class="rb-go" ?disabled=${u === 0} @click=${() => e.runScript(L(n, "vacuum_clean_script"))}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d=${M.play}></path></svg>${ta(u)}
                 </button>
               </div>
-            </section>` : E}
+            </section>` : D}
     `
 	});
 }
@@ -5206,29 +5221,29 @@ function pa(e) {
 		(a.lo + a.hi) / 2,
 		a.lo
 	], l = r.length ? a.x(r[0].t) : null, u = `${e.title}: ${e.caption ?? ""}`;
-	return C`
+	return w`
     <figure class="tr-fig" style="background:${e.color}14">
       <figcaption>
         <span class="tr-title" style="color:${e.color}">${e.title}</span>
-        ${e.caption ? C`<span class="tr-cap">${e.caption}</span>` : E}
+        ${e.caption ? w`<span class="tr-cap">${e.caption}</span>` : D}
       </figcaption>
-      ${t.error && !n.length ? C`<div class="tr-msg">Keine Daten: ${t.error}</div>` : t.loading && !n.length ? C`<div class="tr-msg">Lade Verlauf …</div>` : C`
+      ${t.error && !n.length ? w`<div class="tr-msg">Keine Daten: ${t.error}</div>` : t.loading && !n.length ? w`<div class="tr-msg">Lade Verlauf …</div>` : w`
             <svg width="100%" viewBox="0 0 ${la} 150" role="img" aria-label=${u}>
-              ${c.map((e) => w`
+              ${c.map((e) => T`
                 <line x1="0" y1=${a.y(e)} x2=${la} y2=${a.y(e)} stroke="rgba(255,255,255,0.08)"></line>
                 <text x=${334} y=${a.y(e) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${B(e, e % 1 ? 1 : 0)}${s}</text>`)}
               ${e.bars && i ? n.map((t) => {
 		let n = a.x(t.t), r = Math.max(1, a.x(t.t + i) - n - 2), o = a.y(t.v);
-		return w`<rect x=${n + 1} y=${o} width=${r} height=${Math.max(0, fa - o)} rx=${Math.min(3, r / 2)} fill=${e.color} opacity="0.85"></rect>`;
-	}) : w`
-                  ${a.area ? w`<polygon points=${a.area} fill=${e.color} opacity="0.16"></polygon>` : E}
-                  ${a.line ? w`<polyline points=${a.line} fill="none" stroke=${e.color} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : E}
-                  ${o?.line ? w`<polyline points=${o.line} fill="none" stroke=${e.color} stroke-width="2" stroke-dasharray="5 5" opacity="0.7"></polyline>` : E}
-                  ${l === null ? E : w`<line x1=${l} y1=${12} x2=${l} y2=${fa} stroke="rgba(255,255,255,0.35)" stroke-dasharray="2 3"></line>
+		return T`<rect x=${n + 1} y=${o} width=${r} height=${Math.max(0, fa - o)} rx=${Math.min(3, r / 2)} fill=${e.color} opacity="0.85"></rect>`;
+	}) : T`
+                  ${a.area ? T`<polygon points=${a.area} fill=${e.color} opacity="0.16"></polygon>` : D}
+                  ${a.line ? T`<polyline points=${a.line} fill="none" stroke=${e.color} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : D}
+                  ${o?.line ? T`<polyline points=${o.line} fill="none" stroke=${e.color} stroke-width="2" stroke-dasharray="5 5" opacity="0.7"></polyline>` : D}
+                  ${l === null ? D : T`<line x1=${l} y1=${12} x2=${l} y2=${fa} stroke="rgba(255,255,255,0.35)" stroke-dasharray="2 3"></line>
                         <text x=${l + 4} y=${16} fill="rgba(255,255,255,0.7)" font-size="10">Vorhersage</text>`}
-                  ${a.last ? w`<circle cx=${a.last.x} cy=${a.last.y} r="4.5" fill=${e.color} stroke="#181a22" stroke-width="2"></circle>` : E}`}
+                  ${a.last ? T`<circle cx=${a.last.x} cy=${a.last.y} r="4.5" fill=${e.color} stroke="#181a22" stroke-width="2"></circle>` : D}`}
             </svg>
-            <div class="tr-x">${e.labels.map((e) => C`<span>${e}</span>`)}</div>`}
+            <div class="tr-x">${e.labels.map((e) => w`<span>${e}</span>`)}</div>`}
     </figure>
   `;
 }
@@ -5269,9 +5284,9 @@ var ma = o`
   }
 `, ha = "#8fd0ff", ga = {
 	humidity: M.drop,
-	wind: A.wind,
+	wind: j.wind,
 	pressure: "M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16M12 12l4-3",
-	uv: A.sun,
+	uv: j.sun,
 	visibility: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6"
 }, _a = [
 	"rainy",
@@ -5288,52 +5303,52 @@ function va(e) {
 		subtitle: a.source || void 0,
 		color: ha,
 		glow: "rgba(90,140,220,0.35)",
-		iconPath: j(a.condition),
+		iconPath: Re(a.condition),
 		iconStroke: "#0a1a2a",
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="w-now">
         <span class="w-temp">${a.temp}</span>
-        <span><span class="w-cond">${a.label}</span>${a.today ? C`<span class="w-today">${a.today}</span>` : E}</span>
+        <span><span class="w-cond">${a.label}</span>${a.today ? w`<span class="w-today">${a.today}</span>` : D}</span>
       </div>
-      ${a.chips.length ? C`<div class="w-chips">
-            ${a.chips.map((t) => t.key in Nt ? C`<button class="w-chip" aria-label="${t.label}, Verlauf anzeigen"
+      ${a.chips.length ? w`<div class="w-chips">
+            ${a.chips.map((t) => t.key in Nt ? w`<button class="w-chip" aria-label="${t.label}, Verlauf anzeigen"
                   @click=${() => e.openSheet({
 			id: "weatherMetric",
 			metric: t.key
-		})}>${F(ga[t.key], 14, ha, 2.2)}${t.label}</button>` : C`<span class="w-chip">${F(ga[t.key], 14, ha, 2.2)}${t.label}</span>`)}
-          </div>` : E}
+		})}>${F(ga[t.key], 14, ha, 2.2)}${t.label}</button>` : w`<span class="w-chip">${F(ga[t.key], 14, ha, 2.2)}${t.label}</span>`)}
+          </div>` : D}
 
-      ${c.map((e) => C`
+      ${c.map((e) => w`
         <div class="w-alert" style="border-color:${e.color}66;background:linear-gradient(90deg, ${e.color}38, ${e.color}0d)">
           <div class="w-ah">
-            <span class="circle" style="width:40px;height:40px;background:${e.color}">${F(A.storm, 18, "#1d1030", 2.2)}</span>
+            <span class="circle" style="width:40px;height:40px;background:${e.color}">${F(j.storm, 18, "#1d1030", 2.2)}</span>
             <span><span class="w-wt">${e.current ? e.level >= 3 ? "Unwetterwarnung" : "Warnung" : "Vorabwarnung"}: ${e.title}</span>
               <span class="w-ws">${e.when} · Stufe ${e.level} von 4</span></span>
           </div>
-          ${e.text ? C`<p class="w-at">${e.text}</p>` : E}
+          ${e.text ? w`<p class="w-at">${e.text}</p>` : D}
         </div>`)}
 
-      ${l ? C`<div class="w-warn">
-            <span class="circle" style="width:40px;height:40px;background:#bf9bff">${F(A.storm, 18, "#1d1030", 2.2)}</span>
+      ${l ? w`<div class="w-warn">
+            <span class="circle" style="width:40px;height:40px;background:#bf9bff">${F(j.storm, 18, "#1d1030", 2.2)}</span>
             <span><span class="w-wt">${l.title}</span><span class="w-ws">${l.text}</span></span>
-          </div>` : E}
+          </div>` : D}
 
-      ${i.loading && !i.hourly.length ? C`<div class="w-msg">Vorhersage wird geladen …</div>` : i.error && !i.hourly.length ? C`<div class="w-msg">Vorhersage nicht verfügbar.</div>` : E}
+      ${i.loading && !i.hourly.length ? w`<div class="w-msg">Vorhersage wird geladen …</div>` : i.error && !i.hourly.length ? w`<div class="w-msg">Vorhersage nicht verfügbar.</div>` : D}
 
-      ${o.length ? C`<div class="w-hours" style="grid-template-columns: repeat(${o.length}, minmax(0, 1fr))">
-            ${o.map((e) => C`<div class="w-hour">
+      ${o.length ? w`<div class="w-hours" style="grid-template-columns: repeat(${o.length}, minmax(0, 1fr))">
+            ${o.map((e) => w`<div class="w-hour">
               <span class="w-ht">${e.t}</span>
-              ${F(j(e.condition), 20, _a.includes(e.condition) ? ha : "rgba(255,255,255,0.85)", 2)}
+              ${F(Re(e.condition), 20, _a.includes(e.condition) ? ha : "rgba(255,255,255,0.85)", 2)}
               <span class="w-hv">${e.temp ?? "–"}°</span>
               <span class="w-hr">${e.rain}</span>
             </div>`)}
-          </div>` : E}
+          </div>` : D}
 
-      ${s.length ? C`<div class="w-days">
-            ${s.map((e) => C`<div class="w-day">
+      ${s.length ? w`<div class="w-days">
+            ${s.map((e) => w`<div class="w-day">
               <span class="w-dn">${e.day}</span>
-              ${F(j(e.condition), 20, _a.includes(e.condition) ? ha : "rgba(255,255,255,0.8)", 2)}
+              ${F(Re(e.condition), 20, _a.includes(e.condition) ? ha : "rgba(255,255,255,0.8)", 2)}
               <span class="w-dr">${e.rain}</span>
               <span class="w-track">
                 <span class="w-bar" style="left:${e.left}%;width:${e.width}%"></span>
@@ -5341,12 +5356,12 @@ function va(e) {
               </span>
               <span class="w-dmax">${e.max}°</span>
             </div>`)}
-          </div>` : E}
+          </div>` : D}
 
-      ${u ? C`<div class="w-pollen" style="background:${d}1f">
+      ${u ? w`<div class="w-pollen" style="background:${d}1f">
             ${F(M.leaf, 16, d, 2.2)}
             <span><strong>${u.title}</strong> · ${u.text}</span>
-          </div>` : E}
+          </div>` : D}
     `
 	});
 }
@@ -5364,7 +5379,7 @@ function ba(e, t) {
 		iconPath: ga[t],
 		onClose: e.closeSheet,
 		onBack: () => e.openSheet({ id: "weather" }),
-		body: C`${pa({
+		body: w`${pa({
 			title: n.name,
 			color: n.color,
 			unit: n.unit,
@@ -5558,20 +5573,20 @@ var xa = o`
   }
 `, Sa = "#ff9f0a", Ca = "#ffd60a";
 function wa(e, t, n, r, i) {
-	return C`
+	return w`
     <div class="cr-row">
       <button class="cr-main" @click=${() => e.moreInfo(t.id)}>
         <span class="circle" style="width:40px;height:40px;background:${r}">${F(n, 18, "#141008", 2.2)}</span>
         <span class="cr-text"><span class="cr-name ellipsis">${t.name}</span><span class="cr-detail">${t.detail}</span></span>
       </button>
-      ${t.reset ? C`<button class="cr-act" style="background:${r}" @click=${() => e.confirm({
+      ${t.reset ? w`<button class="cr-act" style="background:${r}" @click=${() => e.confirm({
 		title: t.name,
 		text: i.text,
 		confirm: i.button,
 		color: r,
 		iconPath: n,
 		onConfirm: () => e.call("button", "press", {}, { entity_id: t.reset })
-	})}>${i.button}</button>` : i.hint ? C`<span class="cr-hint">${i.hint}</span>` : E}
+	})}>${i.button}</button>` : i.hint ? w`<span class="cr-hint">${i.hint}</span>` : D}
     </div>`;
 }
 function Ta(e) {
@@ -5581,21 +5596,21 @@ function Ta(e) {
 		subtitle: r ? `${r} ${r === 1 ? "Gerät braucht" : "Geräte brauchen"} Aufmerksamkeit` : "Alles in Ordnung",
 		color: Sa,
 		glow: "rgba(255,159,10,0.22)",
-		iconPath: A.battery,
+		iconPath: j.battery,
 		onClose: e.closeSheet,
-		body: C`
-      ${t.length ? C`<div class="section-head"><h2>Batterien</h2><span class="rule" aria-hidden="true"></span></div>
-            ${t.map((t) => wa(e, t, A.battery, Sa, {
+		body: w`
+      ${t.length ? w`<div class="section-head"><h2>Batterien</h2><span class="rule" aria-hidden="true"></span></div>
+            ${t.map((t) => wa(e, t, j.battery, Sa, {
 			text: "Batterie getauscht? Das Datum wird in Battery Notes gespeichert.",
 			button: "Getauscht"
-		}))}` : E}
-      ${n.length ? C`<div class="section-head"><h2>Filter</h2><span class="rule" aria-hidden="true"></span></div>
-            ${n.map((t) => wa(e, t, A.filter, Ca, {
+		}))}` : D}
+      ${n.length ? w`<div class="section-head"><h2>Filter</h2><span class="rule" aria-hidden="true"></span></div>
+            ${n.map((t) => wa(e, t, j.filter, Ca, {
 			text: "Filter gereinigt oder getauscht? Der Zähler wird zurückgesetzt.",
 			button: "Erledigt",
 			hint: "am Gerät zurücksetzen"
-		}))}` : E}
-      ${r ? E : C`<p class="cr-empty">Keine schwachen Batterien und keine fälligen Filter.</p>`}
+		}))}` : D}
+      ${r ? D : w`<p class="cr-empty">Keine schwachen Batterien und keine fälligen Filter.</p>`}
     `
 	});
 }
@@ -5754,7 +5769,7 @@ var Pa = "#8fd8ff", Fa = {
 };
 function Ia(e) {
 	let t = Na(e.hass, e.config);
-	if (!t) return E;
+	if (!t) return D;
 	let n = t.state !== "off" && t.state !== "unavailable", r = e.target(t.id) ?? t.target, i = (n, r) => e.call("climate", n, r, { entity_id: t.id }), a = (t, n) => e.call("switch", n ? "turn_off" : "turn_on", {}, { entity_id: t });
 	return I({
 		title: "Klimaanlage",
@@ -5764,7 +5779,7 @@ function Ia(e) {
 		iconPath: M.snowflake,
 		iconStroke: n ? "#08202c" : "#fff",
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="tcard" style="background: linear-gradient(140deg, ${n ? "rgba(100,210,255,0.24)" : "rgba(255,255,255,0.1)"}, rgba(255,255,255,0.05) 70%)">
         <div class="tcontrol">
           <button class="bigstep" aria-label="Soll senken" ?disabled=${r === null} @click=${() => e.stepTarget(t.id, -t.step)}>−</button>
@@ -5780,40 +5795,40 @@ function Ia(e) {
       <div class="acs-modes" role="group" aria-label="Betriebsart">
         ${t.modes.map((e) => {
 			let n = t.state === e.id;
-			return C`<button class="acs-mode ${n ? "active" : ""}" aria-pressed=${n} @click=${() => i("set_hvac_mode", { hvac_mode: e.id })}>
+			return w`<button class="acs-mode ${n ? "active" : ""}" aria-pressed=${n} @click=${() => i("set_hvac_mode", { hvac_mode: e.id })}>
             ${F(Fa[e.id] ?? M.power, 18, n ? "#08202c" : "#fff", 2.1)}<span>${e.name}</span>
           </button>`;
 		})}
       </div>
 
-      ${t.fans.length ? C`<div class="section-head"><h2>Lüfter</h2><span class="rule" aria-hidden="true"></span></div>
+      ${t.fans.length ? w`<div class="section-head"><h2>Lüfter</h2><span class="rule" aria-hidden="true"></span></div>
             <div class="acs-seg" role="group" aria-label="Lüfterstufe" style="grid-template-columns: repeat(${t.fans.length}, minmax(0, 1fr))">
-              ${t.fans.map((e) => C`<button class=${t.fan === e.id ? "sel" : ""} aria-pressed=${t.fan === e.id}
+              ${t.fans.map((e) => w`<button class=${t.fan === e.id ? "sel" : ""} aria-pressed=${t.fan === e.id}
                 @click=${() => i("set_fan_mode", { fan_mode: e.id })}>${e.name}</button>`)}
-            </div>` : E}
+            </div>` : D}
 
-      ${t.presets.length ? C`<div class="acs-seg" role="group" aria-label="Modus" style="grid-template-columns: repeat(${t.presets.length}, minmax(0, 1fr))">
-            ${t.presets.map((e) => C`<button class=${t.preset === e.id ? "sel" : ""} aria-pressed=${t.preset === e.id}
+      ${t.presets.length ? w`<div class="acs-seg" role="group" aria-label="Modus" style="grid-template-columns: repeat(${t.presets.length}, minmax(0, 1fr))">
+            ${t.presets.map((e) => w`<button class=${t.preset === e.id ? "sel" : ""} aria-pressed=${t.preset === e.id}
               @click=${() => i("set_preset_mode", { preset_mode: e.id })}>${e.name}</button>`)}
-          </div>` : E}
+          </div>` : D}
 
       <div class="acs-toggles">
-        ${t.swing ? C`<button class="acs-tog ${t.swing.on ? "on" : ""}" aria-pressed=${t.swing.on}
+        ${t.swing ? w`<button class="acs-tog ${t.swing.on ? "on" : ""}" aria-pressed=${t.swing.on}
               @click=${() => i("set_swing_mode", { swing_mode: t.swing.on ? "off" : t.swing.onMode })}>
-              <span class="acs-dot"></span><span class="ellipsis">Lamellen schwenken</span></button>` : E}
-        ${t.switches.map((e) => C`<button class="acs-tog ${e.on ? "on" : ""}" aria-pressed=${e.on} @click=${() => a(e.id, e.on)}>
+              <span class="acs-dot"></span><span class="ellipsis">Lamellen schwenken</span></button>` : D}
+        ${t.switches.map((e) => w`<button class="acs-tog ${e.on ? "on" : ""}" aria-pressed=${e.on} @click=${() => a(e.id, e.on)}>
           <span class="acs-dot"></span><span class="ellipsis">${e.name}</span></button>`)}
       </div>
 
       <div class="confirm-row">
-        ${t.selfClean ? C`<button class="btn" @click=${() => e.confirm({
+        ${t.selfClean ? w`<button class="btn" @click=${() => e.confirm({
 			title: "Selbstreinigung",
 			text: "Selbstreinigung jetzt starten? Das Gerät läuft dann eine Weile.",
 			confirm: "Starten",
 			color: Pa,
 			iconPath: M.snowflake,
 			onConfirm: () => e.call("button", "press", {}, { entity_id: t.selfClean })
-		})}>Selbstreinigung</button>` : E}
+		})}>Selbstreinigung</button>` : D}
         <button class="btn" @click=${() => {
 			e.closeSheet(), e.moreInfo(t.id);
 		}}>Details</button>
@@ -5954,11 +5969,11 @@ function Va(e, t, n, r) {
 		subtitle: c === "kWh" ? n === "24h" ? "kWh pro Stunde" : "kWh pro Tag" : "mittlere Leistung",
 		color: s,
 		glow: `${s}33`,
-		iconPath: A.bolt,
+		iconPath: j.bolt,
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="tabs3" role="tablist" aria-label="Zeitraum">
-        ${Ra.map((i) => C`<button role="tab" aria-selected=${i.id === n} class=${i.id === n ? "sel" : ""}
+        ${Ra.map((i) => w`<button role="tab" aria-selected=${i.id === n} class=${i.id === n ? "sel" : ""}
           @click=${() => e.openSheet({
 			id: "energyChart",
 			key: t,
@@ -5988,10 +6003,10 @@ function Ha(e) {
 		title: c ? `Lüften · ${c.name}` : "Lüften",
 		color: "#5ac8fa",
 		glow: "rgba(90,200,250,0.24)",
-		iconPath: A.wind,
+		iconPath: j.wind,
 		iconStroke: "#06202c",
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="ringcard">
         <span class="ring" style="background: conic-gradient(#5ac8fa 0 ${o}%, rgba(255,255,255,0.1) ${o}% 100%)">
           <span class="ring-in">
@@ -6005,27 +6020,27 @@ function Ha(e) {
         </div>
       </div>
 
-      ${r.openWindows.length ? C`
+      ${r.openWindows.length ? w`
           <div class="section-head"><h2>Offene Fenster</h2><span class="rule" aria-hidden="true"></span></div>
           <div class="chips">
-            ${r.openWindows.map((e) => C`<span class="chip open">${F(A.window, 14, "#ff8a80", 2.4)}${e.name}
+            ${r.openWindows.map((e) => w`<span class="chip open">${F(j.window, 14, "#ff8a80", 2.4)}${e.name}
               <span class="chip-meta">${mt(pt(t, e.window, n))}</span></span>`)}
-          </div>` : E}
+          </div>` : D}
 
-      ${r.recommended.length ? C`
+      ${r.recommended.length ? w`
           <div class="section-head"><h2>Lüften empfohlen</h2><span class="rule" aria-hidden="true"></span></div>
           <div class="chips">
             ${r.recommended.map((e) => {
 			let n = R(t, e.humidity);
-			return C`<span class="chip rec">${F(M.drop, 14, "#8fd8ff", 2.4)}${e.name}${n === null ? E : C`<span class="chip-meta">${B(Math.round(n))} %</span>`}</span>`;
+			return w`<span class="chip rec">${F(M.drop, 14, "#8fd8ff", 2.4)}${e.name}${n === null ? D : w`<span class="chip-meta">${B(Math.round(n))} %</span>`}</span>`;
 		})}
-          </div>` : E}
+          </div>` : D}
 
-      ${a ? C`<div class="confirm-row" style="margin-top:4px">
+      ${a ? w`<div class="confirm-row" style="margin-top:4px">
             <button class="btn" @click=${i}>Neu starten</button>
             <button class="btn primary" style="background:#5ac8fa;color:#06202c"
               @click=${() => e.call("timer", "cancel", {}, { entity_id: L(e.config, "airing_timer") })}>Stopp</button>
-          </div>` : C`<button class="btn primary" style="background:#5ac8fa;color:#06202c;margin-top:4px"
+          </div>` : w`<button class="btn primary" style="background:#5ac8fa;color:#06202c;margin-top:4px"
             @click=${i}>Lüften starten</button>`}
     `
 	});
@@ -6109,20 +6124,20 @@ function Wa(e) {
 		title: Ti(n),
 		color: n === "triggered" ? "#ff453a" : "#bf9bff",
 		glow: "rgba(191,155,255,0.22)",
-		iconPath: A.shield,
+		iconPath: j.shield,
 		iconStroke: "#1d1030",
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="alarm-grid">
         ${wi.map((r) => {
 			let i = r.state === n;
-			return C`
+			return w`
             <button class="alarm-mode ${i ? "active" : ""}" aria-pressed=${i}
               @click=${() => {
 				e.call("alarm_control_panel", r.service, {}, { entity_id: t }), e.closeSheet();
 			}}>
               <span class="circle" style="width:44px;height:44px;background:${i ? "#1d1030" : "rgba(255,255,255,0.12)"}">
-                ${F(A[r.icon], 20, i ? "#bf9bff" : "#e2d3ff", 2.1)}
+                ${F(j[r.icon], 20, i ? "#bf9bff" : "#e2d3ff", 2.1)}
               </span>
               ${r.name}
             </button>
@@ -6178,7 +6193,7 @@ function Xa(e) {
 		iconPath: M.tune,
 		iconStroke: "#101218",
 		onClose: e.closeSheet,
-		body: C`
+		body: w`
       <div class="arcontrol">
         <button class="bigstep" aria-label="Senken" @click=${() => r(-.5)}>−</button>
         <div style="text-align:center">
@@ -6191,21 +6206,21 @@ function Xa(e) {
       <div class="section-head">
         <h2 style="font-size:14px">Räume</h2>
         <span class="rule" aria-hidden="true"></span>
-        ${n.filter((e) => e.id).map((t) => C`<button class="mini"
+        ${n.filter((e) => e.id).map((t) => w`<button class="mini"
           @click=${() => e.setAllRooms({ selected: new Set(t.rooms.map((e) => e.slug)) })}>nur ${t.short}</button>`)}
         <button class="mini" @click=${() => e.setAllRooms({ selected: new Set(e.rooms.map((e) => e.slug)) })}>alle</button>
       </div>
       <div class="chips">
         ${e.rooms.map((e) => {
 			let n = t.selected.has(e.slug);
-			return C`<button class="rchip ${n ? "on" : ""}" aria-pressed=${n} @click=${() => i(e.slug)}>
-            ${n ? F(A.check, 14, "#ffc061", 2.8) : ""}${e.name}</button>`;
+			return w`<button class="rchip ${n ? "on" : ""}" aria-pressed=${n} @click=${() => i(e.slug)}>
+            ${n ? F(j.check, 14, "#ffc061", 2.8) : ""}${e.name}</button>`;
 		})}
       </div>
 
       <div class="section-head"><h2 style="font-size:14px">Wie lange</h2><span class="rule" aria-hidden="true"></span></div>
       <div class="durations" role="radiogroup" aria-label="Dauer">
-        ${Ka.map((n) => C`<button role="radio" aria-checked=${t.duration === n} class=${t.duration === n ? "sel" : ""}
+        ${Ka.map((n) => w`<button role="radio" aria-checked=${t.duration === n} class=${t.duration === n ? "sel" : ""}
           @click=${() => e.setAllRooms({ duration: n })}>${n}</button>`)}
       </div>
 
@@ -6312,65 +6327,65 @@ function no(e, t, n) {
 }
 function ro(e, t) {
 	let n = e === "temp", r = n ? "#ff9f0a" : "#5ac8fa", i = n ? wn(t, Qa, $a, eo, .3, .3, 1) : wn(t, Qa, $a, eo, 1, 1, 2), a = t.map((e) => e.v), o = a[a.length - 1], s = n ? "°" : " %", c = (e) => n ? B(e, 1) : B(Math.round(e)), l = a.length ? `${c(Math.min(...a))}${n ? "°" : ""} – ${c(Math.max(...a))}${s} · jetzt ${c(o)}${s}` : "keine Daten", u = (i.lo + i.hi) / 2, d = i.y(60), f = !n && 60 > i.lo && 60 < i.hi;
-	return C`
+	return w`
     <figure class="fig" style="background:${n ? "rgba(255,159,10,0.08)" : "rgba(90,200,250,0.08)"}">
       <figcaption>
         <span style="font-size:14px;font-weight:600;color:${n ? "#ffc061" : "#8fd8ff"}">${n ? "Temperatur" : "Luftfeuchte"}</span>
         <span class="cap">${l}</span>
       </figcaption>
       <svg width="100%" viewBox="0 0 338 140" role="img" aria-label="${n ? "Temperaturverlauf" : "Luftfeuchteverlauf"}: ${l}">
-        ${n ? w`${[
+        ${n ? T`${[
 		i.hi,
 		u,
 		i.lo
-	].map((e) => w`
+	].map((e) => T`
               <line x1="0" y1=${i.y(e)} x2="338" y2=${i.y(e)} stroke="rgba(255,255,255,0.08)"></line>
-              <text x="334" y=${i.y(e) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${B(e, e % 1 ? 1 : 0)}°</text>`)}` : w`
-              ${f ? w`
+              <text x="334" y=${i.y(e) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${B(e, e % 1 ? 1 : 0)}°</text>`)}` : T`
+              ${f ? T`
                 <rect x="0" y=${$a} width="338" height=${Math.max(0, d - $a)} fill="rgba(255,255,255,0.04)"></rect>
                 <line x1="0" y1=${d} x2="338" y2=${d} stroke="rgba(90,200,250,0.5)" stroke-dasharray="4 4"></line>
-                <text x="4" y=${d - 4} fill="rgba(143,216,255,0.85)" font-size="10">60 % Lüftgrenze</text>` : E}
+                <text x="4" y=${d - 4} fill="rgba(143,216,255,0.85)" font-size="10">60 % Lüftgrenze</text>` : D}
               <line x1="0" y1=${eo} x2="338" y2=${eo} stroke="rgba(255,255,255,0.08)"></line>
               <text x="334" y=${16} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${B(i.hi)} %</text>
               <text x="334" y=${116} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${B(i.lo)} %</text>`}
-        ${i.area ? w`<polygon points=${i.area} fill=${n ? "rgba(255,159,10,0.16)" : "rgba(90,200,250,0.16)"}></polygon>` : E}
-        ${i.line ? w`<polyline points=${i.line} fill="none" stroke=${r} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : E}
-        ${i.last ? w`<circle cx=${i.last.x} cy=${i.last.y} r="4.5" fill=${r} stroke="#181a22" stroke-width="2"></circle>` : E}
+        ${i.area ? T`<polygon points=${i.area} fill=${n ? "rgba(255,159,10,0.16)" : "rgba(90,200,250,0.16)"}></polygon>` : D}
+        ${i.line ? T`<polyline points=${i.line} fill="none" stroke=${r} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : D}
+        ${i.last ? T`<circle cx=${i.last.x} cy=${i.last.y} r="4.5" fill=${r} stroke="#181a22" stroke-width="2"></circle>` : D}
       </svg>
     </figure>
   `;
 }
 function io(e, t, n) {
 	let r = e.rooms.find((e) => e.slug === t);
-	if (!r) return E;
+	if (!r) return D;
 	let i = e.history(t, n), a = n === "24h" && !i.loading ? Tn(i.hum, i.temp) : null, o = no(n, i.start, i.end);
 	return I({
 		title: `${r.name} · Verlauf`,
 		subtitle: n === "30d" ? "Tagesmittel" : "Stundenmittel",
 		color: "#ff9f0a",
 		glow: "rgba(255,159,10,0.12)",
-		iconPath: A.thermo,
+		iconPath: j.thermo,
 		onClose: e.closeSheet,
 		onBack: () => e.openSheet({
 			id: "room",
 			slug: t
 		}),
-		body: C`
+		body: w`
       <div class="tabs3" role="tablist" aria-label="Zeitraum">
-        ${to.map((r) => C`<button role="tab" aria-selected=${r.id === n} class=${r.id === n ? "sel" : ""}
+        ${to.map((r) => w`<button role="tab" aria-selected=${r.id === n} class=${r.id === n ? "sel" : ""}
           @click=${() => e.openSheet({
 			id: "history",
 			slug: t,
 			range: r.id
 		})}>${r.name}</button>`)}
       </div>
-      ${i.loading ? C`<div class="hist-msg">Lade Verlauf …</div>` : i.error ? C`<div class="hist-msg">Verlauf nicht verfügbar: ${i.error}</div>` : C`
+      ${i.loading ? w`<div class="hist-msg">Lade Verlauf …</div>` : i.error ? w`<div class="hist-msg">Verlauf nicht verfügbar: ${i.error}</div>` : w`
             ${ro("temp", i.temp)}
             <div>
               ${ro("hum", i.hum)}
-              <div class="xlabels">${o.map((e) => C`<span>${e}</span>`)}</div>
+              <div class="xlabels">${o.map((e) => w`<span>${e}</span>`)}</div>
             </div>
-            ${a ? C`<div class="insight">${F(A.wind, 16, "#8fd8ff", 2.2)}<span>${a}</span></div>` : E}`}
+            ${a ? w`<div class="insight">${F(j.wind, 16, "#8fd8ff", 2.2)}<span>${a}</span></div>` : D}`}
     `
 	});
 }
@@ -6439,7 +6454,7 @@ var ao = o`
 // src/sheets/room.ts
 function oo(e, t) {
 	let { hass: n } = e, r = e.rooms.find((e) => e.slug === t);
-	if (!r) return E;
+	if (!r) return D;
 	let i = dn(n, r, e.target(r.climate)), a = r.climate, o = i.heating ? "#ff9f0a" : i.vent ? "#5ac8fa" : "rgba(255,255,255,0.16)", s = i.heating ? "rgba(255,159,10,0.2)" : i.vent ? "rgba(90,200,250,0.2)" : "rgba(255,255,255,0.06)", c = i.off ? "Aus" : i.heating ? `heizt${i.valve === null ? "" : ` · Ventile ${i.valve} %`}` : "Soll erreicht", l = or(n, r), u = cr(n, l.map((e) => e.id), e.sceneConfigs(), e.now), d = ar(n, r, e.config.names), f = R(n, L(e.config, "outdoor_dew")), p = z(n, L(e.config, "airing_timer")) === "active", m = [
 		i.pm25 === null ? null : {
 			value: B(i.pm25),
@@ -6458,13 +6473,13 @@ function oo(e, t) {
 		r.window ? i.windowOpen ? {
 			value: "offen",
 			label: "Fenster",
-			icon: A.window,
+			icon: j.window,
 			c: "#ff453a",
 			tint: "rgba(255,69,58,0.14)"
 		} : {
 			value: "zu",
 			label: "Fenster",
-			icon: A.window,
+			icon: j.window,
 			c: "#7ee8a0",
 			tint: "rgba(255,255,255,0.07)"
 		} : null
@@ -6473,37 +6488,37 @@ function oo(e, t) {
 		title: r.name,
 		color: o,
 		glow: s,
-		iconPath: Re(r.name, r.icon),
+		iconPath: Le(r.name, r.icon),
 		iconStroke: i.heating || i.vent ? "#1a1206" : "#fff",
 		onClose: e.closeSheet,
-		headerExtra: C`
+		headerExtra: w`
       <button class="histpill" aria-label="Verlauf Temperatur und Luftfeuchte"
         @click=${() => e.openSheet({
 			id: "history",
 			slug: t,
 			range: "24h"
 		})}>
-        ${F(A.thermo, 14, "#ffc061", 2.4)}${K(i.cur)}°
+        ${F(j.thermo, 14, "#ffc061", 2.4)}${K(i.cur)}°
         ${F(M.drop, 14, "#8fd8ff", 2.4)}${i.hum ?? "–"} %
         ${F(M.trend, 12, "rgba(255,255,255,0.7)", 2.6)}
       </button>`,
-		body: C`
+		body: w`
       <div class="tcard" style="background: linear-gradient(140deg, ${i.heating ? "rgba(255,159,10,0.3)" : "rgba(255,255,255,0.1)"}, rgba(255,255,255,0.05) 70%)">
         <div class="tcontrol">
           <button class="bigstep" aria-label="Soll senken" ?disabled=${!a} @click=${() => a && e.stepTarget(a, -.5)}>−</button>
           <div class="tcenter">
             <div class="tstate" style="color:${i.heating ? "#ffd29a" : "rgba(255,255,255,0.75)"}">
-              ${i.heating ? F(M.flame, 13, "#ffd29a", 2.4) : E}${c}
+              ${i.heating ? F(M.flame, 13, "#ffd29a", 2.4) : D}${c}
             </div>
             <div class="tbig">${K(i.cur)}°</div>
             <div class="tsoll">Soll <strong style="color:${i.heating ? "#ffc061" : "#fff"}">${K(i.target)}°</strong></div>
           </div>
           <button class="bigstep" aria-label="Soll erhöhen" ?disabled=${!a} @click=${() => a && e.stepTarget(a, .5)}>+</button>
         </div>
-        ${a ? C`<div class="presets" role="group" aria-label="Preset">
+        ${a ? w`<div class="presets" role="group" aria-label="Preset">
               ${ln.map((t) => {
 			let n = i.preset === t.id, r = i.presetTemps[t.id];
-			return C`
+			return w`
                   <button class="rpreset ${n ? "active" : ""}" aria-pressed=${n}
                     @click=${() => e.call("climate", "set_preset_mode", { preset_mode: t.id }, { entity_id: a })}>
                     <span class="circle" style="width:32px;height:32px;background:${t.color}">${F(ze[t.id], 16, "#101010", 2.3)}</span>
@@ -6511,40 +6526,40 @@ function oo(e, t) {
                     <span class="ptemp">${r === void 0 ? "–" : `${B(r, r % 1 ? 1 : 0)}°`}</span>
                   </button>`;
 		})}
-            </div>` : E}
+            </div>` : D}
       </div>
 
-      ${l.length ? C`<div class="grid3" role="group" aria-label="Szenen">
+      ${l.length ? w`<div class="grid3" role="group" aria-label="Szenen">
             ${l.map((t, n) => {
 			let r = t.off ? "rgba(255,255,255,0.14)" : rt[n % rt.length], i = t.off ? "#fff" : "#101010", a = u.has(t.id);
-			return C`<button class="scene ${a ? "on" : ""}" aria-pressed=${a} style=${a ? `background:${t.off ? "rgba(255,255,255,0.2)" : r + "33"};box-shadow:0 0 18px ${t.off ? "rgba(255,255,255,0.08)" : r + "40"}` : ""}
+			return w`<button class="scene ${a ? "on" : ""}" aria-pressed=${a} style=${a ? `background:${t.off ? "rgba(255,255,255,0.2)" : r + "33"};box-shadow:0 0 18px ${t.off ? "rgba(255,255,255,0.08)" : r + "40"}` : ""}
                 @click=${() => e.call("scene", "turn_on", {}, { entity_id: t.id })}>
                 <span class="circle" style="width:36px;height:36px;background:${r}">${t.off ? F(M.power, 16, i, 2.1) : it(t.icon, M.scene, i)}</span>
                 <span class="ellipsis">${t.name}</span>
               </button>`;
 		})}
-          </div>` : E}
+          </div>` : D}
 
-      ${m.length ? C`<div class="facts" style="grid-template-columns: repeat(${m.length}, minmax(0, 1fr))">
-            ${m.map((e) => C`<div class="fact" style="background:${e.tint}">
+      ${m.length ? w`<div class="facts" style="grid-template-columns: repeat(${m.length}, minmax(0, 1fr))">
+            ${m.map((e) => w`<div class="fact" style="background:${e.tint}">
               ${F(e.icon, 18, e.c, 2)}
               <span class="fv">${e.value}</span>
               <span class="fl">${e.label}</span>
             </div>`)}
-          </div>` : E}
+          </div>` : D}
 
-      ${i.airing ? C`<div class="airrow">
-            <span class="circle" style="width:40px;height:40px;background:rgba(90,200,250,0.25)">${F(A.wind, 18, "#8fd8ff", 2.2)}</span>
+      ${i.airing ? w`<div class="airrow">
+            <span class="circle" style="width:40px;height:40px;background:rgba(90,200,250,0.25)">${F(j.wind, 18, "#8fd8ff", 2.2)}</span>
             <span class="grow"><span class="t1s">${p ? "Lüften läuft" : i.airing}</span><span class="t2s">${h}</span></span>
-            ${p ? C`<button class="airbtn" @click=${() => e.openSheet({ id: "airing" })}>Ansehen</button>` : i.airing === "Nicht lüften" ? E : C`<button class="airbtn" @click=${() => {
+            ${p ? w`<button class="airbtn" @click=${() => e.openSheet({ id: "airing" })}>Ansehen</button>` : i.airing === "Nicht lüften" ? D : w`<button class="airbtn" @click=${() => {
 			e.runScript(L(e.config, "airing_start")), e.openSheet({ id: "airing" });
 		}}>Start</button>`}
-          </div>` : E}
+          </div>` : D}
 
-      ${d.length ? C`<div class="grid2">
+      ${d.length ? w`<div class="grid2">
             ${d.map((n) => {
 			let r = n.kind === "light" ? "#ffd60a" : "#30d158";
-			return C`<button class="dev ${n.on ? "on" : ""} ${n.unavailable ? "na" : ""}" style=${n.on ? `background:${r}24` : ""}
+			return w`<button class="dev ${n.on ? "on" : ""} ${n.unavailable ? "na" : ""}" style=${n.on ? `background:${r}24` : ""}
                 ${Rn({
 				tap: () => ri(e, n.id),
 				hold: () => e.openSheet({
@@ -6560,7 +6575,7 @@ function oo(e, t) {
                 <span class="devtext"><span class="t1s ellipsis">${n.name}</span><span class="t2s ellipsis">${n.status}</span></span>
               </button>`;
 		})}
-          </div>` : E}
+          </div>` : D}
     `
 	});
 }
@@ -6740,35 +6755,35 @@ var so = o`
     min-width: 0;
     text-align: left;
   }
-`, co, lo = "0.8.0", Q = [
+`, co, lo = "0.8.1", Q = [
 	{
 		id: "overview",
 		name: "Übersicht",
-		icon: A.home,
+		icon: j.home,
 		milestone: 1
 	},
 	{
 		id: "climate",
 		name: "Klima",
-		icon: A.thermo,
+		icon: j.thermo,
 		milestone: 2
 	},
 	{
 		id: "rooms",
 		name: "Räume",
-		icon: A.grid,
+		icon: j.grid,
 		milestone: 3
 	},
 	{
 		id: "energy",
 		name: "Energie",
-		icon: A.bolt,
+		icon: j.bolt,
 		milestone: 4
 	},
 	{
 		id: "security",
 		name: "Schutz",
-		icon: A.shield,
+		icon: j.shield,
 		milestone: 4
 	}
 ], uo = {
@@ -6800,7 +6815,7 @@ function ho() {
 	let t = document.createElement("link");
 	t.id = e, t.rel = "stylesheet", t.href = "https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap", document.head.appendChild(t);
 }
-var go = class extends k {
+var go = class extends A {
 	constructor(...e) {
 		super(...e), this._page = "overview", this._sheet = null, this._confirm = null, this._now = /* @__PURE__ */ new Date(), this._roomsFilter = "all", this._rooms = [], this._pending = {}, this._ui = {}, this._hdr = "", this._energy = {}, this._energyAt = 0, this._energyLoading = !1, this._series = {}, this._navDrag = null, this._scenes = null, this._forecast = {
 			loading: !1,
@@ -7151,12 +7166,12 @@ var go = class extends k {
 		};
 	}
 	render() {
-		if (!this.hass || !this._config) return E;
+		if (!this.hass || !this._config) return D;
 		let e = this._ctx(), t = this._config.nav !== !1;
-		return C`
+		return w`
       <div class="wrap ${this._hdr ? `hdr-${this._hdr}` : ""}" style="background-image:${uo[this._page]}">
         <main class="content">${this._renderPage(e)}</main>
-        ${t ? this._renderNav() : E}
+        ${t ? this._renderNav() : D}
       </div>
       ${this._renderSheets(e)}
     `;
@@ -7168,7 +7183,7 @@ var go = class extends k {
 		if (this._page === "energy") return xi(e);
 		if (this._page === "security") return Ri(e);
 		let t = Q.find((e) => e.id === this._page);
-		return C`
+		return w`
       <header class="page-head">
         <div class="date">${Ut(e.now)}</div>
         <h1>${t.name}</h1>
@@ -7181,16 +7196,16 @@ var go = class extends k {
 	}
 	_renderNav() {
 		let e = Q.length, t = Math.max(0, Q.findIndex((e) => e.id === this._page)), n = this._navDrag, r = `((100% - 12px - ${(e - 1) * 4}px) / ${e + 1})`, i = n ? `left:${n.left}px;width:${n.width}px` : `left:calc(6px + ${t} * (${r} + 4px));width:calc(2 * ${r})`;
-		return C`
+		return w`
       <nav class="nav ${n ? "dragging" : ""}" aria-label="Bereiche"
         @pointerdown=${this._navDown} @pointermove=${this._navMove} @pointerup=${this._navUp} @pointercancel=${this._navCancel}>
         <span class="lens" style=${i} aria-hidden="true"></span>
         ${Q.map((e, t) => {
 			let r = e.id === this._page, i = n?.hover === t;
-			return C`
+			return w`
             <button class="tab ${r ? "active" : ""} ${i ? "hover" : ""}" aria-label=${e.name} aria-current=${r ? "page" : "false"}
               @click=${() => this._selectPage(e.id)}>
-              ${F(e.icon, 20, "currentColor")}${r ? C`<span>${e.name}</span>` : E}
+              ${F(e.icon, 20, "currentColor")}${r ? w`<span>${e.name}</span>` : D}
             </button>
           `;
 		})}
@@ -7206,7 +7221,7 @@ var go = class extends k {
 			onClose: () => this._confirm = null
 		});
 		let t = this._sheet;
-		if (!t) return E;
+		if (!t) return D;
 		switch (t.id) {
 			case "alarm": return Wa(e);
 			case "room": return oo(e, t.slug);
