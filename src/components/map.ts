@@ -33,7 +33,7 @@ const CONTROLS_CSS = `
 `;
 
 /**
- * HA's own map (`ha-map`, Leaflet) inside the card. HA loads it lazily with the map card,
+ * HA's own map (`ha-map`, MapLibre) inside the card. HA loads it lazily with the map card,
  * so the element asks the card helpers for a map card once, then renders `ha-map`.
  * Without HA (dev preview) it shows a placeholder.
  */
