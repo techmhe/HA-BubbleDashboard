@@ -1,5 +1,5 @@
 import { airingBands, bucket, type AiringBand, type Point } from '../logic/climate';
-import { consumptionSeries, shareSeries, statChanges, type EnergyTotals, type ShareKind } from '../logic/energy';
+import { consumptionSeries, shareSeries, statChanges, type EnergyTotals, type GridTariff, type ShareKind } from '../logic/energy';
 import { weatherSeries, type ForecastItem, type HistoryRow, type WeatherMetric } from '../logic/weather';
 import type { HomeAssistant } from '../types';
 
@@ -149,10 +149,14 @@ export async function loadPower(hass: HomeAssistant, id: string, range: ChartRan
 /** Today's kWh per role from the energy dashboard statistics. */
 export async function loadEnergyToday(
   hass: HomeAssistant, ids: { solar: string[]; import: string[]; export: string[]; batteryOut: string[]; batteryIn: string[] },
+  tariff?: GridTariff,
 ): Promise<EnergyTotals> {
   const midnight = new Date();
   midnight.setHours(0, 0, 0, 0);
-  const all = [...ids.solar, ...ids.import, ...ids.export, ...ids.batteryOut, ...ids.batteryIn];
+  // Cost statistics are only needed when the price is not a fixed number.
+  const costIds = tariff && tariff.importPrice === null ? tariff.costStats : [];
+  const compIds = tariff && tariff.exportPrice === null ? tariff.compensationStats : [];
+  const all = [...ids.solar, ...ids.import, ...ids.export, ...ids.batteryOut, ...ids.batteryIn, ...costIds, ...compIds];
   const rows = await hass.callWS<Record<string, { change?: number | null }[]>>({
     type: 'recorder/statistics_during_period',
     start_time: midnight.toISOString(),
@@ -167,7 +171,29 @@ export async function loadEnergyToday(
     export: statChanges(rows, ids.export),
     batteryOut: statChanges(rows, ids.batteryOut),
     batteryIn: statChanges(rows, ids.batteryIn),
+    ...(costIds.some((id) => rows[id]) ? { cost: statChanges(rows, costIds), compensation: statChanges(rows, compIds) } : {}),
   };
+}
+
+/** Grid cost in € per hour/day: fixed price × imported kWh, else HA's cost statistics. `total` = feed-in compensation. */
+export async function loadCost(
+  hass: HomeAssistant, tariff: GridTariff, ids: { import: string[]; export: string[] }, range: ChartRange,
+): Promise<SeriesResult> {
+  const scaled = async (stats: string[], price: number | null, fallback: string[]) => {
+    if (price !== null) {
+      const r = await loadEnergy(hass, stats, range);
+      return { ...r, past: r.past.map((p) => ({ t: p.t, v: p.v * price })) };
+    }
+    return loadEnergy(hass, fallback, range);
+  };
+  const [cost, comp] = await Promise.all([
+    scaled(ids.import, tariff.importPrice, tariff.costStats),
+    ids.export.length || tariff.compensationStats.length
+      ? scaled(ids.export, tariff.exportPrice, tariff.compensationStats)
+      : Promise.resolve({ past: [] as Point[] }),
+  ]);
+  const total = Math.round(comp.past.reduce((s, p) => s + p.v, 0) * 100) / 100;
+  return { ...cost, total };
 }
 
 /** Last 24 h from the weather entity's history (hourly means) and the next 24 h from the hourly forecast. */

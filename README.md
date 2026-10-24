@@ -253,6 +253,11 @@ explicitly; a configured room still auto-fills the fields you leave out.
   from the energy dashboard's battery source), autarky and PV self-use. Tiles open a chart (kWh per
   hour for 24 h, per day for 7 / 30 days); the two split bars open autarky / self-use in
   percent per hour or day.
+- Cost tiles under *Heute*: *Stromkosten* (grid import), *Vergütung* (feed-in) and *Gespart
+  (PV & Akku)* (locally covered consumption at the import price). Fixed prices come from the
+  energy dashboard's grid source; with an entity price the card reads HA's cost statistics
+  (`stat_cost`, else `<import stat>_cost` / `<export stat>_compensation`) and leaves out
+  *Gespart*. Tap → grid cost in € per hour/day.
 - *Aktuell*: every `*_power` sensor that sits in an area, one per device (measured
   before Powercalc), without the grid meter, PV, battery and house devices, phase and PoE
   readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → chart from the
@@ -262,6 +267,10 @@ explicitly; a configured room still auto-fills the fields you leave out.
 ### What Schutz shows
 
 - Headline: open count or *Alles ruhig* and *x von y zu*.
+- Persons pill (top right, like the weather pill on Übersicht): every `person.*` with a
+  device tracker (or `persons:` in the card config), picture or initials, a badge with the
+  zone's icon (green = home, blue = another zone, grey = away) and *Alle da* / *x von y da*.
+  Tap an avatar → HA's more-info (map).
 - Alarm pill with *zuletzt ausgelöst* (Alarmo's `last_triggered`) and buttons for the other
   modes (Abwesend / Zuhause / Nacht / Aus); the shield opens the alarm sheet.
 - Door camera live via HA's `ha-camera-stream` (muted by default; sound and fullscreen

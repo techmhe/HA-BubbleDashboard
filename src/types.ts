@@ -104,6 +104,8 @@ export interface CardConfig {
   vacuum_maps?: Record<string, Record<string, string>>;
   /** Programme tiles; without `button` the tile runs vacuum.start. */
   vacuum_programs?: VacuumProgram[];
+  /** Persons in the Schutz header (default: every person with a device tracker). */
+  persons?: string[];
   /** DWD warning sensors (default: every dwd_weather_warnings sensor). */
   warnings?: string[];
   /** Pollen sensors (default: every sensor.pollenflug_*). */

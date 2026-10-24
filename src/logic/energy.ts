@@ -16,7 +16,11 @@ const z = (v: number | null) => v ?? 0;
 
 /** The parts of HA's energy dashboard config (energy/get_prefs) the card uses. */
 export interface EnergyPrefs {
-  energy_sources: { type: string; stat_energy_from?: string; stat_energy_to?: string; stat_rate?: string }[];
+  energy_sources: {
+    type: string; stat_energy_from?: string; stat_energy_to?: string; stat_rate?: string;
+    stat_cost?: string | null; stat_compensation?: string | null;
+    number_energy_price?: number | null; number_energy_price_export?: number | null;
+  }[];
   device_consumption: { stat_consumption: string; stat_rate?: string; name?: string; included_in_stat?: string }[];
 }
 
@@ -45,6 +49,52 @@ export function batteryStatIds(prefs: EnergyPrefs): { batteryOut: string[]; batt
   return {
     batteryOut: bat.filter((s) => s.stat_energy_from).map((s) => s.stat_energy_from!),
     batteryIn: bat.filter((s) => s.stat_energy_to).map((s) => s.stat_energy_to!),
+  };
+}
+
+export interface GridTariff {
+  /** Fixed prices in €/kWh (only with a single grid source). */
+  importPrice: number | null;
+  exportPrice: number | null;
+  /** Cost statistics HA keeps for the grid (stat_cost, else the generated <stat>_cost sensor). */
+  costStats: string[];
+  compensationStats: string[];
+}
+
+export function gridTariff(prefs: EnergyPrefs): GridTariff {
+  const grid = (prefs.energy_sources ?? []).filter((s) => s.type === 'grid');
+  const one = grid.length === 1 ? grid[0] : undefined;
+  return {
+    importPrice: one?.number_energy_price ?? null,
+    exportPrice: one?.number_energy_price_export ?? null,
+    costStats: grid.filter((s) => s.stat_cost || s.stat_energy_from).map((s) => s.stat_cost || `${s.stat_energy_from}_cost`),
+    compensationStats: grid.filter((s) => s.stat_compensation || s.stat_energy_to).map((s) => s.stat_compensation || `${s.stat_energy_to}_compensation`),
+  };
+}
+
+export interface EnergyCost {
+  /** Paid for grid import, €. */
+  cost: number;
+  /** Earned for feed-in, €. */
+  compensation: number;
+  /** Import avoided by PV and battery at the import price, € (fixed price only). */
+  saved: number | null;
+  net: number;
+}
+
+/** Today's grid cost: fixed prices × kWh, else HA's cost statistics; null when neither is known. */
+export function energyCost(
+  t: GridTariff, kwh: { import: number; export: number; local: number }, stats?: { cost: number; compensation: number },
+): EnergyCost | null {
+  const r2 = (v: number) => Math.round(v * 100) / 100;
+  const cost = t.importPrice !== null ? kwh.import * t.importPrice : stats?.cost;
+  if (cost === undefined) return null;
+  const compensation = t.exportPrice !== null ? kwh.export * t.exportPrice : stats?.compensation ?? 0;
+  return {
+    cost: r2(cost),
+    compensation: r2(compensation),
+    saved: t.importPrice !== null ? r2(kwh.local * t.importPrice) : null,
+    net: r2(cost - compensation),
   };
 }
 
@@ -130,6 +180,9 @@ export interface EnergyTotals {
   export: number;
   batteryOut?: number;
   batteryIn?: number;
+  /** Grid cost statistics today, € (only loaded when the price is not fixed). */
+  cost?: number;
+  compensation?: number;
 }
 
 /** Consumption and the locally covered part: PV + import + battery discharge − export − battery charge. */

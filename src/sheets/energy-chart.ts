@@ -2,8 +2,8 @@ import { html } from 'lit';
 import { sheet } from '../components/ui';
 import { trendFigure } from '../components/trend';
 import { I } from '../icons';
-import { loadConsumption, loadEnergy, loadEnergyShare, loadPower, type ChartRange } from '../data/series';
-import { batteryStatIds, consumerEnergyStat, energyStatIds, type ShareKind } from '../logic/energy';
+import { loadConsumption, loadCost, loadEnergy, loadEnergyShare, loadPower, type ChartRange } from '../data/series';
+import { batteryStatIds, consumerEnergyStat, energyStatIds, gridTariff, type ShareKind } from '../logic/energy';
 import { ent } from '../logic/entities';
 import { friendlyName, fmt, num } from '../logic/util';
 import type { PageContext, SheetState } from '../pages/context';
@@ -51,7 +51,7 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
   const role = ROLES[key];
   const share = SHARES[key];
   const ids = prefs ? { ...energyStatIds(prefs), ...batteryStatIds(prefs) } : null;
-  let kind: 'kWh' | 'W' | 'share' = 'kWh';
+  let kind: 'kWh' | 'W' | 'share' | '€' = 'kWh';
   let title: string;
   let color: string;
   let load: (() => ReturnType<typeof loadEnergy>) | null = null;
@@ -61,6 +61,11 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     title = share.name;
     color = share.color;
     if (ids) load = () => loadEnergyShare(ctx.hass, ids, range, share.kind);
+  } else if (key === 'cost') {
+    kind = '€';
+    title = 'Stromkosten';
+    color = '#ff9f0a';
+    if (prefs && ids) load = () => loadCost(ctx.hass, gridTariff(prefs), ids, range);
   } else if (key === 'house') {
     title = 'Hausverbrauch';
     color = '#ffffff';
@@ -90,11 +95,13 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     ? undefined
     : kind === 'share'
       ? data.total != null ? `gesamt ${data.total} % ${share.total}` : undefined
+      : kind === '€'
+        ? `Summe ${fmt(sum, 2)} €${data.total ? ` · Vergütung ${fmt(data.total, 2)} €` : ''}`
       : kind === 'kWh'
         ? `Summe ${fmt(sum, sum < 10 ? 2 : 1)} kWh`
         : `Ø ${fmt(sum / data.past.length)} W`;
   const per = range === '24h' ? 'Stunde' : 'Tag';
-  const subtitle = { kWh: `kWh pro ${per}`, W: 'mittlere Leistung', share: `Anteil pro ${per}` }[kind];
+  const subtitle = { kWh: `kWh pro ${per}`, W: 'mittlere Leistung', share: `Anteil pro ${per}`, '€': `Netzbezug in € pro ${per}` }[kind];
 
   return sheet({
     title,
@@ -110,8 +117,8 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
           @click=${() => ctx.openSheet({ id: 'energyChart', key, range: r.id, name, back })}>${r.name}</button>`)}
       </div>
       ${trendFigure({
-        title, color, unit, digits: kind === 'kWh' ? 1 : 0, snap: kind === 'kWh' ? 0.5 : unit === '%' ? 25 : 10, data, caption,
-        bars: kind === 'kWh' || kind === 'share', zero: true, max: unit === '%' ? 100 : undefined,
+        title, color, unit, digits: kind === 'kWh' ? 1 : kind === '€' ? 2 : 0, snap: kind === 'kWh' ? 0.5 : kind === '€' ? 0.25 : unit === '%' ? 25 : 10, data, caption,
+        bars: kind === 'kWh' || kind === 'share' || kind === '€', zero: true, max: unit === '%' ? 100 : undefined,
         labels: labels(range, data.start, data.end),
       })}
     `,

@@ -8,7 +8,7 @@ const config = { type: 'custom:ha-start-dashboard' };
 
 describe('weather', () => {
   it('summarises now with today from the daily forecast', () => {
-    const w = weatherNow(makeM5Hass(), config, DAILY);
+    const w = weatherNow(makeM5Hass(), config, DAILY, NOW);
     expect(w).toMatchObject({ temp: '9°', label: 'Regen', today: 'heute 8° – 9° · 3,4 mm', source: 'DWD · Stand 18 Uhr' });
     expect(w.chips.map((c) => c.label)).toEqual(['Feuchte 80 %', 'Wind 30 km/h SW', '1012 hPa', 'UV 2', 'Sicht 47 km']);
   });

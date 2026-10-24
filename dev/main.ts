@@ -45,7 +45,7 @@ hass.callWS = (async (msg: Record<string, any>) => {
     return {
       energy_sources: [
         { type: 'solar', stat_energy_from: 'sensor.solarenergytotal' },
-        { type: 'grid', stat_energy_from: 'sensor.stromverbrauch_shelly_kwh', stat_energy_to: 'sensor.ruckeinspeisung_shelly_kwh' },
+        { type: 'grid', stat_energy_from: 'sensor.stromverbrauch_shelly_kwh', stat_energy_to: 'sensor.ruckeinspeisung_shelly_kwh', number_energy_price: 0.3, number_energy_price_export: 0.08 },
         { type: 'battery', stat_energy_from: 'sensor.akku_entladen_kwh', stat_energy_to: 'sensor.akku_geladen_kwh' },
       ],
       device_consumption: [],
@@ -114,6 +114,14 @@ const card = document.getElementById('card') as any;
   throw new Error('not found');
 };
 hass.states['scene.cozy_evening'].attributes.id = 'c1';
+// Persons for the Schutz header: one at home, one in a work zone.
+const st = (id: string, state: string, attributes: Record<string, unknown>) => {
+  hass.states[id] = { entity_id: id, state, attributes, last_changed: now.toISOString(), last_updated: now.toISOString() };
+};
+st('zone.home', '1', { friendly_name: 'Home', icon: 'mdi:home' });
+st('zone.buro_anna', '1', { friendly_name: 'Büro Anna', icon: 'mdi:briefcase' });
+st('person.max_muster', 'home', { friendly_name: 'Max Muster', device_trackers: ['device_tracker.max'], in_zones: ['zone.home'] });
+st('person.anna_muster', 'Büro Anna', { friendly_name: 'Anna Muster', device_trackers: ['device_tracker.anna'], in_zones: ['zone.buro_anna'] });
 card.setConfig({ type: 'custom:ha-start-dashboard', page: q.get('page') ?? 'overview', header: 'default' });
 card.hass = hass;
 card.addEventListener('hass-more-info', (e: CustomEvent) => console.log('[mock] more-info', e.detail.entityId));

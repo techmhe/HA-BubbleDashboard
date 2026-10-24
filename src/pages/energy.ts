@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon } from '../components/ui';
 import { deviceIcon, I } from '../icons';
 import { watts } from '../logic/devices';
-import { consumers, energyHeadline, energyNow, energyToday, type Consumer } from '../logic/energy';
+import { consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type Consumer } from '../logic/energy';
 import { fmt } from '../logic/util';
 import type { PageContext } from './context';
 
@@ -15,6 +15,7 @@ const E = {
 
 const IDLE = 5;
 const kwh = (v: number) => `${fmt(v, 1)} kWh`;
+const eur = (v: number) => `${fmt(v, 2)} €`;
 
 function consumerIcon(c: Consumer): string {
   if (c.untracked) return E.question;
@@ -42,6 +43,8 @@ export function renderEnergy(ctx: PageContext) {
   const energy = ctx.energy();
   const now = energyNow(hass, config, energy.prefs);
   const today = energyToday(hass, config, energy.today);
+  const cost = energy.prefs ? energyCost(gridTariff(energy.prefs), today, energy.today?.cost !== undefined
+    ? { cost: energy.today.cost, compensation: energy.today.compensation ?? 0 } : undefined) : null;
   const all = consumers(hass, config, 100, energy.prefs);
   const top = ctx.consumersAll ? all : all.slice(0, SHOWN);
   const chart = (key: string, name?: string) => ctx.openSheet({ id: 'energyChart', key, range: '24h', name });
@@ -101,6 +104,16 @@ export function renderEnergy(ctx: PageContext) {
         ].map((t) => html`<button class="tile" aria-label="${t.l} ${kwh(t.v)}, Verlauf anzeigen" @click=${() => chart(t.k)}>
           <span class="tdot" style="background:${t.c}"></span><span class="tv">${kwh(t.v)}</span><span class="tl">${t.l}</span></button>`)}
       </div>
+      ${cost
+        ? html`<div class="tiles">
+            ${[
+              { v: cost.cost, l: 'Stromkosten', c: '#ff9f0a' },
+              { v: cost.compensation, l: 'Vergütung', c: '#64d2ff' },
+              ...(cost.saved !== null ? [{ v: cost.saved, l: 'Gespart (PV & Akku)', c: '#7ee8a0' }] : []),
+            ].map((t) => html`<button class="tile" aria-label="${t.l} ${eur(t.v)}, Verlauf anzeigen" @click=${() => chart('cost')}>
+              <span class="tdot" style="background:${t.c}"></span><span class="tv">${eur(t.v)}</span><span class="tl">${t.l}</span></button>`)}
+          </div>`
+        : nothing}
 
       ${today.consumed > 0
         ? html`<div class="split">
