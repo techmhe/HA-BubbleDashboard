@@ -91,11 +91,12 @@ export function renderEnergy(ctx: PageContext) {
       ${today.consumed > 0
         ? html`<div class="split">
             ${splitBar('Woher kam der Strom?', today.autarky !== null ? `${today.autarky} % autark` : '', '#7ee8a0',
-              [today.local, '#ffd60a', `PV & Akku ${kwh(today.local)}`], [today.import, '#ff9f0a', `Netz ${kwh(today.import)}`])}
+              [today.local, '#ffd60a', `PV & Akku ${kwh(today.local)}`], [today.import, '#ff9f0a', `Netz ${kwh(today.import)}`],
+              () => chart('autarky'))}
             ${today.pv > 0
               ? splitBar('Wohin ging der Solarstrom?', `${today.selfUse} % selbst genutzt`, '#ffe066',
                   [Math.max(0, today.pv - today.export), '#ffd60a', `Haus ${kwh(Math.max(0, today.pv - today.export))}`],
-                  [today.export, '#64d2ff', `Eingespeist ${kwh(today.export)}`])
+                  [today.export, '#64d2ff', `Eingespeist ${kwh(today.export)}`], () => chart('selfuse'))
               : html`<div class="nopv">Heute noch kein Solarstrom.</div>`}
           </div>`
         : nothing}
@@ -114,14 +115,14 @@ export function renderEnergy(ctx: PageContext) {
   `;
 }
 
-function splitBar(title: string, badge: string, badgeColor: string, a: [number, string, string], b: [number, string, string]) {
+function splitBar(title: string, badge: string, badgeColor: string, a: [number, string, string], b: [number, string, string], onTap: () => void) {
   const total = a[0] + b[0] || 1;
   const pa = Math.round((a[0] / total) * 100);
-  return html`<div>
+  return html`<button class="sbtn" aria-label="${title} ${badge}, Verlauf anzeigen" @click=${onTap}>
     <div class="shead"><span>${title}</span><span style="color:${badgeColor}">${badge}</span></div>
     <div class="sbar" role="img" aria-label="${a[2]}, ${b[2]}"><span style="width:${pa}%;background:${a[1]}"></span><span style="width:${100 - pa}%;background:${b[1]}"></span></div>
     <div class="slegend"><span>${a[2]}</span><span>${b[2]}</span></div>
-  </div>`;
+  </button>`;
 }
 
 export const energyStyles = css`
@@ -291,6 +292,11 @@ export const energyStyles = css`
     padding: 14px;
     border-radius: 28px;
     background: rgba(255, 255, 255, 0.06);
+  }
+  .sbtn {
+    display: block;
+    width: 100%;
+    text-align: left;
   }
   .shead {
     display: flex;

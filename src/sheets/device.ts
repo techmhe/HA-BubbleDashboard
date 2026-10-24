@@ -18,7 +18,7 @@ import { minutesUntil } from '../logic/rooms-page';
 import type { Room } from '../logic/rooms';
 import { aqColor } from '../logic/overview';
 import { entityArea, fmt, num } from '../logic/util';
-import type { PageContext } from '../pages/context';
+import type { PageContext, SheetState } from '../pages/context';
 
 const YELLOW = '#ffd60a';
 const GREEN = '#30d158';
@@ -58,7 +58,8 @@ function toggleSwitch(ctx: PageContext, id: string, on: boolean, color: string, 
     style=${on ? `background:${color}` : ''} @click=${() => toggleDevice(ctx, id)}><span></span></button>`;
 }
 
-export function deviceSheet(ctx: PageContext, id: string): TemplateResult | typeof nothing {
+/** `self` is this sheet's own state, so charts opened from it can return here. */
+export function deviceSheet(ctx: PageContext, id: string, self?: SheetState): TemplateResult | typeof nothing {
   const s = ctx.hass.states[id];
   if (!s) return nothing;
   switch (sheetKind(ctx.hass, id)) {
@@ -69,7 +70,7 @@ export function deviceSheet(ctx: PageContext, id: string): TemplateResult | type
     case 'dehumidifier':
       return dehumidifierSheet(ctx, id);
     default:
-      return switchSheet(ctx, id);
+      return switchSheet(ctx, id, self ?? { id: 'device', entity: id });
   }
 }
 
@@ -168,7 +169,7 @@ function offTimer(ctx: PageContext, id: string, options: [label: string, minutes
   `;
 }
 
-function switchSheet(ctx: PageContext, id: string) {
+function switchSheet(ctx: PageContext, id: string, self: SheetState) {
   const { hass } = ctx;
   const s = hass.states[id];
   const on = s.state === 'on';
@@ -188,9 +189,12 @@ function switchSheet(ctx: PageContext, id: string) {
     onClose: ctx.closeSheet,
     body: html`
       ${power
-        ? html`<button class="powerrow" @click=${() => ctx.moreInfo(power.id)}>
+        ? html`<button class="powerrow" aria-label="Leistung, Verlauf anzeigen"
+            @click=${() => ctx.openSheet({ id: 'energyChart', key: power.id, range: '24h', name, back: self })}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${I.bolt}></path></svg>
-            <span class="grow">${power.value !== null ? `verbraucht gerade ${watts(power.value)}` : 'Leistung nicht verfügbar'}</span>
+            <span class="grow">${power.value !== null
+              ? html`<span class="pr-val">${watts(power.value)}</span><span class="pr-lbl">Leistung jetzt</span>`
+              : html`<span class="pr-lbl">Leistung nicht verfügbar</span>`}</span>
             <span class="more">Verlauf ›</span>
           </button>`
         : nothing}
@@ -404,6 +408,18 @@ export const deviceStyles = css`
     background: rgba(255, 159, 10, 0.12);
     font-size: 14px;
     font-weight: 600;
+  }
+  .pr-val {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .pr-lbl {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--sd-muted);
   }
   .powerrow .more {
     font-size: 12px;

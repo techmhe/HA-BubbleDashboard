@@ -1,5 +1,5 @@
 import { bucket, type Point } from '../logic/climate';
-import { statChanges } from '../logic/energy';
+import { shareSeries, statChanges, type ShareKind } from '../logic/energy';
 import { weatherSeries, type ForecastItem, type HistoryRow, type WeatherMetric } from '../logic/weather';
 import type { HomeAssistant } from '../types';
 
@@ -15,6 +15,8 @@ export interface SeriesResult {
   end: number;
   /** Bucket size in ms (bars). */
   step?: number;
+  /** Total over the whole range, where the mean of the buckets would be wrong (percentages). */
+  total?: number | null;
 }
 
 type StatRow = { start: number | string; change?: number | null; mean?: number | null };
@@ -54,6 +56,22 @@ export async function loadEnergy(hass: HomeAssistant, ids: string[], range: Char
   const past: Point[] = [];
   for (let t = r.start; t < r.end; t += r.step) past.push({ t, v: Math.max(0, sums.get(t) ?? 0) });
   return { past, start: r.start, end: r.end, step: r.step };
+}
+
+/** Autarky or self-use in percent per hour/day, from the energy dashboard's PV and grid statistics. */
+export async function loadEnergyShare(
+  hass: HomeAssistant,
+  ids: { solar: string[]; import: string[]; export: string[] },
+  range: ChartRange,
+  kind: ShareKind,
+): Promise<SeriesResult> {
+  const none = (): Promise<SeriesResult> => Promise.resolve({ past: [], start: 0, end: 0 });
+  const [pv, imp, exp] = await Promise.all(
+    [ids.solar, ids.import, ids.export].map((list) => (list.length ? loadEnergy(hass, list, range) : none())),
+  );
+  const base = [pv, imp, exp].find((r) => r.start) ?? pv;
+  const share = shareSeries(kind, { pv: pv.past, import: imp.past, export: exp.past });
+  return { past: share.points, start: base.start, end: base.end, step: base.step, total: share.total };
 }
 
 /** Mean power per hour/day for sensors without an energy statistic. */

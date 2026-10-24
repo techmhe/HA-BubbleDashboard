@@ -1,5 +1,6 @@
 import { noChange } from 'lit';
 import { Directive, directive, PartType, type ElementPart, type PartInfo } from 'lit/directive.js';
+import { clickGuard } from '../logic/click-guard';
 
 export interface HoldOptions {
   tap?: () => void;
@@ -18,6 +19,20 @@ interface State {
 }
 
 const states = new WeakMap<Element, State>();
+
+let guard: ReturnType<typeof clickGuard> | undefined;
+/** Swallow the click that follows a long-press wherever it lands (see clickGuard). */
+function guardReleaseClick() {
+  guard ??= clickGuard(window);
+  guard.arm();
+  const release = () => {
+    window.removeEventListener('pointerup', release, true);
+    window.removeEventListener('pointercancel', release, true);
+    guard!.release();
+  };
+  window.addEventListener('pointerup', release, true);
+  window.addEventListener('pointercancel', release, true);
+}
 
 export function haptic(el: Element, type = 'medium') {
   el.dispatchEvent(new CustomEvent('haptic', { detail: type, bubbles: true, composed: true }));
@@ -38,6 +53,7 @@ function attach(el: HTMLElement) {
     s.timer = window.setTimeout(() => {
       s.held = true;
       s.timer = undefined;
+      guardReleaseClick();
       haptic(el);
       s.opts.hold?.();
     }, HOLD_MS);

@@ -196,3 +196,43 @@ export function consumers(hass: HomeAssistant, config: CardConfig, limit = 6, pr
   if (untracked !== null && untracked >= 1) out.push({ id: untrackedId, name: 'Nicht erfasst', value: untracked, untracked: true });
   return out.sort((a, b) => b.value - a.value).slice(0, limit);
 }
+
+export type ShareKind = 'autarky' | 'selfuse';
+interface SharePoint {
+  t: number;
+  v: number;
+}
+
+/**
+ * Percent per bucket from PV, grid import and export energy, with the same formulas as the
+ * "Heute" bars: autarky = locally covered share of consumption, self-use = share of solar
+ * used in the house. Buckets without consumption (or without solar) are left out.
+ */
+export function shareSeries(kind: ShareKind, parts: { pv: SharePoint[]; import: SharePoint[]; export: SharePoint[] }) {
+  const byT = (p: SharePoint[]) => new Map(p.map((x) => [x.t, x.v]));
+  const imp = byT(parts.import);
+  const exp = byT(parts.export);
+  const pv = byT(parts.pv);
+  const ts = [...new Set([...pv.keys(), ...imp.keys(), ...exp.keys()])].sort((a, b) => a - b);
+  const share = (p: number, i: number, e: number): number | null => {
+    if (kind === 'selfuse') return p > 0.01 ? Math.max(0, p - e) / p : null;
+    const consumed = Math.max(0, p + i - e);
+    return consumed > 0.01 ? Math.max(0, consumed - i) / consumed : null;
+  };
+  const points: SharePoint[] = [];
+  let sp = 0;
+  let si = 0;
+  let se = 0;
+  for (const t of ts) {
+    const p = pv.get(t) ?? 0;
+    const i = imp.get(t) ?? 0;
+    const e = exp.get(t) ?? 0;
+    sp += p;
+    si += i;
+    se += e;
+    const v = share(p, i, e);
+    if (v !== null) points.push({ t, v: Math.round(Math.min(1, v) * 100) });
+  }
+  const total = share(sp, si, se);
+  return { points, total: total === null ? null : Math.round(Math.min(1, total) * 100) };
+}

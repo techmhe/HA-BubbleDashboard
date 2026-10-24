@@ -8,6 +8,7 @@ export function sheetParent(sh: SheetState): SheetState | null {
     case 'history':
       return { id: 'room', slug: sh.slug };
     case 'device':
+    case 'energyChart':
       return sh.back ?? null;
     default:
       return null;

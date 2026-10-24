@@ -25,8 +25,8 @@ export type SheetState =
   | { id: 'care' }
   | { id: 'ac' }
   | { id: 'weatherMetric'; metric: WeatherMetric }
-  /** Energy chart: 'pv' | 'import' | 'export' or a consumer's power sensor. */
-  | { id: 'energyChart'; key: string; range: ChartRange; name?: string }
+  /** Energy chart: 'pv' | 'import' | 'export' | 'autarky' | 'selfuse' or a consumer's power sensor. */
+  | { id: 'energyChart'; key: string; range: ChartRange; name?: string; back?: SheetState }
   /** Long-press sheet for a device; `back` returns to the sheet it was opened from. */
   | { id: 'device'; entity: string; back?: SheetState };
 

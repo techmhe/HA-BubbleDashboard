@@ -596,7 +596,7 @@ export class HaStartDashboard extends LitElement {
       case 'allRooms':
         return allRoomsSheet(ctx);
       case 'device':
-        return deviceSheet(ctx, sh.entity);
+        return deviceSheet(ctx, sh.entity, sh);
       case 'robby':
         return robbySheet(ctx);
       case 'weather':
@@ -606,7 +606,7 @@ export class HaStartDashboard extends LitElement {
       case 'ac':
         return acSheet(ctx);
       case 'energyChart':
-        return energyChartSheet(ctx, sh.key, sh.range, sh.name);
+        return energyChartSheet(ctx, sh.key, sh.range, sh.name, sh.back);
       case 'weatherMetric':
         return weatherMetricSheet(ctx, sh.metric);
     }

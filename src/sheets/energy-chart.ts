@@ -2,10 +2,10 @@ import { html } from 'lit';
 import { sheet } from '../components/ui';
 import { trendFigure } from '../components/trend';
 import { I } from '../icons';
-import { loadEnergy, loadPower, type ChartRange } from '../data/series';
-import { consumerEnergyStat, energyStatIds } from '../logic/energy';
+import { loadEnergy, loadEnergyShare, loadPower, type ChartRange } from '../data/series';
+import { consumerEnergyStat, energyStatIds, type ShareKind } from '../logic/energy';
 import { friendlyName, fmt } from '../logic/util';
-import type { PageContext } from '../pages/context';
+import type { PageContext, SheetState } from '../pages/context';
 
 const RANGES: { id: ChartRange; name: string }[] = [
   { id: '24h', name: '24 h' },
@@ -17,6 +17,12 @@ const ROLES: Record<string, { name: string; color: string; ids: 'solar' | 'impor
   pv: { name: 'PV erzeugt', color: '#ffd60a', ids: 'solar' },
   import: { name: 'Netzbezug', color: '#ff9f0a', ids: 'import' },
   export: { name: 'Eingespeist', color: '#64d2ff', ids: 'export' },
+};
+
+/** The two "Heute" split bars: percent per hour/day. */
+const SHARES: Record<string, { name: string; color: string; kind: ShareKind; total: string }> = {
+  autarky: { name: 'Autarkie', color: '#7ee8a0', kind: 'autarky', total: 'autark' },
+  selfuse: { name: 'Eigenverbrauch', color: '#ffe066', kind: 'selfuse', total: 'selbst genutzt' },
 };
 
 function labels(range: ChartRange, start: number, end: number): string[] {
@@ -32,14 +38,20 @@ function labels(range: ChartRange, start: number, end: number): string[] {
 }
 
 /** Energy per hour/day for PV, grid import/export or one consumer; power means where no energy statistic exists. */
-export function energyChartSheet(ctx: PageContext, key: string, range: ChartRange, name?: string) {
+export function energyChartSheet(ctx: PageContext, key: string, range: ChartRange, name?: string, back?: SheetState) {
   const { prefs } = ctx.energy();
   const role = ROLES[key];
+  const share = SHARES[key];
   let title: string;
   let color: string;
   let unit = 'kWh';
   let load: (() => ReturnType<typeof loadEnergy>) | null = null;
-  if (role) {
+  if (share) {
+    title = share.name;
+    color = share.color;
+    unit = '%';
+    if (prefs) load = () => loadEnergyShare(ctx.hass, energyStatIds(prefs), range, share.kind);
+  } else if (role) {
     title = role.name;
     color = role.color;
     const ids = prefs ? energyStatIds(prefs)[role.ids] : [];
@@ -59,26 +71,31 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     : { loading: !prefs, error: prefs ? 'nicht im Energie-Dashboard' : undefined, past: [], start: 0, end: 0 };
   const sum = data.past.reduce((s, p) => s + p.v, 0);
   const caption = data.past.length
-    ? unit === 'kWh'
+    ? share
+      ? data.total != null ? `gesamt ${data.total} % ${share.total}` : undefined
+      : unit === 'kWh'
       ? `Summe ${fmt(sum, sum < 10 ? 2 : 1)} kWh`
       : `Ø ${fmt(sum / data.past.length)} W`
     : undefined;
 
   return sheet({
     title,
-    subtitle: unit === 'kWh' ? (range === '24h' ? 'kWh pro Stunde' : 'kWh pro Tag') : 'mittlere Leistung',
+    subtitle: share
+      ? (range === '24h' ? 'Anteil pro Stunde' : 'Anteil pro Tag')
+      : unit === 'kWh' ? (range === '24h' ? 'kWh pro Stunde' : 'kWh pro Tag') : 'mittlere Leistung',
     color,
     glow: `${color}33`,
     iconPath: I.bolt,
     onClose: ctx.closeSheet,
+    onBack: back ? () => ctx.openSheet(back) : undefined,
     body: html`
       <div class="tabs3" role="tablist" aria-label="Zeitraum">
         ${RANGES.map((r) => html`<button role="tab" aria-selected=${r.id === range} class=${r.id === range ? 'sel' : ''}
-          @click=${() => ctx.openSheet({ id: 'energyChart', key, range: r.id, name })}>${r.name}</button>`)}
+          @click=${() => ctx.openSheet({ id: 'energyChart', key, range: r.id, name, back })}>${r.name}</button>`)}
       </div>
       ${trendFigure({
-        title, color, unit, digits: unit === 'kWh' ? 1 : 0, snap: unit === 'kWh' ? 0.5 : 10, data, caption,
-        bars: unit === 'kWh', zero: true, labels: labels(range, data.start, data.end),
+        title, color, unit, digits: unit === 'kWh' ? 1 : 0, snap: unit === 'kWh' ? 0.5 : unit === '%' ? 25 : 10, data, caption,
+        bars: unit !== 'W', zero: true, labels: labels(range, data.start, data.end),
       })}
     `,
   });

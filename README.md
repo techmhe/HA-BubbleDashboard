@@ -30,11 +30,13 @@ Gestures:
 
 - **Tab bar**: tap a tab, or slide your finger along the bar. A glass lens follows the
   finger, with a light haptic tick per tab; the page switches on release.
+- **Long-press**: opens the device pop-up; the click a phone sends when the finger lifts
+  is swallowed, so the new pop-up does not close right away.
 - **Pop-ups**: close with the ✕, by tapping outside, or by pulling the sheet down at its
   grabber or header (or anywhere when the content is scrolled to the top). A short pull
   springs back; a pull of a quarter of the sheet (80–140 px) or a quick flick closes it.
 - **Stacked pop-ups**: a pop-up opened from another one (weather → chart, room → history
-  or device) sits on top of it; the one underneath stays visible, shrunk and dimmed. Pulling
+  or device, device → power chart) sits on top of it; the one underneath stays visible, shrunk and dimmed. Pulling
   down or tapping outside goes back one level, ✕ closes all.
 - **Scrolling**: switching tabs starts the new page at the top; tapping the current tab
   scrolls it back up.
@@ -223,7 +225,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   - dimmable / colour light: brightness slider, colour temperature (`color_temp_kelvin`,
     range from the light), colour swatches (`hs_color`), *Lesen* / *Gemütlich* /
     *Farbschleife* (only if the light has a `colorloop` effect);
-  - plug, switch, on/off lamp, fan without presets: toggle, current power (→ history), *Ausschalten in*
+  - plug, switch, on/off lamp, fan without presets: toggle, current power (→ the card's power chart), *Ausschalten in*
     30 min / 1 h / 2 h / time via `delayed_off` (`script.gerat_verzogert_ausschalten`);
   - air purifier (fan with presets): Auto / Schlaf / Manuell, *Stufe* only in Manuell
     (`fan.set_percentage`), PM2.5 chip of the room;
@@ -240,7 +242,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since
   midnight), falling back to the daily utility meters: PV, Netzbezug, Eingespeist,
   consumption (PV + import − export), autarky and PV self-use. Tiles open a chart (kWh per
-  hour for 24 h, per day for 7 / 30 days).
+  hour for 24 h, per day for 7 / 30 days); the two split bars open autarky / self-use in
+  percent per hour or day.
 - *Verbraucher jetzt*: every `*_power` sensor that sits in an area, one per device (measured
   before Powercalc), without the grid meter, PV, battery and house devices, phase and PoE
   readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → chart from the
