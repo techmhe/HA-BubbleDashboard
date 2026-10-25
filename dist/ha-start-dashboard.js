@@ -1487,8 +1487,10 @@ function an(e, t, n, r) {
 		i.push(U("warn", `${e.level >= 3 ? "Unwetterwarnung" : "Warnung"}: ${e.title}`, n, A.storm, [e.color, `${e.color}44`], "weather"));
 	} else c !== null && c >= Vt && i.push(U("storm", "Sturmböen", `Böen bis ${z(Math.round(c))} km/h`, A.storm, H.purple, "weather"));
 	let l = a[I(t, "airing_timer")];
-	if (l && l.state === "active") i.push(U("airing", "Lüften läuft", "Fenster nach Ablauf schließen", A.wind, H.blue, "airing"));
-	else {
+	if (l && l.state === "active") {
+		let a = Dn(e, n, t, r), o = a.openWindows.map((e) => e.name), s = [`noch ${On(a.remaining)}`, o.length ? `${o.join(", ")} offen` : ""].filter(Boolean).join(" · ");
+		i.push(U("airing", "Lüften läuft", s, A.wind, H.blue, "airing"));
+	} else {
 		let r = n.filter((t) => R(e, t.airing) === "Jetzt lüften");
 		if (r.length) {
 			let n = r.map((t) => {
@@ -2920,6 +2922,7 @@ function wi(e, t) {
                   ${n.aq ? C`<span class="dot" style="width:6px;height:6px;background:${n.aq}"></span>` : E}
                   ${n.fanOn ? P(M.fan, 11, "#7ee8a0", 2.6) : E}
                 </span>` : E}
+            ${n.windowOpen ? C`<span class="winchip" title="Fenster offen" aria-label="Fenster offen">${P(A.window, 11, "#5ac8fa", 2.6)}</span>` : E}
           </span>
           <span class="kroom-sub">${W(n.cur)}° · ${n.hum ?? "–"} % · ${n.label}</span>
         </span>
@@ -3000,7 +3003,7 @@ function Oi(e, t, n, r) {
   `;
 }
 function ki(e) {
-	let { hass: t, rooms: n } = e, r = I(e.config, "heating"), i = R(t, r) === "on", a = Tn(t, n, e.config), o = I(e.config, "ac"), s = t.states[o] ? Sn(t, o) : void 0, c = xn(t, n), l = t.states[I(e.config, "weather")]?.state ?? "";
+	let { hass: t, rooms: n } = e, r = I(e.config, "heating"), i = R(t, r) === "on", a = Tn(t, n, e.config), o = I(e.config, "ac"), s = t.states[o] ? Sn(t, o) : void 0, c = xn(t, n), l = t.states[I(e.config, "weather")]?.state ?? "", u = Dn(t, n, e.config, e.now);
 	return C`
     <div class="climate">
       <header class="khead">
@@ -3018,7 +3021,7 @@ function ki(e) {
       <button class="pill outdoor" @click=${() => e.openSheet({ id: "airing" })}>
         <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${P(j(l), 20, "#8fd0ff", 2)}</span>
         <span class="grow"><span class="t1">${a.title}</span><span class="t2">${a.sub}</span></span>
-        ${a.minutes === null ? E : C`<span class="air-badge">${P(A.wind, 14, "#06202c", 2.4)}${z(Math.round(a.minutes))} min</span>`}
+        ${u.active ? C`<span class="air-badge running" aria-label="Lüften läuft, noch ${On(u.remaining)}">${P(A.wind, 14, "#06202c", 2.4)}${On(u.remaining)}</span>` : a.minutes === null ? E : C`<span class="air-badge">${P(A.wind, 14, "#06202c", 2.4)}${z(Math.round(a.minutes))} min</span>`}
       </button>
 
       <div class="pill allrooms">
@@ -3124,6 +3127,24 @@ var Ai = o`
     font-weight: 700;
     margin-right: 4px;
     flex-shrink: 0;
+  }
+  .air-badge.running {
+    font-variant-numeric: tabular-nums;
+    animation: air-pulse 2s ease-in-out infinite;
+  }
+  @keyframes air-pulse {
+    50% {
+      box-shadow: 0 0 0 4px rgba(90, 200, 250, 0.28);
+    }
+  }
+  .winchip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: rgba(90, 200, 250, 0.2);
   }
   .allrooms {
     gap: 6px;
@@ -7935,7 +7956,7 @@ var Ss = o`
     min-width: 0;
     text-align: left;
   }
-`, Cs, ws = "0.10.4", $ = [
+`, Cs, ws = "0.11.0", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",
@@ -8065,11 +8086,14 @@ var js = class extends k {
 		super.connectedCallback(), this._now = /* @__PURE__ */ new Date(), this._tick = window.setInterval(() => this._now = /* @__PURE__ */ new Date(), 3e4);
 	}
 	disconnectedCallback() {
-		super.disconnectedCallback(), window.clearInterval(this._tick), window.clearInterval(this._fastTick), pr(this);
+		super.disconnectedCallback(), window.clearInterval(this._tick), window.clearInterval(this._fastTick), this._fastTick = void 0, pr(this);
 	}
 	updated(e) {
 		let t = this._config?.header ?? "hide", n = fr(this, t) ? t : "";
-		n !== this._hdr && (this._hdr = n), e.has("_sheet") && (window.clearInterval(this._fastTick), this._fastTick = void 0, this._sheet?.id === "airing" && (this._fastTick = window.setInterval(() => this._now = /* @__PURE__ */ new Date(), 1e3)));
+		if (n !== this._hdr && (this._hdr = n), e.has("_sheet") || e.has("hass")) {
+			let e = this.hass && this._config ? this.hass.states[I(this._config, "airing_timer")] : void 0, t = this._sheet?.id === "airing" || e?.state === "active";
+			t && !this._fastTick ? this._fastTick = window.setInterval(() => this._now = /* @__PURE__ */ new Date(), 1e3) : !t && this._fastTick && (window.clearInterval(this._fastTick), this._fastTick = void 0);
+		}
 	}
 	willUpdate(e) {
 		if (this.hass && this._config && (e.has("hass") || e.has("_config"))) {

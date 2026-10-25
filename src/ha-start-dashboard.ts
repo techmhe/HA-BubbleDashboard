@@ -160,6 +160,7 @@ export class HaStartDashboard extends LitElement {
     super.disconnectedCallback();
     window.clearInterval(this._tick);
     window.clearInterval(this._fastTick);
+    this._fastTick = undefined;
     removeHeader(this);
   }
 
@@ -167,11 +168,15 @@ export class HaStartDashboard extends LitElement {
     const mode = this._config?.header ?? 'hide';
     const hdr = applyHeader(this, mode) ? mode : '';
     if (hdr !== this._hdr) this._hdr = hdr;
-    // 1 s clock while the airing countdown is visible.
-    if (changed.has('_sheet')) {
-      window.clearInterval(this._fastTick);
-      this._fastTick = undefined;
-      if (this._sheet?.id === 'airing') this._fastTick = window.setInterval(() => (this._now = new Date()), 1000);
+    // 1 s clock while an airing countdown is visible (pop-up open or timer running).
+    if (changed.has('_sheet') || changed.has('hass')) {
+      const timer = this.hass && this._config ? this.hass.states[ent(this._config, 'airing_timer')] : undefined;
+      const fast = this._sheet?.id === 'airing' || timer?.state === 'active';
+      if (fast && !this._fastTick) this._fastTick = window.setInterval(() => (this._now = new Date()), 1000);
+      else if (!fast && this._fastTick) {
+        window.clearInterval(this._fastTick);
+        this._fastTick = undefined;
+      }
     }
   }
 

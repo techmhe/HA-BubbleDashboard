@@ -181,7 +181,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - **Aktuell** (two columns: urgent items and items with a button full width first, the rest as
   half tiles) shows only what applies, else *Alles ruhig*: alarm triggered, front door open
   ≥ 5 min, DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
-  running, windows open ≥ 20 min, appliance done (`input_boolean.*_fertig`, *OK* turns it
+  running (live countdown of `timer.luften` plus the open windows), windows open ≥ 20 min, appliance done (`input_boolean.*_fertig`, *OK* turns it
   off), Robby error / consumable at ≤ 0 min, waste the day before and on the day,
   filter alarms and `*filter_life` < 10 %, batteries < 15 % (skipping Robby, phones, `_plus`).
   Filters and batteries open the *Wartung* sheet: *Getauscht* presses the device's Battery
@@ -195,13 +195,15 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - Header: how many rooms heat, worst air quality, *Zentralheizung* toggle
   (`input_boolean.heizbetrieb`).
 - Outdoor pill (`sensor.aussen_temperature`, weather humidity, `sensor.aussen_taupunkt_messung`
-  vs. the rooms' mean dew point) with the airing minutes (`sensor.stossluften_dauer`);
-  tap → airing sheet.
+  vs. the rooms' mean dew point) with the airing minutes (`sensor.stossluften_dauer`), or a
+  live countdown while `timer.luften` runs; tap → airing sheet. The card does not start the
+  timer on its own: an HA automation that runs `script.luften_starten` when a window opens
+  makes the countdown appear automatically.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*
   (sets `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`,
   `input_select.alle_raume_dauer`, then runs `script.alle_raume_anwenden`).
 - Rooms per floor with −/Soll/+, state *heizt* / *lüften* / *Soll erreicht* / *Aus*, AQ dot and
-  purifier fan icon. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
+  purifier fan icon, plus a blue window chip while the room's window is open. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
   area's floor with Kühlen / Trocknen / Aus; tap opens the AC sheet: target −/+, modes,
   fan, presets, swing, the device's switches (outdoor quiet mode first), self-cleaning,
   power from `ac_power` (default `sensor.klimaanlage_power`).

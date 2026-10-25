@@ -3,6 +3,7 @@ import { I, roomIcon, weatherIcon } from '../icons';
 import type { Room } from './rooms';
 import { ent, filterAlarmIds, scriptService } from './entities';
 import { weatherWarnings } from './weather';
+import { airingInfo, clock } from './climate';
 import { deviceName, durationText, fmt, friendlyName, minutesSince, num, state } from './util';
 
 export const DEVICE_LABEL = 'dashboard_gerat';
@@ -192,7 +193,10 @@ export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[],
   // Airing
   const timer = S[ent(config, 'airing_timer')];
   if (timer && timer.state === 'active') {
-    out.push(item('airing', 'Lüften läuft', 'Fenster nach Ablauf schließen', I.wind, C.blue, 'airing'));
+    const a = airingInfo(hass, rooms, config, now);
+    const open = a.openWindows.map((r) => r.name);
+    const text = [`noch ${clock(a.remaining)}`, open.length ? `${open.join(', ')} offen` : ''].filter(Boolean).join(' · ');
+    out.push(item('airing', 'Lüften läuft', text, I.wind, C.blue, 'airing'));
   } else {
     const recommend = rooms.filter((r) => state(hass, r.airing) === 'Jetzt lüften');
     if (recommend.length) {

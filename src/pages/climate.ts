@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon } from '../components/ui';
 import { I, IC, PRESET_ICONS, roomIcon, weatherIcon } from '../icons';
 import {
-  average, climateSummary, entityFloor, floorGroups, outdoor, PRESETS, roomClimate, temp, type FloorGroup,
+  airingInfo, average, climateSummary, clock, entityFloor, floorGroups, outdoor, PRESETS, roomClimate, temp, type FloorGroup,
 } from '../logic/climate';
 import type { Room } from '../logic/rooms';
 import { fmt, state } from '../logic/util';
@@ -26,6 +26,9 @@ function renderRoom(ctx: PageContext, room: Room) {
                   ${c.aq ? html`<span class="dot" style="width:6px;height:6px;background:${c.aq}"></span>` : nothing}
                   ${c.fanOn ? icon(IC.fan, 11, '#7ee8a0', 2.6) : nothing}
                 </span>`
+              : nothing}
+            ${c.windowOpen
+              ? html`<span class="winchip" title="Fenster offen" aria-label="Fenster offen">${icon(I.window, 11, '#5ac8fa', 2.6)}</span>`
               : nothing}
           </span>
           <span class="kroom-sub">${temp(c.cur)}° · ${c.hum ?? '–'} % · ${c.label}</span>
@@ -99,6 +102,7 @@ export function renderClimate(ctx: PageContext) {
   const acFloor = hass.states[acId] ? entityFloor(hass, acId) : undefined;
   const floors = floorGroups(hass, rooms);
   const weather = hass.states[ent(ctx.config, 'weather')]?.state ?? '';
+  const airing = airingInfo(hass, rooms, ctx.config, ctx.now);
 
   return html`
     <div class="climate">
@@ -119,7 +123,9 @@ export function renderClimate(ctx: PageContext) {
       <button class="pill outdoor" @click=${() => ctx.openSheet({ id: 'airing' })}>
         <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${icon(weatherIcon(weather), 20, '#8fd0ff', 2)}</span>
         <span class="grow"><span class="t1">${out.title}</span><span class="t2">${out.sub}</span></span>
-        ${out.minutes !== null
+        ${airing.active
+          ? html`<span class="air-badge running" aria-label="Lüften läuft, noch ${clock(airing.remaining)}">${icon(I.wind, 14, '#06202c', 2.4)}${clock(airing.remaining)}</span>`
+          : out.minutes !== null
           ? html`<span class="air-badge">${icon(I.wind, 14, '#06202c', 2.4)}${fmt(Math.round(out.minutes))} min</span>`
           : nothing}
       </button>
@@ -228,6 +234,24 @@ export const climateStyles = css`
     font-weight: 700;
     margin-right: 4px;
     flex-shrink: 0;
+  }
+  .air-badge.running {
+    font-variant-numeric: tabular-nums;
+    animation: air-pulse 2s ease-in-out infinite;
+  }
+  @keyframes air-pulse {
+    50% {
+      box-shadow: 0 0 0 4px rgba(90, 200, 250, 0.28);
+    }
+  }
+  .winchip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: rgba(90, 200, 250, 0.2);
   }
   .allrooms {
     gap: 6px;
