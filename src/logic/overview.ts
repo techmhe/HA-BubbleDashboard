@@ -4,6 +4,7 @@ import type { Room } from './rooms';
 import { ent, filterAlarmIds, scriptService } from './entities';
 import { weatherWarnings } from './weather';
 import { airingInfo, clock } from './climate';
+import { robbyStatus } from './robby';
 import { deviceName, durationText, fmt, friendlyName, minutesSince, num, state } from './util';
 
 export const DEVICE_LABEL = 'dashboard_gerat';
@@ -121,8 +122,9 @@ export function statusBubbles(hass: HomeAssistant, config: CardConfig): StatusBu
   const vac = state(hass, ent(config, 'vacuum')) ?? 'unavailable';
   const alarm = state(hass, ent(config, 'alarm')) ?? 'unavailable';
   const grid = gridPower(hass, config);
+  const full = vac === 'docked' && (robbyStatus(hass, config).battery ?? 0) >= 100;
   return [
-    { key: 'robby', value: VACUUM_STATES[vac] ?? vac, label: 'Robby', icon: I.vacuum, color: vac === 'error' ? '#ff453a' : '#ffffff' },
+    { key: 'robby', value: full ? 'Geladen' : (VACUUM_STATES[vac] ?? vac), label: 'Robby', icon: I.vacuum, color: vac === 'error' ? '#ff453a' : '#ffffff' },
     { key: 'light', value: `${lightsOn(hass).length} an`, label: 'Licht', icon: I.bulb, color: '#ffd60a' },
     { key: 'energy', value: grid.value, label: grid.label, icon: I.bolt, color: grid.label === 'Einspeisung' ? '#30d158' : '#ff9f0a' },
     { key: 'alarm', value: ALARM_STATES[alarm] ?? alarm, label: 'Alarm', icon: alarmIcon(alarm), color: alarm === 'triggered' ? '#ff453a' : '#bf9bff' },
@@ -351,6 +353,8 @@ export interface RoomSummary {
   hum: string;
   heating: boolean;
   vent: boolean;
+  /** Short state after the humidity: "lüftet" (window open), "bitte lüften" or "heizt". */
+  note: string;
   aq: string | null;
 }
 
@@ -365,13 +369,17 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
   return rooms.map((room) => {
     const t = num(hass, room.temperature) ?? (room.climate ? Number(hass.states[room.climate]?.attributes.current_temperature) : NaN);
     const h = num(hass, room.humidity);
+    const heating = !!room.climate && hass.states[room.climate]?.attributes.hvac_action === 'heating';
+    const vent = state(hass, room.airing) === 'Jetzt lüften';
+    const windowOpen = !!room.window && state(hass, room.window) === 'on';
     return {
       room,
       icon: roomIcon(room.name, room.icon),
       temp: t !== null && Number.isFinite(t) ? fmt(t, 1) : '–',
       hum: h !== null ? fmt(Math.round(h)) : '–',
-      heating: !!room.climate && hass.states[room.climate]?.attributes.hvac_action === 'heating',
-      vent: state(hass, room.airing) === 'Jetzt lüften',
+      heating,
+      vent,
+      note: windowOpen ? 'lüftet' : vent ? 'bitte lüften' : heating ? 'heizt' : '',
       aq: room.pm25 ? aqColor(num(hass, room.pm25)) : null,
     };
   });

@@ -112,5 +112,7 @@ export interface CardConfig {
   pollen?: string[];
   /** Leave entities or whole integrations (platforms) out of a list. */
   exclude?: { openings?: string[]; consumers?: string[] };
+  /** Home battery limits (SoC %), to explain why it is idle: discharge stops at `reserve`, charging at `full`. */
+  battery?: { reserve?: number; full?: number };
   entities?: Partial<Record<import('./logic/entities').EntityKey, string>> & { filter_alarms?: string[] };
 }

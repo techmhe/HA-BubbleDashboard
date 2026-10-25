@@ -37,7 +37,6 @@ export function renderRooms(ctx: PageContext) {
         ${filters.map((f) => html`<button role="tab" aria-selected=${f.id === filter} class=${f.id === filter ? 'sel' : ''}
           @click=${() => ctx.setRoomsFilter(f.id)}>${f.label}</button>`)}
       </div>
-      <div class="rhint">Tippen schaltet · lange drücken öffnet Helligkeit &amp; Farbe</div>
 
       ${shown.length ? shown.map((v) => roomCard(ctx, v, filter === 'on')) : html`<div class="rempty">Gerade ist nichts an.</div>`}
     </div>
@@ -168,11 +167,6 @@ export const roomsStyles = css`
   .rfilter button.sel {
     background: #fff;
     color: #101218;
-  }
-  .rhint {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.6);
-    padding: 0 8px;
   }
   .rempty {
     padding: 18px;

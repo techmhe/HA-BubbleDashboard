@@ -340,3 +340,14 @@ export function consumptionSeries(parts: {
 export function powerEnergyKWh(points: { t: number; v: number }[], step: number): number {
   return points.reduce((sum, p) => sum + (p.v * step) / 3600_000 / 1000, 0);
 }
+
+/**
+ * Why an idle battery does nothing: "Reserve" at or below the discharge limit, "voll" at or
+ * above the charge limit (default 100 %). Limits come from the card config (`battery`).
+ */
+export function batteryNote(bat: { soc: number | null; power: number }, limits?: { reserve?: number; full?: number }): string | null {
+  if (bat.soc === null || Math.abs(bat.power) > 10) return null;
+  if (limits?.reserve !== undefined && bat.soc <= limits.reserve) return 'Reserve';
+  if (bat.soc >= (limits?.full ?? 100)) return 'voll';
+  return null;
+}

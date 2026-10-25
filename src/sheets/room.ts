@@ -63,8 +63,8 @@ export function roomSheet(ctx: PageContext, slug: string) {
             <div class="tstate" style="color:${c.heating ? '#ffd29a' : 'rgba(255,255,255,0.75)'}">
               ${c.heating ? icon(IC.flame, 13, '#ffd29a', 2.4) : nothing}${stateLine}
             </div>
-            <div class="tbig">${temp(c.cur)}°</div>
-            <div class="tsoll">Soll <strong style="color:${c.heating ? '#ffc061' : '#fff'}">${temp(c.target)}°</strong></div>
+            <div class="tbig" style="color:${c.heating ? '#ffc061' : '#fff'}">${temp(c.target)}°</div>
+            <div class="tsoll">Ist <strong>${temp(c.cur)}°</strong></div>
           </div>
           <button class="bigstep" aria-label="Soll erhöhen" ?disabled=${!climate} @click=${() => climate && ctx.stepTarget(climate, 0.5)}>+</button>
         </div>

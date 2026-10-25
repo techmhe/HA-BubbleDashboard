@@ -141,6 +141,9 @@ warnings: []            # DWD warning sensors; default: every dwd_weather_warnin
 exclude:                # entity ids or integrations (platforms) to leave out
   openings: []          # always excluded: versatile_thermostat, bambu_lab
   consumers: []
+battery:                # home battery limits (SoC %); an idle battery shows *Reserve* / *voll*
+  reserve: 25           # discharge stops here (e.g. the zero-feed-in automation's min SoC)
+  full: 95              # charging stops here (default 100)
 names:                  # display-name overrides
   switch.nspanelbuerom_relay_1: Deckenlampe
   switch.nspanelbueroa_relay_1: Deckenlampe
@@ -187,7 +190,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   Filters and batteries open the *Wartung* sheet: *Getauscht* presses the device's Battery
   Notes `*_battery_replaced` button, *Erledigt* a filter reset button on the device (where
   none exists, the sheet says to reset it on the device).
-- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* / *lüften*, and
+- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* / *bitte lüften* (recommended) / *lüftet* (window open), and
   an air-quality dot only for rooms with a PM2.5 sensor (green ≤ 12, yellow ≤ 35, red > 35).
 
 ### What Klima shows
@@ -202,7 +205,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*
   (sets `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`,
   `input_select.alle_raume_dauer`, then runs `script.alle_raume_anwenden`).
-- Rooms per floor with −/Soll/+, state *heizt* / *lüften* / *Soll erreicht* / *Aus*, AQ dot and
+- Rooms per floor with −/Soll/+, state *heizt* / *Lüften empfohlen* / *lüftet* (window open) / *Soll erreicht* / *Aus*, AQ dot and
   purifier fan icon, plus a blue window chip while the room's window is open. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
   area's floor with Kühlen / Trocknen / Aus; tap opens the AC sheet: target −/+, modes,
   fan, presets, swing, the device's switches (outdoor quiet mode first), self-cleaning,
@@ -247,7 +250,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - Live flow PV — Haus — Netz (animated dashes in the direction of flow; import orange,
   export blue) with the battery as a node below the house: a ring shows the charge level, a
   vertical line runs up while it feeds the house and down while it charges (*Akku liefert* /
-  *Akku lädt*). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
+  *Akku lädt*); idle at its limits it says *Reserve* or *voll* (`battery:` in the config). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
   (PV + import + battery out − export − battery in), Akku = kWh charged and discharged
   per hour/day (opens on 7 days). *Energie-Dashboard ›*
   opens HA's `/energy`.
@@ -290,7 +293,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
 
 ### Robby and weather pop-ups
 
-- **Robby** (Robby bubble, Robby items in *Aktuell*): status + battery, Start/Pause,
+- **Robby** (Robby bubble, Robby items in *Aktuell*): status + battery (*Geladen* once docked at 100 %), Start/Pause,
   Station, Orten; consumables (*fällig* at ≤ 0 min, else hours; tap resets via the
   vacuum's *Verbrauchsmaterial zurücksetzen* button after a confirm); six programme tiles
   (`button.press`, *Karte komplett* = `vacuum.start`); *Selbst auswählen*: map tabs
@@ -308,7 +311,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   slots and temperature curve as far as the hourly forecast reaches), pollen.
   Forecasts come from `weather.get_forecasts` (hourly + daily), cached for 15 minutes.
 
-Room card: −/+ target, *heizt · Ventile x %* (`valve_open_percent`), presets with
+Room card: −/+ target (the big number; the current temperature below as *Ist*), *heizt · Ventile x %* (`valve_open_percent`), presets with
 `preset_temperatures`, the area's scenes (an active scene glows: every entity still matches
 the stored scene state, read from the scene config for UI scenes; otherwise the last
 activated scene while its entities stay untouched), PM2.5 / dew point / window facts, airing status +

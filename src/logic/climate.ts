@@ -87,7 +87,7 @@ export function roomClimate(hass: HomeAssistant, room: Room, targetOverride?: nu
     fanOn: !!room.purifier && state(hass, room.purifier) === 'on',
     windowOpen,
     airing,
-    label: off ? 'Aus' : vent ? 'lüften' : heating ? 'heizt' : 'Soll erreicht',
+    label: off ? 'Aus' : windowOpen ? 'lüftet' : vent ? 'Lüften empfohlen' : heating ? 'heizt' : 'Soll erreicht',
   };
 }
 

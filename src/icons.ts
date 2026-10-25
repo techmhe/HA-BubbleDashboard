@@ -54,8 +54,9 @@ export function roomIcon(name: string, explicit?: string): string {
 export function weatherIcon(condition: string): string {
   switch (condition) {
     case 'sunny':
-    case 'clear-night':
       return I.sun;
+    case 'clear-night':
+      return I.moon;
     case 'rainy':
     case 'pouring':
       return I.rain;

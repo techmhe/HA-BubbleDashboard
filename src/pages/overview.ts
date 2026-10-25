@@ -156,7 +156,7 @@ export function renderOverview(ctx: PageContext) {
                 <span class="circle room-circle">${icon(r.icon, 16, accent ? '#141008' : '#fff', 2)}</span>
                 <span class="room-text">
                   <span class="room-name"><span class="ellipsis">${r.room.name}</span>${r.aq ? html`<span class="dot" style="background:${r.aq}"></span>` : nothing}</span>
-                  <span class="room-sub">${r.hum} %${r.vent ? ' · lüften' : r.heating ? ' · heizt' : ''}</span>
+                  <span class="room-sub">${r.hum} %${r.note ? ` · ${r.note}` : ''}</span>
                 </span>
                 <span class="room-temp">${r.temp}°</span>
               </button>

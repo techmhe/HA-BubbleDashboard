@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon } from '../components/ui';
 import { deviceIcon, I } from '../icons';
 import { watts } from '../logic/devices';
-import { consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type Consumer } from '../logic/energy';
+import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type Consumer } from '../logic/energy';
 import { fmt } from '../logic/util';
 import type { PageContext } from './context';
 
@@ -86,7 +86,7 @@ export function renderEnergy(ctx: PageContext) {
                 <span class="circle" style="width:44px;height:44px;background:${Math.abs(bat.power) > IDLE ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, Math.abs(bat.power) > IDLE ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
               </span>
               <span class="nv">${Math.abs(bat.power) > IDLE ? watts(Math.abs(bat.power)) : '0 W'}</span>
-              <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}</span>
+              <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}${Math.abs(bat.power) <= IDLE && batteryNote(bat, ctx.config.battery) ? ` · ${batteryNote(bat, ctx.config.battery)}` : ''}</span>
             </button>`
           : nothing}
         <button class="elink" @click=${() => ctx.navigate('/energy')}>Energie-Dashboard ›</button>

@@ -40,7 +40,8 @@ export function robbyStatus(hass: HomeAssistant, config: CardConfig): RobbyStatu
   const battery = num(hass, ent(config, 'vacuum_battery')) ?? (Number.isFinite(Number(vac?.attributes.battery_level)) ? Number(vac!.attributes.battery_level) : null);
   const err = state(hass, ent(config, 'vacuum_error'));
   const error = vac?.state === 'error' || raw === 'error' || (!!err && !['none', 'unknown', 'unavailable', ''].includes(err));
-  const text = raw === 'unavailable' ? 'Offline' : (STATUS[raw] ?? raw);
+  const full = raw === 'charging' && battery !== null && battery >= 100;
+  const text = raw === 'unavailable' ? 'Offline' : full ? 'Geladen' : (STATUS[raw] ?? raw);
   return {
     label: battery !== null ? `${text} · ${Math.round(battery)} %` : text,
     battery,

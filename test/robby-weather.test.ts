@@ -47,7 +47,7 @@ describe('weather', () => {
 
 describe('robby', () => {
   it('shows status and battery', () => {
-    expect(robbyStatus(makeM5Hass(), config)).toMatchObject({ label: 'Lädt · 100 %', cleaning: false, error: false });
+    expect(robbyStatus(makeM5Hass(), config)).toMatchObject({ label: 'Geladen · 100 %', cleaning: false, error: false });
     const h = makeM5Hass({ 'sensor.robby_status': { state: 'cleaning' }, 'sensor.robby_batterie': { state: '80' }, 'vacuum.robby': { state: 'cleaning' } });
     expect(robbyStatus(h, config)).toMatchObject({ label: 'Reinigt · 80 %', cleaning: true });
   });
