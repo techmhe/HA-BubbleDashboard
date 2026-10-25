@@ -34,6 +34,12 @@ describe('heating check', () => {
     expect(check({ hums: ramp(60, 78) })).toEqual([]); // shower
   });
 
+  it('rules out the sun only for rooms that get sun', () => {
+    const living = { ...base, slug: 'wohnzimmer', name: 'Wohnzimmer' };
+    const alerts = heatingAlerts([base, living], 900, { sunny: ['badezimmer', 'schlafzimmer'] });
+    expect(alerts.map((a) => a.slug)).toEqual(['wohnzimmer']);
+  });
+
   it('needs enough data and honours custom limits', () => {
     expect(check({ temps: ramp(19, 21).slice(0, 4) })).toEqual([]);
     expect(heatingAlerts([{ ...base, power: 120 }], 0, { max_power: 100 })).toEqual([]);

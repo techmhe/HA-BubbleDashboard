@@ -3179,20 +3179,18 @@ function Ji(e, t, n = {}) {
 	let r = {
 		...Ki,
 		...n
-	};
-	if (t > r.max_pv) return [];
-	let i = [];
+	}, i = (e) => t > r.max_pv && (!r.sunny || r.sunny.includes(e)), a = [];
 	for (let t of e) {
-		if (t.temps.length < qi || t.heated || t.windowOpened || t.power > r.max_power || !t.off && (t.cur === null || t.target === null || t.cur <= t.target)) continue;
-		let e = t.temps[t.temps.length - 1].v, n = Math.min(...t.temps.slice(0, -1).map((e) => e.v)), a = Math.round((e - n) * 10) / 10;
-		a < r.min_rise || t.hums.length && Math.max(...t.hums.map((e) => e.v)) - t.hums[0].v >= r.max_hum_rise || i.push({
+		if (i(t.slug) || t.temps.length < qi || t.heated || t.windowOpened || t.power > r.max_power || !t.off && (t.cur === null || t.target === null || t.cur <= t.target)) continue;
+		let e = t.temps[t.temps.length - 1].v, n = Math.min(...t.temps.slice(0, -1).map((e) => e.v)), o = Math.round((e - n) * 10) / 10;
+		o < r.min_rise || t.hums.length && Math.max(...t.hums.map((e) => e.v)) - t.hums[0].v >= r.max_hum_rise || a.push({
 			slug: t.slug,
 			name: t.name,
-			rise: a,
+			rise: o,
 			hours: r.hours
 		});
 	}
-	return i;
+	return a;
 }
 function Yi(e) {
 	return e.some((e) => e.a?.hvac_action === "heating");
@@ -8318,7 +8316,7 @@ var Qs = o`
     min-width: 0;
     text-align: left;
   }
-`, $s, ec = "0.16.1", $ = [
+`, $s, ec = "0.16.2", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",

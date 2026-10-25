@@ -17,6 +17,8 @@ export interface HeatingCheckOptions {
   max_pv: number;
   /** Humidity rise (percentage points) that points to a shower or cooking. */
   max_hum_rise: number;
+  /** Rooms (slugs) the sun can warm; PV only rules out these. Unset: every room. */
+  sunny?: string[];
 }
 
 export const HEATING_CHECK_DEFAULTS: HeatingCheckOptions = { hours: 2, min_rise: 1, max_power: 150, max_pv: 300, max_hum_rise: 10 };
@@ -50,10 +52,10 @@ const MIN_POINTS = 6;
 
 export function heatingAlerts(rooms: HeatingRoomInput[], pv: number, opts: Partial<HeatingCheckOptions> = {}): HeatingAlert[] {
   const o = { ...HEATING_CHECK_DEFAULTS, ...opts };
-  if (pv > o.max_pv) return [];
+  const sunny = (slug: string) => pv > o.max_pv && (!o.sunny || o.sunny.includes(slug));
   const out: HeatingAlert[] = [];
   for (const r of rooms) {
-    if (r.temps.length < MIN_POINTS || r.heated || r.windowOpened || r.power > o.max_power) continue;
+    if (sunny(r.slug) || r.temps.length < MIN_POINTS || r.heated || r.windowOpened || r.power > o.max_power) continue;
     if (!r.off && (r.cur === null || r.target === null || r.cur <= r.target)) continue;
     const last = r.temps[r.temps.length - 1].v;
     const low = Math.min(...r.temps.slice(0, -1).map((p) => p.v));

@@ -150,6 +150,7 @@ heating_check:          # stuck-valve check (defaults shown); `heating_check: fa
   max_power: 150        # mean room power (W) above which appliances explain the warmth
   max_pv: 300           # mean PV power (W) above which the sun explains it
   max_hum_rise: 10      # humidity jump (points) that means a shower or cooking
+  sunny: [badezimmer, schlafzimmer]  # rooms the sun warms; PV only rules out these (default: all)
 names:                  # display-name overrides
   switch.nspanelbuerom_relay_1: Deckenlampe
   switch.nspanelbueroa_relay_1: Deckenlampe
@@ -336,7 +337,7 @@ does not call for heat, a hint at a stuck valve. A room is flagged when, over th
 the thermostat did not heat (VTherm's `sensor.<climate>_power_percent` statistics, else its
 history) and the window stayed closed (both also during the hour before),
 the room's power sensors averaged at most `max_power` W (dryer, gaming PC), PV averaged at
-most `max_pv` W (sun) and humidity did not jump by `max_hum_rise` points (shower). It loads
+most `max_pv` W (sun; only for the rooms in `sunny` when set) and humidity did not jump by `max_hum_rise` points (shower). It loads
 5-minute statistics and the window history (no attributes), about 80 KB for 8 rooms. Flagged rooms show
 in *Aktuell* (tap → room card), as an orange chip on the Klima pill and in the room card's
 state line.
