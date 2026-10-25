@@ -1,6 +1,6 @@
 {
   "name": "ha-start-dashboard",
-  "version": "0.12.0",
+  "version": "0.12.1",
   "description": "Phone-first Start dashboard for Home Assistant as one self-contained Lovelace card",
   "type": "module",
   "private": true,

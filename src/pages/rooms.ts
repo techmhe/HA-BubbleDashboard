@@ -3,7 +3,7 @@ import { hold } from '../components/hold';
 import { icon, mdi, SCENE_COLORS } from '../components/ui';
 import { deviceIcon, I, IC, roomIcon } from '../icons';
 import { temp } from '../logic/climate';
-import { lightTint, watts } from '../logic/devices';
+import { lightTint, watts, type DeviceInfo, type SceneInfo } from '../logic/devices';
 import { applyRoomsFilter, roomsFilters, roomsHeader, roomsView, type RoomView } from '../logic/rooms-page';
 import { num } from '../logic/util';
 import { toggleDevice } from '../sheets/device';
@@ -39,12 +39,12 @@ export function renderRooms(ctx: PageContext) {
       </div>
       <div class="rhint">Tippen schaltet · lange drücken öffnet Helligkeit &amp; Farbe</div>
 
-      ${shown.length ? shown.map((v) => roomCard(ctx, v)) : html`<div class="rempty">Gerade ist nichts an.</div>`}
+      ${shown.length ? shown.map((v) => roomCard(ctx, v, filter === 'on')) : html`<div class="rempty">Gerade ist nichts an.</div>`}
     </div>
   `;
 }
 
-function roomCard(ctx: PageContext, v: RoomView) {
+function roomCard(ctx: PageContext, v: RoomView, compact = false) {
   const activeIds = activeScenes(ctx.hass, v.scenes.map((s) => s.id), ctx.sceneConfigs(), ctx.now);
   const { hass } = ctx;
   const { room } = v;
@@ -52,9 +52,9 @@ function roomCard(ctx: PageContext, v: RoomView) {
   const h = num(hass, room.humidity);
   const canOpen = !!room.climate;
   return html`
-    <article class="rcard ${v.active ? 'active' : ''}">
+    <article class="rcard ${v.active ? 'active' : ''} ${compact ? 'compact' : ''}">
       <div class="rtop">
-        <span class="circle" style=${circ(v.active ? '#ffd60a' : 'rgba(255,255,255,0.12)', 40)}>
+        <span class="circle" style=${circ(v.active ? '#ffd60a' : 'rgba(255,255,255,0.12)', compact ? 32 : 40)}>
           ${icon(roomIcon(room.name, room.icon), 18, v.active ? '#2b2200' : '#fff', 2)}
         </span>
         <span class="rname">
@@ -73,44 +73,45 @@ function roomCard(ctx: PageContext, v: RoomView) {
           : nothing}
       </div>
 
-      ${v.scenes.length
-        ? html`<div class="rgrid" role="group" aria-label="Szenen ${room.name}">
-            ${v.scenes.map((s, i) => {
-              const bg = s.off ? 'rgba(255,255,255,0.14)' : SCENE_COLORS[i % SCENE_COLORS.length];
-              const stroke = s.off ? '#fff' : '#101010';
-              const on = activeIds.has(s.id);
-              return html`<button class="rscene" aria-pressed=${on} style=${on ? `background:${s.off ? 'rgba(255,255,255,0.2)' : bg + '33'};box-shadow:0 0 18px ${s.off ? 'rgba(255,255,255,0.08)' : bg + '40'}` : ''}
-                @click=${() => ctx.call('scene', 'turn_on', {}, { entity_id: s.id })}>
-                <span class="circle" style=${circ(bg, 34)}>${s.off ? icon(IC.power, 16, stroke, 2.1) : mdi(s.icon, IC.scene, stroke)}</span>
-                <span class="ellipsis">${s.off ? 'Aus' : s.name}</span>
-              </button>`;
-            })}
-          </div>`
-        : nothing}
-
-      ${v.devices.length
-        ? html`<div class="rgrid">
-            ${v.devices.map((d) => {
-              const light = d.kind === 'light';
-              // Lights take their current colour (or white tone); other devices stay green.
-              const lt = light ? lightTint(ctx.hass.states[d.id]?.attributes ?? {}) : null;
-              const col = lt ? lt.color : '#30d158';
-              const tint = lt ? lt.bg : 'rgba(48,209,88,0.14)';
-              const stroke = d.on ? (lt ? lt.icon : '#151005') : d.unavailable ? 'rgba(255,255,255,0.45)' : '#fff';
-              return html`<button class="rdev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${tint}` : ''}
-                aria-label="${d.name}: ${d.tileState}"
-                ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id }) })}>
-                <span class="circle" style=${circ(d.on ? col : 'rgba(255,255,255,0.1)', 32)}>${icon(deviceIcon(d.id, d.name), 15, stroke, 2.2)}</span>
-                <span class="rdtext">
-                  <span class="ellipsis rdname">${d.name}</span>
-                  <span class="rdstate" style="color:${d.on ? (lt ? lt.text : '#9af0b5') : 'rgba(255,255,255,0.55)'}">${d.tileState}</span>
-                </span>
-              </button>`;
-            })}
-          </div>`
-        : nothing}
+      ${compact
+        ? html`<div class="rgrid">${v.scenes.map((sc, i) => sceneButton(ctx, sc, i, activeIds))}${v.devices.map((d) => deviceTile(ctx, d))}</div>`
+        : html`${v.scenes.length
+            ? html`<div class="rgrid" role="group" aria-label="Szenen ${room.name}">
+                ${v.scenes.map((sc, i) => sceneButton(ctx, sc, i, activeIds))}
+              </div>`
+            : nothing}
+          ${v.devices.length ? html`<div class="rgrid">${v.devices.map((d) => deviceTile(ctx, d))}</div>` : nothing}`}
     </article>
   `;
+}
+
+function sceneButton(ctx: PageContext, s: SceneInfo, i: number, activeIds: Set<string>) {
+  const bg = s.off ? 'rgba(255,255,255,0.14)' : SCENE_COLORS[i % SCENE_COLORS.length];
+  const stroke = s.off ? '#fff' : '#101010';
+  const on = activeIds.has(s.id);
+  return html`<button class="rscene" aria-pressed=${on} style=${on ? `background:${s.off ? 'rgba(255,255,255,0.2)' : bg + '33'};box-shadow:0 0 18px ${s.off ? 'rgba(255,255,255,0.08)' : bg + '40'}` : ''}
+    @click=${() => ctx.call('scene', 'turn_on', {}, { entity_id: s.id })}>
+    <span class="circle" style=${circ(bg, 34)}>${s.off ? icon(IC.power, 16, stroke, 2.1) : mdi(s.icon, IC.scene, stroke)}</span>
+    <span class="ellipsis">${s.off ? 'Aus' : s.name}</span>
+  </button>`;
+}
+
+function deviceTile(ctx: PageContext, d: DeviceInfo) {
+  const light = d.kind === 'light';
+  // Lights take their current colour (or white tone); other devices stay green.
+  const lt = light ? lightTint(ctx.hass.states[d.id]?.attributes ?? {}) : null;
+  const col = lt ? lt.color : '#30d158';
+  const tint = lt ? lt.bg : 'rgba(48,209,88,0.14)';
+  const stroke = d.on ? (lt ? lt.icon : '#151005') : d.unavailable ? 'rgba(255,255,255,0.45)' : '#fff';
+  return html`<button class="rdev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${tint}` : ''}
+    aria-label="${d.name}: ${d.tileState}"
+    ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id }) })}>
+    <span class="circle" style=${circ(d.on ? col : 'rgba(255,255,255,0.1)', 32)}>${icon(deviceIcon(d.id, d.name), 15, stroke, 2.2)}</span>
+    <span class="rdtext">
+      <span class="ellipsis rdname">${d.name}</span>
+      <span class="rdstate" style="color:${d.on ? (lt ? lt.text : '#9af0b5') : 'rgba(255,255,255,0.55)'}">${d.tileState}</span>
+    </span>
+  </button>`;
 }
 
 export const roomsStyles = css`
@@ -187,6 +188,19 @@ export const roomsStyles = css`
   }
   .rcard.active {
     background: linear-gradient(160deg, rgba(255, 214, 10, 0.14), rgba(255, 255, 255, 0.05) 50%);
+  }
+  .rcard.compact {
+    gap: 8px;
+    padding: 8px;
+    border-radius: 24px;
+  }
+  .rcard.compact .rsub {
+    display: none;
+  }
+  .rcard.compact .rdev,
+  .rcard.compact .rscene {
+    height: 44px;
+    border-radius: 22px;
   }
   .rtop {
     display: flex;

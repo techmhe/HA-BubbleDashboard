@@ -215,7 +215,8 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - Header: lights and other devices that are on; *Licht aus* turns off every labelled light
   that is on. Filter *Alle* / *An* / one per floor, upper floor first (the Licht bubble opens
   *An*). *An* shows only the devices that are on, plus the room's *Aus* scene
-  (`scene.*_off` / `scene.*_aus`) instead of all scenes.
+  (`scene.*_off` / `scene.*_aus`) instead of all scenes, in a compact card: name and pill,
+  then one grid with *Aus* first and the devices.
 - One card per room: the climate rooms plus every other area with a `dashboard_gerat`
   device (e.g. Garten), upper floors first (OG before EG), rooms without a floor last. Card: *x von y an*, a pill with
   temperature · humidity · room power (tap → room card), the area's scenes, and a 3-column
