@@ -8183,7 +8183,7 @@ var zs = o`
     min-width: 0;
     text-align: left;
   }
-`, Bs, Vs = "0.13.0", $ = [
+`, Bs, Vs = "0.13.1", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",
@@ -8752,6 +8752,9 @@ Bs = Js, Bs.properties = {
         min-height: calc(100vh - var(--header-height, 56px));
         background-color: var(--sd-bg);
         background-repeat: no-repeat;
+        /* iOS rubber-band scrolling shows what lies below the page (the HA theme background);
+           a shadow paints the card background there without growing the scroll area. */
+        box-shadow: 0 100vh 0 0 var(--sd-bg);
         display: flex;
         flex-direction: column;
       }
