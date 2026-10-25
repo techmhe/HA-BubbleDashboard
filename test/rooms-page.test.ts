@@ -12,10 +12,10 @@ function view(h = makeRoomsHass()) {
 }
 
 describe('roomsView', () => {
-  it('lists EG rooms first, then OG, then areas without floor that hold devices', () => {
+  it('lists OG rooms first, then EG, then areas without floor that hold devices', () => {
     expect(view().map((v) => v.room.slug)).toEqual([
-      'wohnzimmer', 'kuche_esszimmer', 'flur_eg',
       'arbeitszimmer_anna', 'arbeitszimmer_max', 'badezimmer', 'schlafzimmer', 'flur_1_og',
+      'wohnzimmer', 'kuche_esszimmer', 'flur_eg',
       'garten',
     ]);
   });
@@ -86,14 +86,14 @@ describe('header and filters', () => {
     expect(roomsHeader(view(makeRoomsHass(off)))).toBe('Alles aus');
   });
 
-  it('offers Alle, An and one filter per floor (lowest first)', () => {
+  it('offers Alle, An and one filter per floor (highest first)', () => {
     const h = makeRoomsHass();
-    expect(roomsFilters(h, view(h)).map((f) => f.label)).toEqual(['Alle', 'An', 'EG', 'OG']);
+    expect(roomsFilters(h, view(h)).map((f) => f.label)).toEqual(['Alle', 'An', 'OG', 'EG']);
   });
 
   it('filters by on-state and floor', () => {
     const v = view();
-    expect(applyRoomsFilter(v, 'on').map((x) => x.room.slug)).toEqual(['wohnzimmer', 'flur_eg', 'flur_1_og']);
+    expect(applyRoomsFilter(v, 'on').map((x) => x.room.slug)).toEqual(['flur_1_og', 'wohnzimmer', 'flur_eg']);
     expect(applyRoomsFilter(v, 'og')).toHaveLength(5);
     expect(applyRoomsFilter(v, 'all')).toHaveLength(9);
   });

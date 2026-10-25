@@ -21,8 +21,8 @@ export interface RoomView {
 
 /**
  * Rooms for the Räume page: the climate rooms plus any other area that holds a
- * device with the `dashboard_gerat` label (e.g. Garten). EG before OG, rooms
- * without a floor last.
+ * device with the `dashboard_gerat` label (e.g. Garten). Upper floors first (OG before EG),
+ * rooms without a floor last.
  */
 export function roomsView(hass: HomeAssistant, config: CardConfig, rooms: Room[]): RoomView[] {
   const covered = new Set(rooms.flatMap((r) => r.areas));
@@ -35,9 +35,9 @@ export function roomsView(hass: HomeAssistant, config: CardConfig, rooms: Room[]
   const all = [...rooms, ...extraAreas.map((a) => complete(hass, { slug: a, areas: [a] }))];
   const level = (r: Room) => {
     const l = r.floor ? hass.floors?.[r.floor]?.level : undefined;
-    return l ?? Number.POSITIVE_INFINITY;
+    return l ?? Number.NEGATIVE_INFINITY;
   };
-  const sorted = all.map((r, i) => ({ r, i })).sort((a, b) => level(a.r) - level(b.r) || a.i - b.i).map((x) => x.r);
+  const sorted = all.map((r, i) => ({ r, i })).sort((a, b) => level(b.r) - level(a.r) || a.i - b.i).map((x) => x.r);
 
   return sorted.map((room) => {
     const devices = roomDevices(hass, room, config.names);
@@ -108,10 +108,10 @@ export interface RoomsFilter {
   label: string;
 }
 
-/** Alle, An, then one per floor that has rooms (lowest level first). */
+/** Alle, An, then one per floor that has rooms (highest level first). */
 export function roomsFilters(hass: HomeAssistant, views: RoomView[]): RoomsFilter[] {
   const floors = [...new Set(views.map((v) => v.room.floor).filter((f): f is string => !!f))];
-  floors.sort((a, b) => (hass.floors?.[a]?.level ?? 99) - (hass.floors?.[b]?.level ?? 99));
+  floors.sort((a, b) => (hass.floors?.[b]?.level ?? -99) - (hass.floors?.[a]?.level ?? -99));
   return [
     { id: 'all', label: 'Alle' },
     { id: 'on', label: 'An' },
@@ -121,7 +121,12 @@ export function roomsFilters(hass: HomeAssistant, views: RoomView[]): RoomsFilte
 
 export function applyRoomsFilter(views: RoomView[], filter: string): RoomView[] {
   if (filter === 'all') return views;
-  if (filter === 'on') return views.filter((v) => v.onCount > 0);
+  // "An": only what is on, plus the room's "Alles aus" scene to switch it all off.
+  if (filter === 'on') {
+    return views
+      .filter((v) => v.onCount > 0)
+      .map((v) => ({ ...v, devices: v.devices.filter((d) => d.on), scenes: v.scenes.filter((s) => s.off) }));
+  }
   return views.filter((v) => v.room.floor === filter);
 }
 

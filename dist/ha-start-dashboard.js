@@ -2424,11 +2424,11 @@ function Hr(e, t, n) {
 	let a = [...n, ...i.map((t) => Bn(e, {
 		slug: t,
 		areas: [t]
-	}))], o = (t) => (t.floor ? e.floors?.[t.floor]?.level : void 0) ?? Infinity;
+	}))], o = (t) => (t.floor ? e.floors?.[t.floor]?.level : void 0) ?? -Infinity;
 	return a.map((e, t) => ({
 		r: e,
 		i: t
-	})).sort((e, t) => o(e.r) - o(t.r) || e.i - t.i).map((e) => e.r).map((n) => {
+	})).sort((e, t) => o(t.r) - o(e.r) || e.i - t.i).map((e) => e.r).map((n) => {
 		let r = Ar(e, n, t.names), i = r.filter((e) => e.on).length, a = r.filter((e) => e.on && e.kind === "light").length, o = n.floor ? e.floors?.[n.floor]?.name ?? n.floor.toUpperCase() : void 0, s = r.length ? i ? `${i} von ${r.length} an` : "alles aus" : "keine Geräte";
 		return {
 			room: n,
@@ -2473,7 +2473,7 @@ function Kr(e) {
 }
 function qr(e, t) {
 	let n = [...new Set(t.map((e) => e.room.floor).filter((e) => !!e))];
-	return n.sort((t, n) => (e.floors?.[t]?.level ?? 99) - (e.floors?.[n]?.level ?? 99)), [
+	return n.sort((t, n) => (e.floors?.[n]?.level ?? -99) - (e.floors?.[t]?.level ?? -99)), [
 		{
 			id: "all",
 			label: "Alle"
@@ -2489,7 +2489,11 @@ function qr(e, t) {
 	];
 }
 function Jr(e, t) {
-	return t === "all" ? e : t === "on" ? e.filter((e) => e.onCount > 0) : e.filter((e) => e.room.floor === t);
+	return t === "all" ? e : t === "on" ? e.filter((e) => e.onCount > 0).map((e) => ({
+		...e,
+		devices: e.devices.filter((e) => e.on),
+		scenes: e.scenes.filter((e) => e.off)
+	})) : e.filter((e) => e.room.floor === t);
 }
 function Yr(e, t) {
 	let [n, r] = t.split(":").map(Number), i = new Date(e);
@@ -7956,7 +7960,7 @@ var Ss = o`
     min-width: 0;
     text-align: left;
   }
-`, Cs, ws = "0.11.0", $ = [
+`, Cs, ws = "0.12.0", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",
