@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Aktuell Technik-Meldungen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#101218}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+.ph{width:390px;height:520px;background:#101218;color:#fff;font-family:Rubik,system-ui,sans-serif;padding:22px 14px;display:flex;flex-direction:column;gap:6px}
+.circle{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.sh{display:flex;align-items:center;gap:10px;margin:0 6px 4px}
+.sh h2{margin:0;font-size:15px;font-weight:600}
+.rule{flex:1;height:2px;border-radius:1px;background:rgba(255,255,255,.12)}
+.now{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;height:50px;padding:0 8px;border-radius:25px}
+.nt{flex:1;min-width:0}
+.ntt{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nts{display:block;font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na{flex-shrink:0;height:32px;padding:0 14px;border-radius:16px;display:flex;align-items:center;font-size:13px;font-weight:700;color:#101010;border:none;font-family:inherit}
+.cap{margin:6px 8px 0;font-size:11px;color:rgba(255,255,255,.5)}
+.bar{position:absolute;bottom:0;height:3px;border-radius:2px}
+</style>
+</helmet>
+<div class="ph">
+  <div class="sh"><h2>Aktuell · Technik-Varianten</h2><span class="rule"></span></div>
+
+  <span class="cap">Druck läuft · Fortschrittsbalken, tippen öffnet Drucker</span>
+  <a href="Drucker.dc.html" class="now" style="background:linear-gradient(90deg, rgba(191,155,255,.26), rgba(255,255,255,.05) 75%)">
+    <span class="circle" style="width:34px;height:34px;background:#bf9bff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v4H4zM9 7v4l3 3 3-3V7M6 21h12M8 17h8"></path></svg></span>
+    <span class="nt"><span class="ntt">3D-Druck · 63 %</span><span class="nts">Halterung_v3 · fertig um 23:40</span></span>
+    <span style="flex-shrink:0;font-size:13px;font-weight:700;color:#d6c4ff;margin-right:8px">1:12 h</span>
+    <span class="bar" style="left:42px;width:63%;max-width:calc(100% - 60px);background:#bf9bff"></span>
+  </a>
+
+  <span class="cap">Druck fertig · bleibt bis Steckdose aus oder OK</span>
+  <a href="DruckerFertig.dc.html" class="now" style="background:linear-gradient(90deg, rgba(48,209,88,.24), rgba(255,255,255,.05) 75%)">
+    <span class="circle" style="width:34px;height:34px;background:#30d158"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>
+    <span class="nt"><span class="ntt">3D-Druck fertig</span><span class="nts">Halterung_v3 · Bett 41°, noch abkühlen</span></span>
+    <button class="na" style="background:#30d158">OK</button>
+  </a>
+
+  <span class="cap">Druckfehler / HMS-Meldung</span>
+  <a href="DruckerFehler.dc.html" class="now" style="background:linear-gradient(90deg, rgba(255,69,58,.28), rgba(255,255,255,.05) 75%)">
+    <span class="circle" style="width:34px;height:34px;background:#ff453a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16h.01M10.3 3.9L2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></span>
+    <span class="nt"><span class="ntt">3D-Druck angehalten</span><span class="nts">Filament gerissen · AMS Slot 2</span></span>
+    <button class="na" style="background:#ff453a">Ansehen</button>
+  </a>
+
+  <span class="cap">Dienst ausgefallen · aus Uptime Kuma oder eigenem Monitoring</span>
+  <a href="Netz.dc.html" class="now" style="background:linear-gradient(90deg, rgba(255,69,58,.28), rgba(255,255,255,.05) 75%)">
+    <span class="circle" style="width:34px;height:34px;background:#ff453a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01"></path></svg></span>
+    <span class="nt"><span class="ntt">Nextcloud nicht erreichbar</span><span class="nts">seit 14 min · NAS01</span></span>
+    <button class="na" style="background:#ff453a">Ansehen</button>
+  </a>
+
+  <span class="cap">Werbeblocker aus · nur wenn ungeplant (nicht während Pause)</span>
+  <a href="NetzAn.dc.html" class="now" style="background:linear-gradient(90deg, rgba(255,69,58,.28), rgba(255,255,255,.05) 75%)">
+    <span class="circle" style="width:34px;height:34px;background:#ff453a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM4 4l16 16"></path></svg></span>
+    <span class="nt"><span class="ntt">Werbeblocker aus</span><span class="nts">Pi-hole · seit gestern 22:05</span></span>
+    <button class="na" style="background:#ff453a">Einschalten</button>
+  </a>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":520}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

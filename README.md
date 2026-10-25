@@ -443,6 +443,43 @@ blue = airing runs (window open), orange = heating, otherwise none.
 
 The stuck-sensor check loads 5-minute statistics of the rooms with a window open ≥ 30 min.
 
+### Technik (tech users only)
+
+A server button left of the weather pill opens the *Technik* sheet: Werbeblocker (Pi-hole on,
+pause 5 min / 1 h, off), Dienste (Uptime Kuma monitors, only problems listed, the rest behind
+"N weitere erreichbar"), Gäste-WLAN (QR code, on/off, new password) and a 3D printer row that
+opens the printer sheet. A red dot on the button means a service is down (≥ 3 min), Pi-hole
+has been off for ≥ 70 min or the printer reports an error. *Aktuell* gets the matching items
+(print running with a progress bar, print finished with OK, print error, services down,
+Werbeblocker aus).
+
+Everything is auto-detected; every key is optional:
+
+```yaml
+technik:                       # or `technik: false` to switch the feature off
+  users: [Max]                 # HA user names or ids; default: every admin
+  printer: <device id>         # default: first ha-bambulab device with a print status
+  printer_plug: switch.drucker_steckdose        # no auto-detection; enables power button and "aus"
+  printer_plug_power: sensor.drucker_steckdose_power
+  printer_plug_energy: sensor.drucker_steckdose_energy   # "Diesen Monat" kWh
+  pihole: switch.pi_hole       # default: first pi_hole switch
+  guest_wifi: switch.gaeste_wlan   # default: first UniFi WLAN switch with "guest" in its id
+  services_exclude: [Testserver]   # Uptime Kuma monitor (device) names to hide
+  service_groups:              # one row per group, red when any member is down
+    DNS: '^DNS\b'               # default
+```
+
+- **Printer** ([ha-bambulab](https://github.com/greghesp/ha-bambulab)): entities are found by
+  their `translation_key`, so the entity language does not matter. The plug switch is locked
+  while printing, in an error and while a nozzle is ≥ 50 °C; switching off asks first.
+  Pause, stop and the camera only show when the integration exposes them (LAN mode); in cloud
+  mode the sheet says to continue at the printer or in Bambu Handy.
+- **Uptime Kuma**: every monitor of the core integration is a device; its name is the row name.
+  Certificates expiring in < 7 days show in the sheet only.
+- **UniFi guest WLAN**: the `QR-Code` image and `Passwort neu generieren` button entities are
+  disabled by default in HA. Enable both on the WLAN device to get the QR code and the
+  new-password button; without them the card shows only on/off and the client count.
+
 ### Heating check
 
 Every 10 minutes the card looks for rooms that keep getting warmer although their thermostat

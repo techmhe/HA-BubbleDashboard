@@ -19,3 +19,11 @@ describe('Aktuell layout', () => {
     expect(ids(nowLayout([it_('filter')]))).toEqual(['filter*']);
   });
 });
+
+describe('Aktuell layout for technical items', () => {
+  it('renders the technical items full width', () => {
+    expect(ids(nowLayout([it_('filter'), it_('print'), it_('print-done'), it_('print-error'), it_('services'), it_('pihole'), it_('battery')]))).toEqual([
+      'print*', 'print-done*', 'print-error*', 'services*', 'pihole*', 'filter', 'battery',
+    ]);
+  });
+});

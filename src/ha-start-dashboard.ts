@@ -7,6 +7,7 @@ import { dateLine } from './logic/overview';
 import { resolveRooms, type Room } from './logic/rooms';
 import { num } from './logic/util';
 import { baseStyles } from './styles';
+import { loadDismissed, saveDismissed, type Dismissed } from './logic/dismiss';
 import { haptic } from './components/hold';
 import { repeat } from 'lit/directives/repeat.js';
 import { sheetKey, sheetParent } from './logic/sheet-stack';
@@ -43,6 +44,8 @@ import { personsSheet, personsStyles } from './sheets/persons';
 import { allRoomsSheet, allRoomsStyles, DURATIONS } from './sheets/all-rooms';
 import { historySheet, historyStyles } from './sheets/history';
 import { roomSheet, roomStyles } from './sheets/room';
+import { technikSheet, technikStyles } from './sheets/technik';
+import { printerSheet, printerStyles } from './sheets/printer';
 
 declare const __VERSION__: string;
 const VERSION = typeof __VERSION__ === 'string' ? __VERSION__ : 'dev';
@@ -104,6 +107,8 @@ export class HaStartDashboard extends LitElement {
     _stuck: { state: true },
     _scenes: { state: true },
     _navDrag: { state: true },
+    _dismissed: { state: true },
+    _piholePause: { state: true },
   };
 
   hass?: HomeAssistant;
@@ -136,6 +141,8 @@ export class HaStartDashboard extends LitElement {
   private _debounce: Record<string, number> = {};
   private _history: Record<string, HistoryData> = {};
   private _allRooms: AllRoomsState = { temp: 19, selected: new Set(), duration: 'Dauerhaft' };
+  private _dismissed: Dismissed = loadDismissed();
+  private _piholePause?: number;
 
   static getStubConfig(): Partial<CardConfig> {
     return { page: 'overview' };
@@ -179,9 +186,10 @@ export class HaStartDashboard extends LitElement {
     const hdr = applyHeader(this, mode) ? mode : '';
     if (hdr !== this._hdr) this._hdr = hdr;
     // 1 s clock while an airing countdown is visible (pop-up open or timer running).
-    if (changed.has('_sheet') || changed.has('hass')) {
+    if (changed.has('_sheet') || changed.has('hass') || changed.has('_piholePause')) {
       const timer = this.hass && this._config ? this.hass.states[ent(this._config, 'airing_timer')] : undefined;
-      const fast = this._sheet?.id === 'airing' || timer?.state === 'active';
+      const paused = !!this._piholePause && this._piholePause > Date.now();
+      const fast = this._sheet?.id === 'airing' || timer?.state === 'active' || (this._sheet?.id === 'technik' && paused);
       if (fast && !this._fastTick) this._fastTick = window.setInterval(() => (this._now = new Date()), 1000);
       else if (!fast && this._fastTick) {
         window.clearInterval(this._fastTick);
@@ -502,6 +510,13 @@ export class HaStartDashboard extends LitElement {
       setPending: (id, attr, value, send) => this._setPending(id, attr, value, send),
       ui: this._ui,
       setUi: (patch) => (this._ui = { ...this._ui, ...patch }),
+      dismissed: (key) => key in this._dismissed,
+      dismiss: (key) => {
+        this._dismissed = { ...loadDismissed(), ...this._dismissed, [key]: Date.now() };
+        saveDismissed(this._dismissed);
+      },
+      piholePause: this._piholePause,
+      setPiholePause: (until) => (this._piholePause = until),
     };
   }
 
@@ -685,6 +700,10 @@ export class HaStartDashboard extends LitElement {
         return dewSheet(ctx, sh.slug, sh.range);
       case 'weatherDay':
         return weatherDaySheet(ctx, sh.date);
+      case 'technik':
+        return technikSheet(ctx);
+      case 'printer':
+        return printerSheet(ctx);
     }
   }
 
@@ -708,6 +727,8 @@ export class HaStartDashboard extends LitElement {
     dewStyles,
     careStyles,
     acStyles,
+    technikStyles,
+    printerStyles,
     trendStyles,
     scrubStyles,
     css`

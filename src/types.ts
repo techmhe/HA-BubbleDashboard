@@ -18,6 +18,8 @@ export interface HassEntityRegistryEntry {
   name?: string | null;
   /** Integration domain, e.g. versatile_thermostat. */
   platform?: string;
+  /** Stable, language-independent key of the entity within its integration. */
+  translation_key?: string | null;
 }
 
 export interface HassDevice {
@@ -48,9 +50,11 @@ export interface HomeAssistant {
   devices: Record<string, HassDevice>;
   areas: Record<string, HassArea>;
   floors?: Record<string, HassFloor>;
-  user?: { name: string };
+  user?: { id?: string; name: string; is_admin?: boolean };
   locale?: { language: string };
   callService(domain: string, service: string, data?: Record<string, unknown>, target?: Record<string, unknown>): Promise<unknown>;
+  /** Translated state label (HA 2023.12+). */
+  formatEntityState?(stateObj: HassEntity): string;
   callWS<T = unknown>(msg: Record<string, unknown>): Promise<T>;
   callApi?<T = unknown>(method: 'GET' | 'POST', path: string): Promise<T>;
 }
@@ -117,4 +121,24 @@ export interface CardConfig {
   /** Stuck-valve check: limits, or false to switch it off. */
   heating_check?: Partial<import('./logic/heating-check').HeatingCheckOptions> | false;
   entities?: Partial<Record<import('./logic/entities').EntityKey, string>> & { filter_alarms?: string[] };
+  /** Technik button, sheets and Aktuell items; false turns them off for everyone. */
+  technik?: TechnikConfig | false;
+}
+
+export interface TechnikConfig {
+  /** HA user ids or names that see the technical parts (default: admins). */
+  users?: string[];
+  /** Device id of the 3D printer (default: first ha-bambulab printer). */
+  printer?: string;
+  printer_plug?: string;
+  printer_plug_power?: string;
+  printer_plug_energy?: string;
+  /** Pi-hole blocking switch (default: first pi_hole switch). */
+  pihole?: string;
+  /** Guest WLAN switch (default: first UniFi WLAN switch with "guest" in its id). */
+  guest_wifi?: string;
+  /** Uptime Kuma monitor names to leave out. */
+  services_exclude?: string[];
+  /** Merge monitors into one row: { name: regex on the monitor name }. Default { DNS: '^DNS\\b' }. */
+  service_groups?: Record<string, string>;
 }

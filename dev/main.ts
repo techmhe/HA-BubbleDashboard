@@ -5,6 +5,7 @@ import { makeHass } from '../test/fixture';
 import { ROOM_EXTRAS } from '../test/fixture-rooms';
 import { ENERGY_EXTRAS, SECURITY_EXTRAS } from '../test/fixture-m4';
 import { DAILY, HOURLY, M5_EXTRAS } from '../test/fixture-m5';
+import { AMS, GUEST, MONITORS, PLUG, PRINTER, technikDefs, monitorStatus } from '../test/fixture-technik';
 
 const q = new URLSearchParams(location.search);
 const now = new Date();
@@ -32,7 +33,18 @@ if (q.has('busy')) {
     'sensor.luftreiniger_w_filter_life': { state: '4' },
   };
 }
-const hass = makeHass(overrides, now, { ...ROOM_EXTRAS, ...ENERGY_EXTRAS, ...SECURITY_EXTRAS, ...M5_EXTRAS });
+// ?technik: printer, Pi-hole, guest WLAN and Uptime Kuma; ?technik=down adds a failing service.
+const technik = q.has('technik');
+if (q.get('technik') === 'down') overrides = { ...overrides, [monitorStatus('Nextcloud')]: { state: 'down', minutesAgo: 12 } };
+const hass = makeHass(overrides, now, { ...ROOM_EXTRAS, ...ENERGY_EXTRAS, ...SECURITY_EXTRAS, ...M5_EXTRAS, ...(technik ? technikDefs() : {}) });
+hass.user = { id: 'u-max', name: 'Max', is_admin: true };
+if (technik) {
+  hass.devices[PRINTER] = { id: PRINTER, area_id: null, name: 'x2d_musterdrucker' };
+  hass.devices[AMS] = { id: AMS, area_id: null, name: 'x2d_musterdrucker_AMS_1' };
+  hass.devices[GUEST] = { id: GUEST, area_id: null, name: 'Gäste' };
+  for (const [device, name] of MONITORS) hass.devices[device] = { id: device, area_id: null, name };
+  hass.formatEntityState = (s) => ({ printing: 'Drucken', standard: 'Standard' })[s.state] ?? s.state;
+}
 hass.callService = async (domain, service, data, target) => {
   console.log('[mock] callService', domain, service, JSON.stringify(data), 'target=' + JSON.stringify(target));
 };
@@ -129,6 +141,9 @@ st('zone.home', '1', { friendly_name: 'Home', icon: 'mdi:home' });
 st('zone.buro_anna', '1', { friendly_name: 'Büro Anna', icon: 'mdi:briefcase' });
 st('person.max_muster', 'home', { friendly_name: 'Max Muster', device_trackers: ['device_tracker.max'], in_zones: ['zone.home'] });
 st('person.anna_muster', 'Büro Anna', { friendly_name: 'Anna Muster', device_trackers: ['device_tracker.anna'], in_zones: ['zone.buro_anna'] });
-card.setConfig({ type: 'custom:ha-start-dashboard', page: q.get('page') ?? 'overview', header: 'default' });
+card.setConfig({
+  type: 'custom:ha-start-dashboard', page: q.get('page') ?? 'overview', header: 'default',
+  ...(technik ? { technik: { printer_plug: PLUG, printer_plug_power: 'sensor.drucker_steckdose_power', printer_plug_energy: 'sensor.drucker_steckdose_energy' } } : {}),
+});
 card.hass = hass;
 card.addEventListener('hass-more-info', (e: CustomEvent) => console.log('[mock] more-info', e.detail.entityId));

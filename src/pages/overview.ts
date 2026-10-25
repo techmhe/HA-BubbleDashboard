@@ -10,6 +10,8 @@ import { ent } from '../logic/entities';
 import { clock } from '../logic/climate';
 import { roomAccent, shortOpen, type WindowState } from '../logic/window-state';
 import type { PageContext } from './context';
+import { technikItems, technikProblemCount } from '../logic/technik-now';
+import { hasTechnik, isTechUser } from '../logic/technik';
 
 function statusActions(ctx: PageContext, b: StatusBubble) {
   const { config } = ctx;
@@ -84,6 +86,10 @@ function itemTap(ctx: PageContext, n: NowItem): (() => void) | undefined {
       return () => ctx.go('rooms');
     case 'care':
       return () => ctx.openSheet({ id: 'care' });
+    case 'technik':
+      return () => ctx.openSheet({ id: 'technik' });
+    case 'printer':
+      return () => ctx.openSheet({ id: 'printer' });
   }
 }
 
@@ -98,10 +104,16 @@ function renderItem(ctx: PageContext, n: NowItem, wide = true) {
           <span class="now-title ellipsis">${n.title}</span>
           <span class="now-sub ellipsis">${n.text}</span>
         </span>
+        ${n.value ? html`<span class="now-value" style="color:${n.color}">${n.value}</span>` : nothing}
       </button>
       ${act
         ? html`<button class="now-action" style="background:${n.color}"
             @click=${() => ctx.call(act.domain, act.service, act.data, act.target)}>${act.label}</button>`
+        : n.dismiss
+          ? html`<button class="now-action" style="background:${n.color}" @click=${() => ctx.dismiss(n.dismiss!.key)}>${n.dismiss.label}</button>`
+          : nothing}
+      ${n.progress !== undefined
+        ? html`<span class="now-progress" style="width:calc((100% - 60px) * ${Math.max(0, Math.min(1, n.progress))});background:${n.color}"></span>`
         : nothing}
     </div>
   `;
@@ -112,8 +124,13 @@ export function renderOverview(ctx: PageContext) {
   const weatherId = ent(config, 'weather');
   const w = weatherInfo(hass, weatherId);
   const bubbles = statusBubbles(hass, config);
-  const items = nowItems(hass, config, ctx.rooms, now, ctx.heating(), (r) => ctx.window(r));
+  const items = [
+    ...nowItems(hass, config, ctx.rooms, now, ctx.heating(), (r) => ctx.window(r)),
+    ...technikItems(hass, config, now, { dismissed: ctx.dismissed, pauseUntil: ctx.piholePause }),
+  ];
   const rooms = roomSummaries(hass, ctx.rooms, (r) => ctx.window(r));
+  const tech = isTechUser(hass, config) && hasTechnik(hass, config);
+  const techAlert = tech && technikProblemCount(hass, config, now, { dismissed: ctx.dismissed, pauseUntil: ctx.piholePause }) > 0;
 
   return html`
     <div class="overview">
@@ -122,6 +139,12 @@ export function renderOverview(ctx: PageContext) {
           <div class="date">${dateLine(now)}</div>
           <h1>${greeting(now)}</h1>
         </div>
+        <span class="head-actions">
+        ${tech
+          ? html`<button class="tech-btn" aria-label=${techAlert ? 'Technik öffnen, es gibt Meldungen' : 'Technik öffnen'} @click=${() => ctx.openSheet({ id: 'technik' })}>
+              ${icon(I.server, 20, 'rgba(255,255,255,0.85)', 2)}${techAlert ? html`<span class="tech-dot"></span>` : nothing}
+            </button>`
+          : nothing}
         <button class="weather" aria-label="Wetter öffnen" @click=${() => ctx.openSheet({ id: 'weather' })}>
           <span class="circle" style="width:40px;height:40px;background:rgba(143,208,255,0.2)">${icon(w.icon, 20, '#8fd0ff', 2)}</span>
           <span>
@@ -129,6 +152,7 @@ export function renderOverview(ctx: PageContext) {
             <span class="wp-label">${w.label}</span>
           </span>
         </button>
+        </span>
       </header>
 
       <div class="status">
@@ -211,6 +235,32 @@ export const overviewStyles = css`
     font-size: 28px;
     font-weight: 700;
   }
+  .head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .tech-btn {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .tech-dot {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 11px;
+    height: 11px;
+    border-radius: 6px;
+    background: #ff453a;
+    box-shadow: 0 0 0 2.5px var(--sd-bg, #0e1016);
+  }
   .weather {
     display: flex;
     align-items: center;
@@ -275,6 +325,24 @@ export const overviewStyles = css`
   }
   .now.wide {
     grid-column: 1 / -1;
+  }
+  .now {
+    position: relative;
+    overflow: hidden;
+  }
+  .now-value {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    margin-right: 8px;
+    filter: brightness(1.25);
+  }
+  .now-progress {
+    position: absolute;
+    left: 42px;
+    bottom: 0;
+    height: 3px;
+    border-radius: 2px;
   }
   .now-main {
     flex: 1;

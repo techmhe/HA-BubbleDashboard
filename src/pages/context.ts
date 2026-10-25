@@ -29,6 +29,9 @@ export type SheetState =
   | { id: 'ac' }
   | { id: 'weatherMetric'; metric: WeatherMetric }
   | { id: 'weatherRain' }
+  /** Pi-hole, services, guest WLAN, printer row (tech users only). */
+  | { id: 'technik' }
+  | { id: 'printer' }
   /** Room dew point vs. outdoor, with the airing recommendation as bands. */
   | { id: 'dew'; slug: string; range: DewRange }
   /** One forecast day; `date` is the daily forecast item's datetime. */
@@ -121,6 +124,12 @@ export interface PageContext {
   /** Small per-sheet UI state (time input open, chosen time, ...); reset when the sheet changes. */
   ui: Record<string, unknown>;
   setUi(patch: Record<string, unknown>): void;
+  /** Items hidden on this device (e.g. a finished print after "OK"). */
+  dismissed(key: string): boolean;
+  dismiss(key: string): void;
+  /** End of a Pi-hole pause started from this card (ms), if any. */
+  piholePause?: number;
+  setPiholePause(until?: number): void;
 }
 
 export type PageRenderer = (ctx: PageContext) => TemplateResult;

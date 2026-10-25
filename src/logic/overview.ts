@@ -138,7 +138,7 @@ export type NowAction =
   | { kind: 'service'; label: string; domain: string; service: string; data: Record<string, unknown>; target?: { entity_id: string | string[] } }
   | { kind: 'none' };
 
-export type NowTap = 'airing' | 'weather' | 'robby' | 'alarm' | 'rooms' | 'care' | { moreInfo: string } | { room: string } | null;
+export type NowTap = 'airing' | 'weather' | 'robby' | 'alarm' | 'rooms' | 'care' | 'technik' | 'printer' | { moreInfo: string } | { room: string } | null;
 
 export interface NowItem {
   id: string;
@@ -148,6 +148,12 @@ export interface NowItem {
   color: string;
   tint: string;
   action?: NowAction & { kind: 'service' };
+  /** Button that only hides the item on this device (stored under `key`). */
+  dismiss?: { label: string; key: string };
+  /** 0–1: thin progress bar along the bottom edge. */
+  progress?: number;
+  /** Short value right-aligned in the row, e.g. remaining time. */
+  value?: string;
   tap: NowTap;
 }
 
@@ -416,7 +422,7 @@ export function roomSummaries(
 
 
 /** Items that keep a full-width row: urgent ones, so their text stays readable. */
-const WIDE = new Set(['alarm', 'door', 'warn', 'heat', 'window', 'sensor']);
+const WIDE = new Set(['alarm', 'door', 'warn', 'heat', 'window', 'sensor', 'print', 'print-done', 'print-error', 'services', 'pihole']);
 
 /**
  * Two-column layout for "Aktuell": urgent and actionable items full width first, the rest as

@@ -302,3 +302,22 @@ export async function loadWeatherMetric(
     end,
   };
 }
+
+/** Energy of one meter since the start of the calendar month (kWh) in `total`. */
+export async function loadMonthEnergy(hass: HomeAssistant, id: string, now = Date.now()): Promise<SeriesResult> {
+  const first = new Date(now);
+  first.setDate(1);
+  first.setHours(0, 0, 0, 0);
+  const rows = await hass.callWS<Record<string, StatRow[]>>({
+    type: 'recorder/statistics_during_period',
+    start_time: first.toISOString(),
+    end_time: new Date(now).toISOString(),
+    statistic_ids: [id],
+    period: 'month',
+    types: ['change'],
+    units: { energy: 'kWh' },
+  });
+  const hour = await runningHour(hass, [id], 'change', now);
+  const sum = (r: StatRow[] | undefined) => (r ?? []).reduce((a, x) => a + (x.change ?? 0), 0);
+  return { past: [], start: first.getTime(), end: now, total: sum(rows[id]) + sum(hour.rows[id]) };
+}

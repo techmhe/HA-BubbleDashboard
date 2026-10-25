@@ -32,6 +32,17 @@ export const I = {
   snow: 'M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7M8 19h.01M12 19h.01M16 19h.01M10 22h.01M14 22h.01',
   fog: 'M4 10h16M3 14h18M6 18h12',
   tree: 'M12 2l6 9h-3l4 6H5l4-6H6zM12 17v5',
+  printer: 'M4 3h16v4H4zM9 7v4l3 3 3-3V7M6 21h12M8 17h8',
+  server: 'M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01',
+  shieldOff: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM4 4l16 16',
+  shieldOk: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM8.5 12l2.5 2.5 4.5-5',
+  wifi: 'M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 19.5h.01',
+  pause: 'M7 5h4v14H7zM13 5h4v14h-4z',
+  cube: 'M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5',
+  lock: 'M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3',
+  refresh: 'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',
+  chevron: 'M6 9l6 6 6-6',
+  expand: 'M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5',
 } as const;
 
 export type IconKey = keyof typeof I;

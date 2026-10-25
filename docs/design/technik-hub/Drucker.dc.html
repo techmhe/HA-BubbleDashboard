@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>3D-Drucker druckt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#08090c}
+*{box-sizing:border-box}
+.ph{width:390px;height:1060px;background:#08090c;color:#fff;font-family:Rubik,system-ui,sans-serif;position:relative;overflow:hidden}
+.sheet{position:absolute;left:0;right:0;bottom:0;top:44px;border-radius:42px 42px 0 0;background:#181a22;padding:8px 14px 24px;display:flex;flex-direction:column;gap:10px}
+.grab{align-self:center;width:40px;height:5px;border-radius:3px;background:rgba(255,255,255,.25)}
+.head{display:flex;align-items:center;gap:8px;height:60px;padding:0 6px 0 8px;border-radius:30px;background:rgba(255,255,255,.08)}
+.circle{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.close{width:40px;height:40px;border-radius:20px;background:rgba(255,255,255,.12);border:none;display:flex;align-items:center;justify-content:center}
+.card{border-radius:28px;background:rgba(255,255,255,.06);padding:14px}
+.lbl{font-size:12px;color:rgba(255,255,255,.72)}
+.pill{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:20px;background:rgba(255,255,255,.07)}
+.pv{font-size:15px;font-weight:700}.pl{font-size:11px;color:rgba(255,255,255,.72)}
+.ctl{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:72px;border-radius:24px;border:none;font-family:inherit;font-size:12px;font-weight:600;color:#fff;background:rgba(255,255,255,.07)}
+.chip{display:flex;align-items:center;gap:5px;height:26px;padding:0 10px;border-radius:13px;font-size:11px;font-weight:600;background:rgba(0,0,0,.55)}
+.slot{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+</style>
+</helmet>
+<div class="ph">
+  <div class="sheet">
+    <span class="grab"></span>
+    <div class="head">
+      <span class="circle" style="width:44px;height:44px;background:#bf9bff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v4H4zM9 7v4l3 3 3-3V7M6 21h12M8 17h8"></path></svg></span>
+      <span style="flex:1;min-width:0"><span style="display:block;font-size:18px;font-weight:700">3D-Drucker</span><span style="display:block;font-size:12px;color:rgba(255,255,255,.72)">Bambu Lab X2D · Büro</span></span>
+      <button class="close" aria-label="Schließen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+
+
+    <div aria-label="Druckerkamera live" style="position:relative;height:200px;border-radius:28px;overflow:hidden;background:radial-gradient(ellipse at 50% 70%, #3a3440 0%, #1c1b22 55%, #111116 100%)">
+      <div style="position:absolute;left:22%;right:22%;bottom:34px;height:16px;border-radius:4px;background:#2a2a30;box-shadow:0 -2px 0 #444"></div>
+      <div style="position:absolute;left:41%;width:18%;bottom:50px;height:38px;border-radius:4px 4px 0 0;background:linear-gradient(#26262b,#1a1a1f)"></div>
+      <div style="position:absolute;left:46%;width:8%;top:22px;height:58px;border-radius:4px;background:#3c3c44"></div>
+      <span class="chip" style="position:absolute;left:12px;top:12px"><span style="width:7px;height:7px;border-radius:4px;background:#ff453a"></span>Live</span>
+      <span class="chip" style="position:absolute;right:12px;top:12px">Tür zu</span>
+      <span class="chip" style="position:absolute;right:12px;bottom:12px" aria-label="Vollbild"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></span>
+    </div>
+
+    <div class="card" style="background:linear-gradient(160deg, rgba(191,155,255,.18), rgba(255,255,255,.05) 70%);display:flex;gap:14px;align-items:center">
+      <div style="position:relative;width:118px;height:118px;flex-shrink:0">
+        <svg width="118" height="118" viewBox="0 0 118 118" aria-hidden="true"><circle cx="59" cy="59" r="52" fill="none" stroke="rgba(191,155,255,.18)" stroke-width="10"></circle><circle cx="59" cy="59" r="52" fill="none" stroke="#bf9bff" stroke-width="10" stroke-linecap="round" stroke-dasharray="206 327" transform="rotate(-90 59 59)"></circle></svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:30px;font-weight:700;line-height:1">63 %</span>
+          <span class="lbl" style="margin-top:3px">Schicht 182/290</span>
+        </div>
+      </div>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div aria-label="Titelbild des Drucks" style="width:46px;height:46px;border-radius:12px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d6c4ff" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9zM12 12l8-4.5M12 12v9M12 12L4 7.5"></path></svg></div>
+          <span style="min-width:0"><span style="display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Halterung_v3</span><span class="lbl">86 g · PLA</span></span>
+        </div>
+        <span><span class="lbl">fertig um</span><span style="display:block;font-size:26px;font-weight:700;line-height:1.05">23:40</span></span>
+        <span style="font-size:13px;color:#d6c4ff;font-weight:600">noch 1 h 12 min</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:20px;background:rgba(255,255,255,.06);font-size:13px">
+      <span style="width:8px;height:8px;border-radius:4px;background:#30d158"></span>
+      <span style="font-weight:700">Druckt</span>
+      <span style="flex:1;color:rgba(255,255,255,.72)">· Arbeitsschritt: Drucken</span>
+      <span class="lbl">Standard</span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px">
+      <button class="ctl" style="background:rgba(255,214,10,.16)"><span class="circle" style="width:34px;height:34px;background:#ffd60a"><svg width="16" height="16" viewBox="0 0 24 24" fill="#2b2200" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg></span>Pause</button>
+      <button class="ctl" style="background:rgba(255,69,58,.14)"><span class="circle" style="width:34px;height:34px;background:#ff453a"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1f0606" aria-hidden="true"><path d="M5 5h14v14H5z"></path></svg></span>Stopp</button>
+      <button class="ctl" style="background:rgba(255,214,10,.16)"><span class="circle" style="width:34px;height:34px;background:#ffd60a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2b2200" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg></span>Licht an</button>
+      <button class="ctl" style="color:rgba(255,255,255,.45)"><span class="circle" style="position:relative;width:34px;height:34px;background:rgba(255,255,255,.08)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0"></path></svg><svg width="12" height="12" viewBox="0 0 24 24" fill="#ffc061" style="position:absolute;right:-2px;bottom:-2px" aria-hidden="true"><path d="M6 10V8a6 6 0 0 1 12 0v2h1v11H5V10zm3 0h6V8a3 3 0 0 0-6 0z"></path></svg></span>Strom</button>
+    </div>
+    <span class="lbl" style="margin:-4px 8px 0;font-size:11px">Stopp: halten zum Bestätigen · Strom gesperrt während Druck und bis Düse &lt; 50°</span>
+
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px">
+      <div class="pill"><span class="pv" style="color:#ffb37a">220°</span><span class="pl">Düse L</span></div>
+      <div class="pill"><span class="pv" style="color:rgba(255,255,255,.6)">38°</span><span class="pl">Düse R</span></div>
+      <div class="pill"><span class="pv" style="color:#ffb37a">65°</span><span class="pl">Bett</span></div>
+      <div class="pill"><span class="pv">34°</span><span class="pl">Druckraum</span></div>
+    </div>
+
+    <div class="card" style="display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="flex:1;font-size:14px;font-weight:600">Filament · AMS 2 Pro</span>
+        <span style="display:flex;align-items:center;gap:4px;font-size:12px;color:#7ee8a0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7ee8a0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"></path></svg>18 % · trocken</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px">
+        <sc-for list="{{slots}}" as="s" hint-placeholder-count="4">
+          <div class="slot">
+            <span class="circle" style="width:40px;height:40px;background:{{s.color}};box-shadow:{{s.ring}}"></span>
+            <span style="font-size:12px;font-weight:600">{{s.type}}</span>
+            <span class="pl" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%">{{s.name}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 14px;border-radius:26px;background:rgba(255,255,255,.06)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg>
+      <span style="flex:1;font-size:13px;font-weight:600">Steckdose · 182 W</span>
+      <span class="lbl">dieser Druck ≈ 0,6 kWh</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1060}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const slot = (color, type, name, active) => ({ color, type, name, ring: active ? '0 0 0 3px #181a22, 0 0 0 5px #bf9bff' : 'inset 0 0 0 1px rgba(255,255,255,.18)' });
+    return {
+      slots: [
+        slot('#1d1d1f', 'PLA', 'Schwarz', true),
+        slot('#f2f2f2', 'PETG', 'Weiß', false),
+        slot('#e5484d', 'PLA', 'Rot matt', false),
+        slot('#3b82f6', 'PLA', 'Blau', false),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

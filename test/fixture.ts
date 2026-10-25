@@ -1,6 +1,6 @@
 import type { HassEntity, HomeAssistant } from '../src/types';
 
-export type Def = [state: string, attrs?: Record<string, any>, minutesAgo?: number, reg?: { area?: string; labels?: string[]; device?: string; platform?: string }];
+export type Def = [state: string, attrs?: Record<string, any>, minutesAgo?: number, reg?: { area?: string; labels?: string[]; device?: string; platform?: string; translation_key?: string }];
 
 export const NOW = new Date(2026, 9, 24, 19, 30); // Sat 24 Oct 2026, 19:30 local
 
@@ -111,7 +111,7 @@ export function makeHass(
     const o = overrides[id] ?? {};
     const changed = new Date(now.getTime() - (o.minutesAgo ?? ago) * 60000).toISOString();
     states[id] = { entity_id: id, state: o.state ?? st, attributes: { ...attrs, ...o.attributes }, last_changed: changed, last_updated: changed };
-    if (reg) entities[id] = { entity_id: id, area_id: reg.area ?? null, labels: reg.labels ?? [], device_id: reg.device ?? null, platform: reg.platform };
+    if (reg) entities[id] = { entity_id: id, area_id: reg.area ?? null, labels: reg.labels ?? [], device_id: reg.device ?? null, platform: reg.platform, translation_key: reg.translation_key ?? null };
   }
   for (const [id, o] of Object.entries(overrides)) {
     if (states[id]) continue;

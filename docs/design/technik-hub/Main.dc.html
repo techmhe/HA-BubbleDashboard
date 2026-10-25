@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Übersicht v2</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#101218}
+*{box-sizing:border-box}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+.ph{width:390px;height:844px;background:#101218;color:#fff;font-family:Rubik,system-ui,sans-serif;position:relative;overflow:hidden}
+.ct{padding:22px 14px 0;display:flex;flex-direction:column;gap:12px}
+.circle{flex-shrink:0;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.sh{display:flex;align-items:center;gap:10px;margin:4px 6px 2px}
+.sh h2{margin:0;font-size:15px;font-weight:600}
+.rule{flex:1;height:2px;border-radius:1px;background:rgba(255,255,255,.12)}
+.meta{font-size:12px;color:rgba(255,255,255,.72);display:flex;align-items:center;gap:3px}
+.dot{width:7px;height:7px;border-radius:4px;flex-shrink:0}
+.bub{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px 8px;border-radius:22px;background:rgba(255,255,255,.07);min-width:0}
+.bv{font-size:13px;font-weight:700}.bl{font-size:11px;color:rgba(255,255,255,.72)}
+.now{display:flex;align-items:center;gap:8px;height:50px;padding:0 8px;border-radius:25px}
+.nt{flex:1;min-width:0}
+.ntt{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nts{display:block;font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.na{flex-shrink:0;height:32px;padding:0 14px;border-radius:16px;display:flex;align-items:center;font-size:13px;font-weight:700;color:#101010;border:none;font-family:inherit}
+.room{display:flex;align-items:center;gap:8px;height:48px;padding:0 4px 0 5px;border-radius:24px;background:rgba(255,255,255,.07);min-width:0}
+.room .circle{width:36px;height:36px;background:rgba(255,255,255,.12)}
+.room.heat{background:rgba(255,159,10,.12)}.room.heat .circle{background:#ff9f0a}
+.rn{display:block;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs{display:block;font-size:11px;color:rgba(255,255,255,.72)}
+.room.heat .rs{color:#ffc061}
+.rt{font-size:15px;font-weight:700;margin-right:8px}
+.nav{position:absolute;left:14px;right:14px;bottom:16px;display:flex;gap:4px;padding:6px;border-radius:34px;background:rgba(30,32,40,.88);border:1px solid rgba(255,255,255,.1);box-shadow:0 10px 30px rgba(0,0,0,.55)}
+.tab{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border-radius:23px;font-size:13px;font-weight:700;color:rgba(255,255,255,.8)}
+.tab.on{flex:2;background:#fff;color:#101218}
+.tp{position:relative;display:flex;align-items:center;gap:8px;height:52px;padding:0 10px 0 6px;border-radius:26px;background:rgba(255,255,255,.07);min-width:0;overflow:hidden}
+.bar{position:absolute;left:0;bottom:0;height:3px;border-radius:2px}
+</style>
+</helmet>
+<div class="ph">
+  <div class="ct">
+    <header style="display:flex;justify-content:space-between;align-items:center;padding:0 4px 0 6px">
+      <div>
+        <div style="font-size:14px;color:rgba(255,255,255,.72)">Sonntag, 25. Oktober</div>
+        <h1 style="margin:2px 0 0;font-size:28px;font-weight:700">Guten Abend</h1>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+      <a href="Netz.dc.html" aria-label="Technik öffnen, 1 Meldung" style="position:relative;width:52px;height:52px;border-radius:26px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v6H4zM4 14h16v6H4zM8 7h.01M8 17h.01"></path></svg>
+        <span style="position:absolute;top:5px;right:5px;width:12px;height:12px;border-radius:6px;background:#ff453a;border:2px solid #101218"></span>
+      </a>
+      <div style="display:flex;align-items:center;gap:8px;height:52px;padding:0 14px 0 6px;border-radius:26px;background:rgba(255,255,255,.08)">
+        <span class="circle" style="width:40px;height:40px;background:rgba(143,208,255,.2)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8fd0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a4 4 0 0 1-.5-8A5.5 5.5 0 0 1 17 8.5a3.5 3.5 0 0 1 0 6.5M9 18l-1 2M13 18l-1 2M17 18l-1 2"></path></svg></span>
+        <span><span style="display:block;font-size:18px;font-weight:700;line-height:1">9°</span><span style="display:block;font-size:11px;color:rgba(255,255,255,.72)">Regen</span></span>
+      </div>
+      </div>
+    </header>
+
+    <div style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:6px">
+      <sc-for list="{{bubbles}}" as="b" hint-placeholder-count="4">
+        <div class="bub">
+          <span class="circle" style="width:34px;height:34px;background:{{b.color}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{b.icon}}"></path></svg></span>
+          <span class="bv">{{b.value}}</span>
+          <span class="bl">{{b.label}}</span>
+        </div>
+      </sc-for>
+    </div>
+
+    <section style="display:flex;flex-direction:column;gap:6px">
+      <div class="sh"><h2>Aktuell</h2><span class="rule"></span><span class="meta">4</span></div>
+      <a href="Drucker.dc.html" class="now" style="position:relative;overflow:hidden;background:linear-gradient(90deg, rgba(191,155,255,.26), rgba(255,255,255,.05) 75%)">
+        <span class="circle" style="width:34px;height:34px;background:#bf9bff"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 3h16v4H4zM9 7v4l3 3 3-3V7M6 21h12M8 17h8"></path></svg></span>
+        <span class="nt"><span class="ntt">3D-Druck · 63 %</span><span class="nts">Halterung_v3 · fertig um 23:40</span></span>
+        <span style="flex-shrink:0;font-size:13px;font-weight:700;color:#d6c4ff;margin-right:8px">1:12 h</span>
+        <span class="bar" style="width:63%;background:#bf9bff;left:42px;max-width:calc(100% - 60px)"></span>
+      </a>
+      <a href="Netz.dc.html" class="now" style="background:linear-gradient(90deg, rgba(255,69,58,.28), rgba(255,255,255,.05) 75%)">
+        <span class="circle" style="width:34px;height:34px;background:#ff453a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6zM4 4l16 16"></path></svg></span>
+        <span class="nt"><span class="ntt">Werbeblocker aus</span><span class="nts">Pi-hole · seit gestern 22:05</span></span>
+        <button class="na" style="background:#ff453a">Einschalten</button>
+      </a>
+      <div class="now" style="background:linear-gradient(90deg, rgba(90,200,250,.25), rgba(255,255,255,.05) 75%)">
+        <span class="circle" style="width:34px;height:34px;background:#5ac8fa"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7"></path></svg></span>
+        <span class="nt"><span class="ntt">Jetzt lüften</span><span class="nts">Büro Anna 62 % · Badezimmer 61 % · 15 min</span></span>
+        <button class="na" style="background:#5ac8fa">Start</button>
+      </div>
+      <div class="now" style="background:linear-gradient(90deg, rgba(255,214,10,.22), rgba(255,255,255,.05) 75%)">
+        <span class="circle" style="width:34px;height:34px;background:#ffd60a"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"></path></svg></span>
+        <span class="nt"><span class="ntt">Robby: Wartung fällig</span><span class="nts">Filter &amp; Sensoren reinigen</span></span>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:6px">
+      <div class="sh"><h2>Zusammenfassung</h2><span class="rule"></span><span class="meta" style="font-size:11px"><span class="dot" style="background:#30d158"></span><span class="dot" style="background:#ffd60a"></span><span class="dot" style="background:#ff453a;margin-right:3px"></span>Luftqualität</span></div>
+      <div style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:6px">
+        <sc-for list="{{rooms}}" as="r" hint-placeholder-count="8">
+          <div class="room {{r.cls}}">
+            <span class="circle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+            <span style="flex:1;min-width:0"><span class="rn">{{r.name}}</span><span class="rs">{{r.sub}}</span></span>
+            <span class="rt">{{r.temp}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="nav">
+    <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+      <span class="tab {{t.cls}}"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"></path></svg>{{t.label}}</span>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const I = {
+      robby: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 8a3 3 0 1 0 0 6a3 3 0 1 0 0-6',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      bolt: 'M13 2L4 14h7l-1 8 9-12h-7z',
+      shield: 'M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z',
+      desk: 'M3 4h18v12H3zM8 20h8M12 16v4',
+      bath: 'M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM6 12V5a2 2 0 0 1 4 0',
+      bed: 'M3 18V8M3 14h18v4M21 14v-3a3 3 0 0 0-3-3h-7v6',
+      door: 'M6 3h12v18H6zM14 12h.01',
+      sofa: 'M4 11V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v3M2 11h20v6H2zM5 17v2M19 17v2',
+      pot: 'M4 9h16v8a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3zM2 9h20M9 5h6',
+      home: 'M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z',
+      thermo: 'M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z',
+      grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+    };
+    const room = (name, sub, temp, icon, heat) => ({ name, sub, temp, icon, cls: heat ? 'heat' : '', stroke: heat ? '#141008' : '#fff' });
+    return {
+      bubbles: [
+        { value: 'Geladen', label: 'Robby', color: '#f2f2f7', icon: I.robby },
+        { value: '5 an', label: 'Licht', color: '#ffd60a', icon: I.bulb },
+        { value: '775 W', label: 'Netzbezug', color: '#ff9f0a', icon: I.bolt },
+        { value: 'Aus', label: 'Alarm', color: '#bf9bff', icon: I.shield },
+      ],
+      rooms: [
+        room('Büro Anna', '62 %', '19,0°', I.desk, true),
+        room('Büro Max', '57 %', '19,2°', I.desk, false),
+        room('Badezimmer', '61 %', '19,1°', I.bath, false),
+        room('Schlafzimmer', '58 % · heizt', '19,1°', I.bed, true),
+        room('Flur 1.OG', '59 %', '19,5°', I.door, false),
+        room('Wohnzimmer', '60 % · heizt', '19,9°', I.sofa, true),
+        room('Küche & Essen', '58 %', '19,5°', I.pot, false),
+        room('Flur EG', '58 % · heizt', '18,9°', I.door, true),
+      ],
+      tabs: [
+        { label: 'Übersicht', icon: I.home, cls: 'on' },
+        { label: '', icon: I.thermo, cls: '' },
+        { label: '', icon: I.grid, cls: '' },
+        { label: '', icon: I.bolt, cls: '' },
+        { label: '', icon: I.shield, cls: '' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
