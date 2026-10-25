@@ -65,3 +65,31 @@ describe('heating check in Aktuell', () => {
     expect(nowItems(h, cfg, resolveRooms(h, cfg), NOW).some((i) => i.id === 'heat')).toBe(false);
   });
 });
+
+import { loadHeatingAlerts } from '../src/data/heating-check';
+
+describe('heating check loader', () => {
+  it('reads heating demand from statistics and keeps the window history small', async () => {
+    const cfg = { type: 'custom:ha-start-dashboard' };
+    const base = makeHass({ 'sensor.vtherm_badezimmer_power_percent': { state: '0' } });
+    const rooms = resolveRooms(base, cfg).filter((r) => r.slug === 'badezimmer');
+    const calls: Record<string, unknown>[] = [];
+    const now = NOW.getTime();
+    const temps = Array.from({ length: 24 }, (_, i) => ({ start: now - (23 - i) * M5, mean: 19 + i * 0.08 }));
+    const hass = {
+      ...base,
+      states: { ...base.states, [rooms[0].climate!]: { ...base.states[rooms[0].climate!], state: 'heat', attributes: { ...base.states[rooms[0].climate!].attributes, hvac_action: 'idle', temperature: 18, current_temperature: 20.8 } } },
+      callWS: async (msg: Record<string, unknown>) => {
+        calls.push(msg);
+        if (msg.type === 'recorder/statistics_during_period') {
+          return { [rooms[0].temperature]: temps, 'sensor.vtherm_badezimmer_power_percent': [{ start: now - 3 * 3600_000, mean: 0, max: 0 }] };
+        }
+        return {};
+      },
+    } as unknown as typeof base;
+    const alerts = await loadHeatingAlerts(hass, rooms, [], {}, now);
+    expect(calls.filter((c) => c.type === 'history/history_during_period').every((c) => c.no_attributes === true)).toBe(true);
+    expect((calls[0].statistic_ids as string[])).toContain('sensor.vtherm_badezimmer_power_percent');
+    expect(alerts.map((a) => a.slug)).toEqual(['badezimmer']);
+  });
+});

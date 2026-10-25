@@ -31,6 +31,9 @@ function renderRoom(ctx: PageContext, room: Room) {
             ${c.windowOpen
               ? html`<span class="winchip" title="Fenster offen" aria-label="Fenster offen">${icon(I.window, 11, '#5ac8fa', 2.6)}</span>`
               : nothing}
+            ${c.recommend && !c.windowOpen
+              ? html`<span class="winchip" title="Lüften empfohlen" aria-label="Lüften empfohlen">${icon(I.wind, 12, '#5ac8fa', 2.4)}</span>`
+              : nothing}
             ${heat
               ? html`<span class="heatchip" title="Heizung prüfen: +${fmt(heat.rise, 1)}° in ${heat.hours} h ohne Heizbedarf"
                   aria-label="Heizung prüfen">${icon(I.thermo, 11, '#ff9f0a', 2.6)}!</span>`

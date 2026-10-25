@@ -19,7 +19,8 @@ describe('review fixes', () => {
     const h = makeHass({ 'binary_sensor.fenster_flur_1_og': { state: 'on' } });
     const s = roomSummaries(h, resolveRooms(h, cfg));
     const note = (slug: string) => s.find((r) => r.room.slug === slug)!.note;
-    expect(note('arbeitszimmer_anna')).toBe('bitte lüften');
+    const anna = s.find((r) => r.room.slug === 'arbeitszimmer_anna')!;
+    expect(anna).toMatchObject({ note: 'heizt', recommend: true });
     expect(note('flur_1_og')).toBe('lüftet');
   });
 

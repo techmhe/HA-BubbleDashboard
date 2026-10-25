@@ -21,12 +21,12 @@ describe('roomClimate', () => {
     expect(c).toMatchObject({ cur: 19.9, target: 20, valve: 16, preset: null, label: 'heizt', heating: true, aq: '#ffd60a' });
     expect(c.presetTemps).toEqual({ eco: 18, comfort: 19, boost: 20, frost: 7 });
   });
-  it('labels Lüften empfohlen, lüftet (window open), Soll erreicht and Aus — never ruht', () => {
+  it('labels heizt, lüftet (window open), Soll erreicht and Aus — never ruht; a recommendation is a flag', () => {
     const h = makeHass({
       'binary_sensor.fenster_flur_1_og': { state: 'on' },
       'climate.vtherm_flur_eg': { state: 'off' },
     });
-    expect(roomClimate(h, room('arbeitszimmer_anna', h)).label).toBe('Lüften empfohlen');
+    expect(roomClimate(h, room('arbeitszimmer_anna', h))).toMatchObject({ label: 'heizt', recommend: true });
     expect(roomClimate(h, room('flur_1_og', h)).label).toBe('lüftet');
     expect(roomClimate(h, room('arbeitszimmer_max', h)).label).toBe('Soll erreicht');
     expect(roomClimate(h, room('flur_eg', h)).label).toBe('Aus');

@@ -21,6 +21,8 @@ export interface RoomClimate {
   dew: number | null;
   heating: boolean;
   vent: boolean;
+  /** Airing recommended (sensor "Jetzt lüften"); shown as an icon. */
+  recommend: boolean;
   off: boolean;
   valve: number | null;
   preset: string | null;
@@ -65,7 +67,8 @@ export function roomClimate(hass: HomeAssistant, room: Room, targetOverride?: nu
   const heating = !off && a.hvac_action === 'heating';
   const windowOpen = !!room.window && state(hass, room.window) === 'on';
   const airing = state(hass, room.airing);
-  const vent = airing === 'Jetzt lüften' || windowOpen;
+  const recommend = airing === 'Jetzt lüften';
+  const vent = recommend || windowOpen;
   const pm25 = room.pm25 ? num(hass, room.pm25) : null;
   const valve = Number.isFinite(Number(a.valve_open_percent)) ? Math.round(Number(a.valve_open_percent)) : null;
   return {
@@ -75,6 +78,7 @@ export function roomClimate(hass: HomeAssistant, room: Room, targetOverride?: nu
     dew: num(hass, `sensor.${room.slug}_taupunkt`),
     heating,
     vent,
+    recommend,
     off,
     valve,
     preset: typeof a.preset_mode === 'string' && a.preset_mode !== 'none' ? a.preset_mode : null,
@@ -87,7 +91,7 @@ export function roomClimate(hass: HomeAssistant, room: Room, targetOverride?: nu
     fanOn: !!room.purifier && state(hass, room.purifier) === 'on',
     windowOpen,
     airing,
-    label: off ? 'Aus' : windowOpen ? 'lüftet' : vent ? 'Lüften empfohlen' : heating ? 'heizt' : 'Soll erreicht',
+    label: off ? 'Aus' : windowOpen ? 'lüftet' : heating ? 'heizt' : 'Soll erreicht',
   };
 }
 

@@ -196,7 +196,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   Filters and batteries open the *Wartung* sheet: *Getauscht* presses the device's Battery
   Notes `*_battery_replaced` button, *Erledigt* a filter reset button on the device (where
   none exists, the sheet says to reset it on the device).
-- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* / *bitte lüften* (recommended) / *lüftet* (window open), and
+- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* / *lüftet* (window open), a blue airing icon when airing is recommended, and
   an air-quality dot only for rooms with a PM2.5 sensor (green ≤ 12, yellow ≤ 35, red > 35).
 
 ### What Klima shows
@@ -211,7 +211,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*
   (sets `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`,
   `input_select.alle_raume_dauer`, then runs `script.alle_raume_anwenden`).
-- Rooms per floor with −/Soll/+, state *heizt* / *Lüften empfohlen* / *lüftet* (window open) / *Soll erreicht* / *Aus*, AQ dot and
+- Rooms per floor with −/Soll/+, state *heizt* / *lüftet* (window open) / *Soll erreicht* / *Aus*, a blue airing chip when airing is recommended, AQ dot and
   purifier fan icon, plus a blue window chip while the room's window is open and an orange *!* chip from the heating check. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
   area's floor with Kühlen / Trocknen / Aus; tap opens the AC sheet: target −/+, modes,
   fan, presets, swing, the device's switches (outdoor quiet mode first), self-cleaning,
@@ -333,10 +333,11 @@ room line, the outdoor dew point, and green bands where the room's `sensor.<slug
 Every 10 minutes the card looks for rooms that keep getting warmer although their thermostat
 does not call for heat, a hint at a stuck valve. A room is flagged when, over the last
 `hours`: it rose by at least `min_rise` K and is above its target (or its thermostat is off),
-the thermostat did not heat and the window stayed closed (both also during the hour before),
+the thermostat did not heat (VTherm's `sensor.<climate>_power_percent` statistics, else its
+history) and the window stayed closed (both also during the hour before),
 the room's power sensors averaged at most `max_power` W (dryer, gaming PC), PV averaged at
 most `max_pv` W (sun) and humidity did not jump by `max_hum_rise` points (shower). It loads
-5-minute statistics and the thermostat/window history in two requests. Flagged rooms show
+5-minute statistics and the window history (no attributes), a few KB. Flagged rooms show
 in *Aktuell* (tap → room card), as an orange chip on the Klima pill and in the room card's
 state line.
 

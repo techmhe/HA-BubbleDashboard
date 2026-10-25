@@ -156,7 +156,9 @@ export function renderOverview(ctx: PageContext) {
                 <span class="circle room-circle">${icon(r.icon, 16, accent ? '#141008' : '#fff', 2)}</span>
                 <span class="room-text">
                   <span class="room-name"><span class="ellipsis">${r.room.name}</span>${r.aq ? html`<span class="dot" style="background:${r.aq}"></span>` : nothing}</span>
-                  <span class="room-sub">${r.hum} %${r.note ? ` · ${r.note}` : ''}</span>
+                  <span class="room-sub">${r.hum} %${r.note ? ` · ${r.note}` : ''}${r.recommend
+                    ? html` · <span class="room-air" title="Lüften empfohlen" aria-label="Lüften empfohlen">${icon(I.wind, 13, '#5ac8fa', 2.4)}</span>`
+                    : nothing}</span>
                 </span>
                 <span class="room-temp">${r.temp}°</span>
               </button>
@@ -337,6 +339,10 @@ export const overviewStyles = css`
     gap: 5px;
     font-size: 13px;
     font-weight: 600;
+  }
+  .room-air {
+    display: inline-flex;
+    vertical-align: -2px;
   }
   .room-sub {
     display: block;

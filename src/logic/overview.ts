@@ -360,8 +360,10 @@ export interface RoomSummary {
   hum: string;
   heating: boolean;
   vent: boolean;
-  /** Short state after the humidity: "lüftet" (window open), "bitte lüften" or "heizt". */
+  /** Short state after the humidity: "lüftet" (window open) or "heizt". */
   note: string;
+  /** Airing recommended (shown as an icon). */
+  recommend: boolean;
   aq: string | null;
 }
 
@@ -386,7 +388,8 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
       hum: h !== null ? fmt(Math.round(h)) : '–',
       heating,
       vent,
-      note: windowOpen ? 'lüftet' : vent ? 'bitte lüften' : heating ? 'heizt' : '',
+      note: windowOpen ? 'lüftet' : heating ? 'heizt' : '',
+      recommend: vent && !windowOpen,
       aq: room.pm25 ? aqColor(num(hass, room.pm25)) : null,
     };
   });
