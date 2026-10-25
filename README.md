@@ -84,6 +84,7 @@ header: hide            # HA toolbar: hide | blend (transparent) | default; back
 entities:               # override any entity/script; defaults shown are this home's
   weather: weather.musterstadt
   gusts: sensor.musterstadt_windboen
+  precipitation: sensor.musterstadt_niederschlag   # DWD rain now (mm/h); optional
   alarm: alarm_control_panel.alarmo
   vacuum: vacuum.robby
   vacuum_status: sensor.robby_status
@@ -400,14 +401,15 @@ explicitly; a configured room still auto-fills the fields you leave out.
   `vacuum_selection`), mode tiles, suction (`vacuum.set_fan_speed`, hidden for mop only),
   water (hidden for vacuum only), passes 1×/2×, *N Räume starten* (`vacuum_clean_script`).
   All state lives in HA, so the Bubble build and the card stay in sync.
-- **Weather** (weather pill, storm item): now with today's range and rain, chips (humidity,
-  wind + direction, pressure, UV, visibility; tap → chart of the last 24 h from history and
-  the next 24 h from the hourly forecast), DWD warnings (current and advance, from the core
+- **Weather** (weather pill, storm item): now with today's range and rain, chips (rain now,
+  humidity, wind + direction, pressure, UV, visibility; tap → chart of the last 24 h from
+  history and the next 24 h from the hourly forecast; rain as hourly bars, the past from the
+  `precipitation` sensor's statistics, without the sensor only the forecast), DWD warnings (current and advance, from the core
   `dwd_weather_warnings` integration; repeats of one type are merged into one row with the
   highest level and the full time span; compact rows, tap shows the DWD text) or else a storm
   hint (gusts ≥ 60 km/h now or the first forecast day), 6 slots every 2 h, 7 days on a shared
   temperature scale (tap a day → its rain, sunshine, wind and gusts, humidity, UV, 3-hourly
-  slots and temperature curve as far as the hourly forecast reaches), pollen.
+  slots and temperature curve with hourly rain bars as far as the hourly forecast reaches), pollen.
   Forecasts come from `weather.get_forecasts` (hourly + daily), cached for 15 minutes.
 
 Room card: −/+ target (the big number; the current temperature below as *Ist*), *heizt · Ventile x %* (`valve_open_percent`), presets with

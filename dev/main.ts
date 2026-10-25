@@ -96,6 +96,13 @@ hass.callWS = (async (msg: Record<string, any>) => {
   const step = msg.period === 'day' ? 86400_000 : msg.period === '5minute' ? 300_000 : 3600_000;
   const out: Record<string, { start: number; mean: number }[]> = {};
   for (const id of msg.statistic_ids as string[]) {
+    if (id.includes('niederschlag')) {
+      // A shower in the past evening, dry since.
+      const rows = [];
+      for (let t = start, i = 0; t < end; t += step, i++) rows.push({ start: t, mean: i >= 3 && i <= 9 ? [0.4, 1.2, 2.6, 1.8, 0.9, 0.3, 0.1][i - 3] : 0 });
+      out[id] = rows;
+      continue;
+    }
     const isT = id.endsWith('_temperature');
     const rows = [];
     for (let t = start, i = 0; t < end; t += step, i++) {

@@ -7,6 +7,8 @@ import type { CardConfig } from '../types';
 export const ENTITY_DEFAULTS = {
   weather: 'weather.musterstadt',
   gusts: 'sensor.musterstadt_windboen',
+  /** Precipitation now in mm/h (DWD sensor); without it the hourly forecast is used. */
+  precipitation: 'sensor.musterstadt_niederschlag',
   alarm: 'alarm_control_panel.alarmo',
   vacuum: 'vacuum.robby',
   vacuum_status: 'sensor.robby_status',

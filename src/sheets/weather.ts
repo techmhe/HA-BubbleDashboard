@@ -2,14 +2,15 @@ import { css, html, nothing } from 'lit';
 import { icon, sheet } from '../components/ui';
 import { I, IC, weatherIcon } from '../icons';
 import { ent } from '../logic/entities';
-import { dailyRows, dayDetail, hourlySlots, pollenInfo, stormHint, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
-import { loadWeatherMetric } from '../data/series';
+import { dailyRows, dayDetail, hourlySlots, pollenInfo, rainNow, stormHint, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
+import { loadWeatherMetric, loadWeatherRain } from '../data/series';
 import { trendFigure } from '../components/trend';
 import { fmt, num } from '../logic/util';
 import type { PageContext } from '../pages/context';
 
 const BLUE = '#8fd0ff';
 const CHIP_ICONS: Record<string, string> = {
+  precipitation: IC.drop,
   humidity: IC.drop,
   wind: I.wind,
   pressure: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16M12 12l4-3',
@@ -24,7 +25,7 @@ export function weatherSheet(ctx: PageContext) {
   const { hass, config } = ctx;
   const id = ent(config, 'weather');
   const fc = ctx.forecast();
-  const now = weatherNow(hass, config, fc.daily, ctx.now);
+  const now = weatherNow(hass, config, fc.daily, ctx.now, fc.hourly);
   const hours = hourlySlots(fc.hourly, ctx.now);
   const days = dailyRows(fc.daily);
   const warnings = weatherWarnings(hass, config, ctx.now);
@@ -47,9 +48,9 @@ export function weatherSheet(ctx: PageContext) {
       </div>
       ${now.chips.length
         ? html`<div class="w-chips">
-            ${now.chips.map((c) => c.key in WEATHER_METRICS
+            ${now.chips.map((c) => c.key in WEATHER_METRICS || c.key === 'precipitation'
               ? html`<button class="w-chip" aria-label="${c.label}, Verlauf anzeigen"
-                  @click=${() => ctx.openSheet({ id: 'weatherMetric', metric: c.key as WeatherMetric })}>${icon(CHIP_ICONS[c.key], 14, BLUE, 2.2)}${c.label}</button>`
+                  @click=${() => ctx.openSheet(c.key === 'precipitation' ? { id: 'weatherRain' } : { id: 'weatherMetric', metric: c.key as WeatherMetric })}>${icon(CHIP_ICONS[c.key], 14, BLUE, 2.2)}${c.label}</button>`
               : html`<span class="w-chip">${icon(CHIP_ICONS[c.key], 14, BLUE, 2.2)}${c.label}</span>`)}
           </div>`
         : nothing}
@@ -168,11 +169,45 @@ export function weatherDaySheet(ctx: PageContext, date: string) {
         ? trendFigure({
             title: 'Temperatur', color: '#ffc061', unit: '°C', digits: 1, snap: 2, dot: false,
             data: { loading: false, past: d.temps, start: d.start, end: d.end },
-            caption: `${fmt(Math.min(...d.temps.map((p) => p.v)), 1)} – ${fmt(Math.max(...d.temps.map((p) => p.v)), 1)} °C`,
+            rain: d.rain,
+            caption: `${fmt(Math.min(...d.temps.map((p) => p.v)), 1)} – ${fmt(Math.max(...d.temps.map((p) => p.v)), 1)} °C${rainSum(d.rain)}`,
             labels: [at(0), at(5), at(10), at(14), at(19)],
           })
         : nothing}
     `,
+  });
+}
+
+const rainSum = (rain: { v: number }[]) => {
+  const sum = rain.reduce((s, p) => s + p.v, 0);
+  return sum > 0 ? ` · Regen ${fmt(sum, 1)} mm` : '';
+};
+
+/** Rain per hour: last 24 h from the precipitation sensor, next 24 h from the forecast. */
+export function weatherRainSheet(ctx: PageContext) {
+  const sensorId = ent(ctx.config, 'precipitation');
+  const sensor = ctx.hass.states[sensorId] ? sensorId : undefined;
+  const fc = ctx.forecast();
+  const data = ctx.series(`weather:rain:${fc.hourly.length ? fc.at : 0}`, () => loadWeatherRain(ctx.hass, sensor, fc.hourly), 10 * 60_000);
+  const now = rainNow(ctx.hass, ctx.config, fc.hourly, ctx.now);
+  const sum = (pts?: { v: number }[]) => fmt((pts ?? []).reduce((s, p) => s + p.v, 0), 1);
+  const caption = data.start
+    ? `${now !== null ? `jetzt ${fmt(now, 1)} mm/h · ` : ''}${sensor ? `24 h ${sum(data.past)} mm · ` : ''}nächste 24 h ${sum(data.future)} mm`
+    : undefined;
+  const at = (h: number) => `${String(new Date(data.start + h * HOUR).getHours()).padStart(2, '0')} Uhr`;
+  return sheet({
+    title: 'Niederschlag',
+    subtitle: sensor ? '24 h zurück · 24 h Vorhersage' : '24 h Vorhersage',
+    color: BLUE,
+    glow: 'rgba(90,140,220,0.35)',
+    iconPath: IC.drop,
+    iconStroke: '#0a1a2a',
+    onClose: ctx.closeSheet,
+    onBack: () => ctx.openSheet({ id: 'weather' }),
+    body: html`${trendFigure({
+      title: 'Niederschlag', color: '#5ac8fa', unit: 'mm', digits: 1, snap: 0.5, data, caption, zero: true, bars: true,
+      labels: data.start ? [at(0), at(12), 'jetzt', at(36), at(48)] : [],
+    })}`,
   });
 }
 

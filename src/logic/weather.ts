@@ -55,7 +55,19 @@ export interface WeatherNow {
   chips: { key: string; label: string }[];
 }
 
-export function weatherNow(hass: HomeAssistant, config: CardConfig, daily: ForecastItem[], now = new Date()): WeatherNow {
+/** Precipitation in mm/h now: the precipitation sensor, else the forecast of the running hour. */
+export function rainNow(hass: HomeAssistant, config: CardConfig, hourly: ForecastItem[], now = new Date()): number | null {
+  const s = hass.states[ent(config, 'precipitation')]?.state;
+  if (s !== undefined && s !== '' && Number.isFinite(Number(s))) return Number(s);
+  const from = new Date(now);
+  from.setMinutes(0, 0, 0);
+  const cur = hourly.find((h) => new Date(h.datetime).getTime() === from.getTime());
+  return cur?.precipitation !== undefined ? cur.precipitation : null;
+}
+
+export function weatherNow(
+  hass: HomeAssistant, config: CardConfig, daily: ForecastItem[], now = new Date(), hourly: ForecastItem[] = [],
+): WeatherNow {
   const w = hass.states[ent(config, 'weather')];
   const a = w?.attributes ?? {};
   const t = Number(a.temperature);
@@ -71,6 +83,8 @@ export function weatherNow(hass: HomeAssistant, config: CardConfig, daily: Forec
   const source = [provider, updated && !Number.isNaN(updated.getTime()) ? `Stand ${updated.getHours()} Uhr` : ''].filter(Boolean).join(' · ');
   const chips: WeatherNow['chips'] = [];
   const has = (k: string) => a[k] !== undefined && a[k] !== null && Number.isFinite(Number(a[k]));
+  const rain = rainNow(hass, config, hourly, now);
+  if (rain !== null) chips.push({ key: 'precipitation', label: `Regen ${mm(rain)} mm/h` });
   if (has('humidity')) chips.push({ key: 'humidity', label: `Feuchte ${Math.round(a.humidity)} %` });
   if (has('wind_speed')) chips.push({ key: 'wind', label: `Wind ${Math.round(a.wind_speed)} ${a.wind_speed_unit ?? 'km/h'}${has('wind_bearing') ? ` ${compass(Number(a.wind_bearing))}` : ''}` });
   if (has('pressure')) chips.push({ key: 'pressure', label: `${Math.round(a.pressure)} ${a.pressure_unit ?? 'hPa'}` });
@@ -157,6 +171,8 @@ export interface DayDetail {
   /** Every third hour of the day from the hourly forecast (empty beyond its reach). */
   hours: HourSlot[];
   temps: { t: number; v: number }[];
+  /** Rain per hour in mm, from the hourly forecast. */
+  rain: { t: number; v: number }[];
   start: number;
   end: number;
 }
@@ -196,6 +212,7 @@ export function dayDetail(day: ForecastItem, hourly: ForecastItem[]): DayDetail 
         condition: h.condition ?? '',
       })),
     temps: hours.filter((h) => h.temperature !== undefined).map((h) => ({ t: new Date(h.datetime).getTime(), v: h.temperature! })),
+    rain: hours.filter((h) => h.precipitation !== undefined).map((h) => ({ t: new Date(h.datetime).getTime(), v: h.precipitation! })),
     start,
     end,
   };

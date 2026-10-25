@@ -247,6 +247,35 @@ export async function loadCost(
   return { ...cost, total };
 }
 
+/**
+ * Rain bars per hour: the last 24 h from the precipitation sensor's hourly statistics (mean
+ * mm/h = mm in that hour), the running hour and the next 23 from the hourly forecast.
+ */
+export async function loadWeatherRain(hass: HomeAssistant, sensor: string | undefined, hourly: ForecastItem[]): Promise<SeriesResult> {
+  const now = Date.now();
+  const hourStart = Math.floor(now / HOUR) * HOUR;
+  const start = Math.floor((now - 24 * HOUR) / HOUR) * HOUR;
+  const end = hourStart + 24 * HOUR;
+  const rows = sensor
+    ? await hass.callWS<Record<string, StatRow[]>>({
+        type: 'recorder/statistics_during_period',
+        start_time: new Date(start).toISOString(),
+        end_time: new Date(hourStart).toISOString(),
+        statistic_ids: [sensor],
+        period: 'hour',
+        types: ['mean'],
+      })
+    : {};
+  const past = (sensor ? rows[sensor] ?? [] : [])
+    .map((row) => ({ t: ts(row.start), v: Math.max(0, Number(row.mean)) }))
+    .filter((p) => Number.isFinite(p.v) && p.t < hourStart);
+  const future = hourly
+    .map((f) => ({ t: Date.parse(f.datetime), v: Number(f.precipitation) }))
+    .filter((p) => Number.isFinite(p.t) && Number.isFinite(p.v) && p.t >= hourStart && p.t < end)
+    .slice(0, 24);
+  return { past, future, start, end, step: HOUR };
+}
+
 /** Last 24 h from the weather entity's history (hourly means) and the next 24 h from the hourly forecast. */
 export async function loadWeatherMetric(
   hass: HomeAssistant, entity: string, metric: WeatherMetric, hourly: ForecastItem[],

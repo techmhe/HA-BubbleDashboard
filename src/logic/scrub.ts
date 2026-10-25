@@ -55,6 +55,8 @@ export interface ScrubInput {
   value: (v: number) => string;
   /** Label for the comparison value, e.g. "außen". */
   compareName?: string;
+  /** Extra line per time, e.g. the rain of that hour. */
+  extra?: (t: number) => string | undefined;
 }
 
 /** The points a finger can scrub over: bars centred on their slot, forecast marked. */
@@ -75,6 +77,8 @@ export function scrubPoints(o: ScrubInput): ScrubPoint[] {
       const c = cmpAt(p.t);
       if (c) out.extra = `${o.compareName} ${o.value(c.v)}`;
     }
+    const more = o.extra?.(p.t);
+    if (more) out.extra = out.extra ? `${more} · ${out.extra}` : more;
     return out;
   };
   return [...o.past.map((p) => point(p, false)), ...(o.future ?? []).map((p) => point(p, true))];

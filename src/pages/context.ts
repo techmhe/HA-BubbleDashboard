@@ -28,6 +28,7 @@ export type SheetState =
   | { id: 'care' }
   | { id: 'ac' }
   | { id: 'weatherMetric'; metric: WeatherMetric }
+  | { id: 'weatherRain' }
   /** Room dew point vs. outdoor, with the airing recommendation as bands. */
   | { id: 'dew'; slug: string; range: DewRange }
   /** One forecast day; `date` is the daily forecast item's datetime. */

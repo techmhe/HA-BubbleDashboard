@@ -1,5 +1,5 @@
 import { css, html, nothing, svg } from 'lit';
-import { timeChart } from '../logic/climate';
+import { timeChart, type Point } from '../logic/climate';
 import { fmt } from '../logic/util';
 import type { SeriesData } from '../pages/context';
 import { scrubPoints } from '../logic/scrub';
@@ -35,7 +35,13 @@ export interface TrendOptions {
   compareName?: string;
   /** Background bands from data.bands, coloured by level. */
   bandColors?: Record<string, string>;
+  /** Rain bars (mm per hour) along the bottom, on their own scale (temperature forecast). */
+  rain?: Point[];
 }
+
+const RAIN_COLOR = '#5ac8fa';
+/** Rain bars use the lower 45 % of the plot; 2 mm/h fills it unless more is forecast. */
+const RAIN_TOP = BOTTOM - (BOTTOM - TOP) * 0.45;
 
 /** Line or bar chart over time; a forecast part (data.future) is drawn dashed after a "jetzt" marker. */
 export function trendFigure(o: TrendOptions) {
@@ -55,10 +61,24 @@ export function trendFigure(o: TrendOptions) {
   const grid = [g.hi, (g.lo + g.hi) / 2, g.lo];
   const nowX = future.length ? g.x(future[0].t) : null;
   const label = `${o.title}: ${o.caption ?? ''}`;
+  const rain = (o.rain ?? []).filter((p) => p.v > 0);
+  const rainMax = Math.max(2, ...rain.map((p) => p.v));
+  const rainY = (v: number) => BOTTOM - (v / rainMax) * (BOTTOM - RAIN_TOP);
+  const rainAt = new Map((o.rain ?? []).map((p) => [p.t, p.v]));
   const points = scrubPoints({
     past, future, compare, step, bars: !!(o.bars && step), start: d.start, end: d.end, x: g.x, y: g.y,
     value: (v) => `${fmt(v, o.digits)}${unit}`, compareName: o.compareName,
+    extra: o.rain ? (t) => {
+      const v = rainAt.get(t);
+      return v ? `Regen ${fmt(v, 1)} mm` : undefined;
+    } : undefined,
   });
+  const bar = (p: Point, fill: string, opacity: number, y: (v: number) => number) => {
+    const x0 = g.x(p.t);
+    const w = Math.max(1, g.x(p.t + (step || 3600_000)) - x0 - 2);
+    const top = y(p.v);
+    return svg`<rect x=${x0 + 1} y=${top} width=${w} height=${Math.max(0, BOTTOM - top)} rx=${Math.min(3, w / 2)} fill=${fill} opacity=${opacity}></rect>`;
+  };
 
   return html`
     <figure class="tr-fig" style="background:${o.color}14">
@@ -80,14 +100,15 @@ export function trendFigure(o: TrendOptions) {
                 height=${BOTTOM - TOP + 6} fill=${o.bandColors?.[band.level] ?? 'rgba(255,255,255,0.08)'}></rect>`)}
               ${cmp?.line ? svg`<polyline points=${cmp.line} fill="none" stroke=${o.compareColor ?? 'rgba(255,255,255,0.6)'} stroke-width="1.6" stroke-linejoin="round" opacity="0.9"></polyline>` : nothing}
               ${o.bars && step
-                ? past.map((p) => {
-                    const x0 = g.x(p.t);
-                    const w = Math.max(1, g.x(p.t + step) - x0 - 2);
-                    const y = g.y(p.v);
-                    return svg`<rect x=${x0 + 1} y=${y} width=${w} height=${Math.max(0, BOTTOM - y)} rx=${Math.min(3, w / 2)} fill=${o.color} opacity="0.85"></rect>`;
-                  })
+                ? svg`${past.map((p) => bar(p, o.color, 0.85, g.y))}
+                  ${future.map((p) => bar(p, o.color, 0.4, g.y))}
+                  ${nowX !== null
+                    ? svg`<line x1=${nowX} y1=${TOP - 6} x2=${nowX} y2=${BOTTOM} stroke="rgba(255,255,255,0.35)" stroke-dasharray="2 3"></line>
+                        <text x=${nowX + 4} y=${TOP - 2} fill="rgba(255,255,255,0.7)" font-size="10">Vorhersage</text>`
+                    : nothing}`
                 : svg`
                   ${g.area ? svg`<polygon points=${g.area} fill=${o.color} opacity="0.16"></polygon>` : nothing}
+                  ${rain.map((p) => bar(p, RAIN_COLOR, 0.7, rainY))}
                   ${g.line ? svg`<polyline points=${g.line} fill="none" stroke=${o.color} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : nothing}
                   ${fut?.line ? svg`<polyline points=${fut.line} fill="none" stroke=${o.color} stroke-width="2" stroke-dasharray="5 5" opacity="0.7"></polyline>` : nothing}
                   ${nowX !== null

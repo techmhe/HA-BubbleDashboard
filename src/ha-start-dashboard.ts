@@ -29,7 +29,7 @@ import { energyStyles, renderEnergy } from './pages/energy';
 import { renderSecurity, securityStyles } from './pages/security';
 import { deviceSheet, deviceStyles } from './sheets/device';
 import { robbySheet, robbyStyles } from './sheets/robby';
-import { weatherDaySheet, weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
+import { weatherDaySheet, weatherMetricSheet, weatherRainSheet, weatherSheet, weatherStyles } from './sheets/weather';
 import { dewSheet, dewStyles } from './sheets/dew';
 import { trendStyles } from './components/trend';
 import { scrubStyles } from './components/scrub';
@@ -679,6 +679,8 @@ export class HaStartDashboard extends LitElement {
         return energyChartSheet(ctx, sh.key, sh.range, sh.name, sh.back);
       case 'weatherMetric':
         return weatherMetricSheet(ctx, sh.metric);
+      case 'weatherRain':
+        return weatherRainSheet(ctx);
       case 'dew':
         return dewSheet(ctx, sh.slug, sh.range);
       case 'weatherDay':
