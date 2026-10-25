@@ -337,7 +337,7 @@ the thermostat did not heat (VTherm's `sensor.<climate>_power_percent` statistic
 history) and the window stayed closed (both also during the hour before),
 the room's power sensors averaged at most `max_power` W (dryer, gaming PC), PV averaged at
 most `max_pv` W (sun) and humidity did not jump by `max_hum_rise` points (shower). It loads
-5-minute statistics and the window history (no attributes), a few KB. Flagged rooms show
+5-minute statistics and the window history (no attributes), about 80 KB for 8 rooms. Flagged rooms show
 in *Aktuell* (tap → room card), as an orange chip on the Klima pill and in the room card's
 state line.
 
