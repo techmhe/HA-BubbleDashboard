@@ -3,6 +3,8 @@ import { icon, sheet } from '../components/ui';
 import { I } from '../icons';
 import { airingInsight, chart, type Point } from '../logic/climate';
 import { fmt } from '../logic/util';
+import { scrubTime, type ScrubPoint } from '../logic/scrub';
+import { scrub } from '../components/scrub';
 import type { HistoryRange, PageContext } from '../pages/context';
 
 const W = 300;
@@ -26,7 +28,7 @@ function xLabels(range: HistoryRange, start: number, end: number): string[] {
   return out;
 }
 
-function figure(kind: 'temp' | 'hum', points: Point[]) {
+function figure(kind: 'temp' | 'hum', points: Point[], range: HistoryRange) {
   const isT = kind === 'temp';
   const color = isT ? '#ff9f0a' : '#5ac8fa';
   const g = isT ? chart(points, W, TOP, BOTTOM, 0.3, 0.3, 1) : chart(points, W, TOP, BOTTOM, 1, 1, 2);
@@ -38,6 +40,14 @@ function figure(kind: 'temp' | 'hum', points: Point[]) {
     ? `${f(Math.min(...vals))}${isT ? '°' : ''} – ${f(Math.max(...vals))}${unit} · jetzt ${f(now)}${unit}`
     : 'keine Daten';
   const mid = (g.lo + g.hi) / 2;
+  const span = points.length > 1 ? points[points.length - 1].t - points[0].t : 0;
+  const step = range === '30d' ? 24 * 3600_000 : 3600_000;
+  const scrubbed: ScrubPoint[] = points.map((p, i) => ({
+    x: Math.round((i / Math.max(1, points.length - 1)) * W * 10) / 10,
+    y: g.y(p.v),
+    time: scrubTime(p.t, { step, span }),
+    value: `${f(p.v)}${unit}`,
+  }));
   const y60 = g.y(60);
   const show60 = !isT && 60 > g.lo && 60 < g.hi;
   return html`
@@ -46,6 +56,7 @@ function figure(kind: 'temp' | 'hum', points: Point[]) {
         <span style="font-size:14px;font-weight:600;color:${isT ? '#ffc061' : '#8fd8ff'}">${isT ? 'Temperatur' : 'Luftfeuchte'}</span>
         <span class="cap">${caption}</span>
       </figcaption>
+      <div class="sc-wrap" ${scrub({ points: scrubbed, width: 338, height: 140, color })}>
       <svg width="100%" viewBox="0 0 338 140" role="img" aria-label="${isT ? 'Temperaturverlauf' : 'Luftfeuchteverlauf'}: ${caption}">
         ${isT
           ? svg`${[g.hi, mid, g.lo].map((v) => svg`
@@ -63,6 +74,8 @@ function figure(kind: 'temp' | 'hum', points: Point[]) {
         ${g.line ? svg`<polyline points=${g.line} fill="none" stroke=${color} stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></polyline>` : nothing}
         ${g.last ? svg`<circle cx=${g.last.x} cy=${g.last.y} r="4.5" fill=${color} stroke="#181a22" stroke-width="2"></circle>` : nothing}
       </svg>
+      <div class="sc-layer"></div>
+      </div>
     </figure>
   `;
 }
@@ -91,9 +104,9 @@ export function historySheet(ctx: PageContext, slug: string, range: HistoryRange
         : data.error
           ? html`<div class="hist-msg">Verlauf nicht verfügbar: ${data.error}</div>`
           : html`
-            ${figure('temp', data.temp)}
+            ${figure('temp', data.temp, range)}
             <div>
-              ${figure('hum', data.hum)}
+              ${figure('hum', data.hum, range)}
               <div class="xlabels">${labels.map((l) => html`<span>${l}</span>`)}</div>
             </div>
             ${insight

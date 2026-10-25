@@ -53,7 +53,7 @@ export function dewSheet(ctx: PageContext, slug: string, range: DewRange) {
       </div>
       ${trendFigure({
         title: 'Taupunkt', color: ROOM, unit: '°C', digits: 1, snap: 2, data, caption: caption || undefined,
-        compareColor: OUTDOOR, bandColors: BANDS, labels: labels(range, data.start, data.end),
+        compareColor: OUTDOOR, compareName: 'außen', bandColors: BANDS, labels: labels(range, data.start, data.end),
       })}
       <div class="dw-legend">
         <span><i style="background:${ROOM}"></i>innen</span>

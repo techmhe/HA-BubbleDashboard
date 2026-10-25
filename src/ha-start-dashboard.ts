@@ -28,6 +28,7 @@ import { robbySheet, robbyStyles } from './sheets/robby';
 import { weatherDaySheet, weatherMetricSheet, weatherSheet, weatherStyles } from './sheets/weather';
 import { dewSheet, dewStyles } from './sheets/dew';
 import { trendStyles } from './components/trend';
+import { scrubStyles } from './components/scrub';
 import { careSheet, careStyles } from './sheets/care';
 import { acSheet, acStyles } from './sheets/ac';
 import { energyChartSheet } from './sheets/energy-chart';
@@ -650,6 +651,7 @@ export class HaStartDashboard extends LitElement {
     careStyles,
     acStyles,
     trendStyles,
+    scrubStyles,
     css`
       .wrap {
         position: relative;

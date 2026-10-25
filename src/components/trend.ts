@@ -2,6 +2,8 @@ import { css, html, nothing, svg } from 'lit';
 import { timeChart } from '../logic/climate';
 import { fmt } from '../logic/util';
 import type { SeriesData } from '../pages/context';
+import { scrubPoints } from '../logic/scrub';
+import { scrub } from './scrub';
 
 const VW = 338;
 const W = 300;
@@ -29,6 +31,8 @@ export interface TrendOptions {
   labels: string[];
   /** Second, thinner line from data.compare (e.g. outdoor), on the same scale. */
   compareColor?: string;
+  /** Name of the comparison line in the scrub bubble (e.g. "außen"). */
+  compareName?: string;
   /** Background bands from data.bands, coloured by level. */
   bandColors?: Record<string, string>;
 }
@@ -51,6 +55,10 @@ export function trendFigure(o: TrendOptions) {
   const grid = [g.hi, (g.lo + g.hi) / 2, g.lo];
   const nowX = future.length ? g.x(future[0].t) : null;
   const label = `${o.title}: ${o.caption ?? ''}`;
+  const points = scrubPoints({
+    past, future, compare, step, bars: !!(o.bars && step), start: d.start, end: d.end, x: g.x, y: g.y,
+    value: (v) => `${fmt(v, o.digits)}${unit}`, compareName: o.compareName,
+  });
 
   return html`
     <figure class="tr-fig" style="background:${o.color}14">
@@ -63,6 +71,7 @@ export function trendFigure(o: TrendOptions) {
         : d.loading && !past.length
           ? html`<div class="tr-msg">Lade Verlauf …</div>`
           : html`
+            <div class="sc-wrap" ${scrub({ points, width: VW, height: 150, color: o.color })}>
             <svg width="100%" viewBox="0 0 ${VW} 150" role="img" aria-label=${label}>
               ${grid.map((v) => svg`
                 <line x1="0" y1=${g.y(v)} x2=${VW} y2=${g.y(v)} stroke="rgba(255,255,255,0.08)"></line>
@@ -87,6 +96,8 @@ export function trendFigure(o: TrendOptions) {
                     : nothing}
                   ${g.last && o.dot !== false ? svg`<circle cx=${g.last.x} cy=${g.last.y} r="4.5" fill=${o.color} stroke="#181a22" stroke-width="2"></circle>` : nothing}`}
             </svg>
+            <div class="sc-layer"></div>
+            </div>
             <div class="tr-x">${o.labels.map((l) => html`<span>${l}</span>`)}</div>`}
     </figure>
   `;

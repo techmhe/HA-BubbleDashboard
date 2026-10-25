@@ -319,6 +319,11 @@ Tapping the dew point fact opens a dew point chart (24 h / 3 days / 7 days from 
 room line, the outdoor dew point, and green bands where the room's `sensor.<slug>_luftung` said
 "Jetzt lüften" (dark) or "Lüften möglich" (light).
 
+All charts (energy, costs, battery, dew point, room history, weather) can be read by finger:
+tap or drag along the chart and a line, a dot and a bubble show the time and value of the
+bar or point underneath (the dew chart adds the outdoor value, forecasts say *Vorhersage*).
+Vertical swipes still scroll the sheet.
+
 ## Development
 
 ```bash
