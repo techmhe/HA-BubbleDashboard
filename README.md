@@ -173,6 +173,89 @@ The v0.1 top-level keys `weather`, `alarm`, `vacuum`, `front_door` and `ac` stil
 `entities:` wins when both are set. All service calls put entities in `target:` (never
 `entity_id` inside `data:`), following the HA best practices.
 
+## Home Assistant setup
+
+The card only reads states and calls services; timers, pushes and other logic live in HA.
+Everything is optional: a missing entity hides its part of the card. Entity ids below are
+the defaults; each can be changed under `entities:` (see Configuration).
+
+| What | Entities | Used for |
+|---|---|---|
+| Room sensors | `sensor.<slug>_temperature`, `_humidity`, `_taupunkt` (`state_class: measurement`) | pills, history and dew charts, heating check (needs statistics) |
+| Airing per room | template `sensor.<slug>_luftung`: *Jetzt lüften* / *Lüften möglich* / *Nicht lüften* | room auto-detection, airing icon, *Jetzt lüften* item, dew chart bands |
+| Room power | `sensor.<slug>_leistung` (label `raumverbrauch`, `state_class: measurement`) | Räume pill, heating check (appliances) |
+| Outdoor | `sensor.aussen_temperature`, `sensor.aussen_taupunkt_messung`, weather entity | Klima outdoor pill |
+| Airing | `timer.luften`, `sensor.stossluften_dauer` (minutes), `script.luften_starten` | countdown, airing sheet, *Start* |
+| Heating | VTherm climates (`preset_temperatures`, `valve_open_percent`, `sensor.<climate>_power_percent`), `input_boolean.heizbetrieb`, `script.heizung_preset_alle` | Klima, room card, heating check |
+| All rooms | `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`, `input_select.alle_raume_dauer`, `script.alle_raume_anwenden` | *Alle Räume einstellen* |
+| Devices | label `dashboard_gerat`; `script.gerat_verzogert_ausschalten` (fields `entity`, `minutes`) | Räume, room card, *Ausschalten in* |
+| Appliances | `input_boolean.<name>_fertig`, switched on by your own automation | *fertig* item with *OK* |
+| Waste | `sensor.naechster_abfalltermin` (attribute `daysTo`) | waste item |
+| Energy | HA's energy dashboard (solar, grid with prices, battery, device consumption), grid/battery/house power sensors, `sensor.stromverbrauch_nicht_erfasst` | Energie page |
+| Robby | vacuum, status/battery/error sensors, map/mode/mop selects, `input_text.robby_raumauswahl`, `input_number.robby_durchgange`, Robby scripts | Robby sheet |
+| Maintenance | Battery Notes `*_battery_replaced` buttons, filter reset buttons | *Wartung* sheet |
+| Weather | weather entity, core `dwd_weather_warnings`, `sensor.pollenflug_*` | weather sheet, warnings |
+
+`script.luften_starten` starts the timer with the recommended duration:
+
+```yaml
+sequence:
+  - action: timer.start
+    target: { entity_id: timer.luften }
+    data:
+      duration:
+        minutes: "{{ states('sensor.stossluften_dauer') | int(15) }}"
+```
+
+`sensor.stossluften_dauer` is a template on the outdoor temperature, e.g.
+`{{ 5 if t < 0 else 10 if t < 15 else 20 if t < 20 else 25 }}`.
+
+To start the countdown automatically when a window opens (and stop it when all are closed
+again), add an automation like this; the card then shows the countdown on Übersicht and Klima:
+
+```yaml
+alias: "Lüften: Timer bei offenem Fenster"
+mode: queued
+triggers:
+  - trigger: state
+    entity_id: [binary_sensor.fenster_wohnzimmer, binary_sensor.fenster_bad]
+    from: "off"
+    to: "on"
+    id: opened
+  - trigger: state
+    entity_id: [binary_sensor.fenster_wohnzimmer, binary_sensor.fenster_bad]
+    from: "on"
+    to: "off"
+    id: closed
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: opened
+          - condition: state
+            entity_id: timer.luften
+            state: idle
+        sequence:
+          - action: script.luften_starten
+      - conditions:
+          - condition: trigger
+            id: closed
+          - condition: state
+            entity_id: timer.luften
+            state: active
+          - condition: state
+            entity_id: [binary_sensor.fenster_wohnzimmer, binary_sensor.fenster_bad]
+            state: "off"
+        sequence:
+          - action: timer.cancel
+            target: { entity_id: timer.luften }
+```
+
+Push messages ("Fenster schließen", airing finished) are HA automations too, sent only to
+persons at home. If both a per-window push and a timer-finished push exist, give the
+timer-finished one a condition that the per-window automation is not running
+(`attribute: current`, `state: 0`) to avoid two pushes for the same window.
+
 ### Room auto-detection
 
 Without `rooms:`, every `sensor.<slug>_luftung` becomes a room. For each room the card
@@ -351,7 +434,7 @@ Vertical swipes still scroll the sheet.
 
 ```bash
 npm install
-npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?busy, ?calm, ?page=climate)
+npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?page=climate, ?busy, ?calm, ?airing)
 npm test           # vitest: status logic
 npm run check      # typecheck + tests + build
 ```
@@ -359,7 +442,8 @@ npm run check      # typecheck + tests + build
 The build writes one ES module, `dist/ha-start-dashboard.js` (Lit bundled, no runtime
 imports). `dist/` is committed so releases and direct resource URLs work without a build.
 
-Release: bump `version` in `package.json`, `npm run check`, commit, tag `vX.Y.Z`, push `main`
-and the tag to both remotes, then `gh release create vX.Y.Z` on GitHub **without** attaching
-the file. HACS then reads `dist/ha-start-dashboard.js` at the tag. Downloading an attached
-release asset currently fails in HACS 2.0.5 (aiohttp `LineTooLong` on GitHub's asset redirect).
+Release: on a branch, bump `version` in `package.json`, `npm run check`, commit, merge into
+`main`, tag `vX.Y.Z`, push `main` and the tag to GitHub, then
+`gh release create vX.Y.Z dist/ha-start-dashboard.js`. HACS installs the attached file;
+in HA: HACS → Start Dashboard → *Update information*, then download, then reload the
+dashboard.
