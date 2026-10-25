@@ -128,7 +128,7 @@ export const PIHOLE_PROBLEM_MIN = 70;
 export interface PiholeState {
   entity: string;
   kind: 'on' | 'off' | 'paused';
-  /** Share of blocked queries today, rounded. */
+  /** Share of blocked queries today (%), whole numbers; one decimal below 1 %. */
   percent?: number;
   /** Off since (ms). */
   offSince?: number;
@@ -153,7 +153,7 @@ export function pihole(hass: HomeAssistant, config: CardConfig, now: Date, pause
   if (st.state === 'on') {
     const pctId = platformEntities(hass, 'pi_hole').find((e) => e.translation_key === 'percent_ads_blocked')?.entity_id;
     const pct = num(hass, pctId);
-    return { entity, kind: 'on', percent: pct === null ? undefined : Math.round(pct), problem: false };
+    return { entity, kind: 'on', percent: pct === null ? undefined : pct < 1 ? Math.round(pct * 10) / 10 : Math.round(pct), problem: false };
   }
   if (pauseUntil && pauseUntil > now.getTime()) {
     return { entity, kind: 'paused', remainingSec: Math.ceil((pauseUntil - now.getTime()) / 1000), problem: false };

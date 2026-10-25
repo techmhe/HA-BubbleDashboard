@@ -4018,7 +4018,7 @@ function La(e, t, n, r) {
 		return {
 			entity: i,
 			kind: "on",
-			percent: n === null ? void 0 : Math.round(n),
+			percent: n === null ? void 0 : n < 1 ? Math.round(n * 10) / 10 : Math.round(n),
 			problem: !1
 		};
 	}
@@ -9189,7 +9189,7 @@ function hl(e, t) {
       <span class="tk-line">
         <span class="circle" style="width:40px;height:40px;background:${ll}">${M(O.shieldOk, 18, "#06200e", 2.2)}</span>
         <span class="tk-grow"><span class="tk-title">Werbeblocker an</span>
-          <span class="tk-sub">${t.percent === void 0 ? "Pi-hole" : `heute ${L(t.percent)} % aller Anfragen blockiert`}</span></span>
+          <span class="tk-sub">${t.percent === void 0 ? "Pi-hole" : `heute ${L(t.percent, +(t.percent < 1))} % aller Anfragen blockiert`}</span></span>
       </span>
       <div class="tk-two">
         <button class="tk-btn soft" @click=${r("00:05:00", 3e5)}>5 min pausieren</button>
@@ -9657,7 +9657,7 @@ var Jl = o`
   .pr-cam ha-camera-stream { display: block; width: 100%; }
   .pr-chip { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 11px; font-weight: 600; background: rgba(0, 0, 0, 0.55); }
   .pr-dotl { width: 7px; height: 7px; border-radius: 4px; background: #ff453a; }
-`, Yl, Xl = "0.19.0", $ = [
+`, Yl, Xl = "0.19.1", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",

@@ -51,7 +51,7 @@ function adBlocker(ctx: PageContext, ph: PiholeState) {
       <span class="tk-line">
         <span class="circle" style="width:40px;height:40px;background:${GREEN}">${icon(I.shieldOk, 18, '#06200e', 2.2)}</span>
         <span class="tk-grow"><span class="tk-title">Werbeblocker an</span>
-          <span class="tk-sub">${ph.percent !== undefined ? `heute ${fmt(ph.percent)} % aller Anfragen blockiert` : 'Pi-hole'}</span></span>
+          <span class="tk-sub">${ph.percent !== undefined ? `heute ${fmt(ph.percent, ph.percent < 1 ? 1 : 0)} % aller Anfragen blockiert` : 'Pi-hole'}</span></span>
       </span>
       <div class="tk-two">
         <button class="tk-btn soft" @click=${pause('00:05:00', 5 * 60_000)}>5 min pausieren</button>

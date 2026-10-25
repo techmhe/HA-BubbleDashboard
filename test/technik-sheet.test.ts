@@ -64,6 +64,11 @@ describe('technik sheet', () => {
     expect(templateText(technikSheet(ctx()))).toContain('image.gaeste_wlan_qr_code');
   });
 
+  it('shows small block shares with one decimal', () => {
+    const t = visibleText(technikSheet(ctx({ 'sensor.pi_hole_anteil': { state: '0.117037862539291' } })));
+    expect(t).toContain('heute 0,1 % aller Anfragen blockiert');
+  });
+
   it('shows a running pause with a countdown', () => {
     const t = visibleText(technikSheet(ctx({ 'switch.pi_hole': { state: 'off', minutesAgo: 1 } }, 'max', { piholePause: NOW.getTime() + 222_000 })));
     expect(t).toContain('Pausiert noch 3:42');
