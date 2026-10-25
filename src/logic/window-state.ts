@@ -26,6 +26,18 @@ export interface WindowState {
 export const GRACE_MIN = 5;
 
 /** Compact open time for pills: "33 min", "2 h". */
+export type RoomAccent = 'alert' | 'vent' | 'heat' | '';
+
+/**
+ * Room tint, the same on Übersicht, Klima and the room sheet: red when a window is open too
+ * long, blue only while airing runs with the window open, orange while heating.
+ */
+export function roomAccent(win: WindowState, heating: boolean): RoomAccent {
+  if (win.kind === 'overdue') return 'alert';
+  if (win.kind === 'airing') return 'vent';
+  return heating ? 'heat' : '';
+}
+
 export function shortOpen(min: number): string {
   return min < 60 ? `${min} min` : `${Math.floor(min / 60)} h`;
 }

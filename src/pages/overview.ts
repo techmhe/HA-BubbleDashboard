@@ -8,7 +8,7 @@ import {
 } from '../logic/overview';
 import { ent } from '../logic/entities';
 import { clock } from '../logic/climate';
-import { shortOpen, type WindowState } from '../logic/window-state';
+import { roomAccent, shortOpen, type WindowState } from '../logic/window-state';
 import type { PageContext } from './context';
 
 function statusActions(ctx: PageContext, b: StatusBubble) {
@@ -171,7 +171,7 @@ export function renderOverview(ctx: PageContext) {
         </div>
         <div class="sum-grid">
           ${rooms.map((r) => {
-            const accent = r.win.kind === 'overdue' ? 'alert' : r.vent || r.win.kind === 'airing' ? 'vent' : r.heating ? 'heat' : '';
+            const accent = roomAccent(r.win, r.heating);
             return html`
               <button class="room ${accent}" @click=${() => ctx.openSheet({ id: 'room', slug: r.room.slug })}
                 aria-label="${r.room.name}: ${r.temp} Grad, ${r.hum} Prozent">

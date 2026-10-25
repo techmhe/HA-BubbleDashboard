@@ -5,7 +5,7 @@ import {
   airingInfo, average, climateSummary, clock, entityFloor, floorGroups, outdoor, PRESETS, roomClimate, temp, type FloorGroup,
 } from '../logic/climate';
 import type { Room } from '../logic/rooms';
-import { shortOpen, type WindowState } from '../logic/window-state';
+import { roomAccent, shortOpen, type WindowState } from '../logic/window-state';
 import { fmt, state } from '../logic/util';
 import { ent } from '../logic/entities';
 import type { PageContext } from './context';
@@ -49,7 +49,7 @@ function winLabel(w: WindowState): string | null {
 function renderRoom(ctx: PageContext, room: Room) {
   const c = roomClimate(ctx.hass, room, ctx.target(room.climate));
   const w = ctx.window(room);
-  const accent = w.kind === 'overdue' ? 'alert' : c.heating ? 'heat' : c.vent ? 'vent' : '';
+  const accent = roomAccent(w, c.heating);
   const climate = room.climate;
   const heat = ctx.heating().find((a) => a.slug === room.slug);
   return html`

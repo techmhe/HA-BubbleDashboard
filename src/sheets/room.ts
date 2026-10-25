@@ -3,7 +3,7 @@ import { hold } from '../components/hold';
 import { icon, mdi, SCENE_COLORS, sheet } from '../components/ui';
 import { deviceIcon, I, IC, PRESET_ICONS, roomIcon } from '../icons';
 import { clock, PRESETS, roomClimate, temp } from '../logic/climate';
-import type { WindowState } from '../logic/window-state';
+import { roomAccent, type WindowState } from '../logic/window-state';
 import { ent } from '../logic/entities';
 import { activeScenes, lightTint, roomDevices, roomScenes } from '../logic/devices';
 import { durationText, fmt, num, state } from '../logic/util';
@@ -33,8 +33,9 @@ export function roomSheet(ctx: PageContext, slug: string) {
   if (!room) return nothing;
   const c = roomClimate(hass, room, ctx.target(room.climate));
   const climate = room.climate;
-  const color = c.heating ? '#ff9f0a' : c.vent ? '#5ac8fa' : 'rgba(255,255,255,0.16)';
-  const glow = c.heating ? 'rgba(255,159,10,0.2)' : c.vent ? 'rgba(90,200,250,0.2)' : 'rgba(255,255,255,0.06)';
+  const accent = roomAccent(room.window ? ctx.window(room) : { kind: 'none', openMin: 0, remaining: 0 }, c.heating);
+  const color = { alert: '#ff453a', vent: '#5ac8fa', heat: '#ff9f0a', '': 'rgba(255,255,255,0.16)' }[accent];
+  const glow = { alert: 'rgba(255,69,58,0.2)', vent: 'rgba(90,200,250,0.2)', heat: 'rgba(255,159,10,0.2)', '': 'rgba(255,255,255,0.06)' }[accent];
   const heat = ctx.heating().find((a) => a.slug === room.slug);
   const stateLine = heat
     ? `Heizung prüfen · +${fmt(heat.rise, 1)}° in ${heat.hours} h ohne Heizbedarf`
@@ -63,7 +64,7 @@ export function roomSheet(ctx: PageContext, slug: string) {
     color,
     glow,
     iconPath: roomIcon(room.name, room.icon),
-    iconStroke: c.heating || c.vent ? '#1a1206' : '#fff',
+    iconStroke: accent ? '#1a1206' : '#fff',
     onClose: ctx.closeSheet,
     headerExtra: html`
       <button class="histpill" aria-label="Verlauf Temperatur und Luftfeuchte"

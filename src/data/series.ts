@@ -26,6 +26,25 @@ export interface SeriesResult {
 type StatRow = { start: number | string; change?: number | null; mean?: number | null };
 const ts = (v: number | string) => (typeof v === 'number' ? v : Date.parse(v));
 
+/**
+ * Long-term statistics only exist for finished hours, so the running hour comes from the
+ * 5-minute statistics (from the start of the hour until now).
+ */
+async function runningHour(hass: HomeAssistant, ids: string[], type: 'change' | 'mean', now = Date.now()) {
+  const start = Math.floor(now / HOUR) * HOUR;
+  if (!ids.length) return { start, rows: {} as Record<string, StatRow[]> };
+  const rows = await hass.callWS<Record<string, StatRow[]>>({
+    type: 'recorder/statistics_during_period',
+    start_time: new Date(start).toISOString(),
+    end_time: new Date(now).toISOString(),
+    statistic_ids: ids,
+    period: '5minute',
+    types: [type],
+    ...(type === 'change' ? { units: { energy: 'kWh' } } : {}),
+  });
+  return { start, rows };
+}
+
 function rangeSpec(range: ChartRange, now = Date.now()) {
   if (range === '4h') {
     // Short-term statistics (kept ~10 days by the recorder): 48 points.
@@ -47,21 +66,29 @@ function rangeSpec(range: ChartRange, now = Date.now()) {
 /** Energy per hour (24 h) or per day (7/30 days), summed over the given statistics (kWh). */
 export async function loadEnergy(hass: HomeAssistant, ids: string[], range: ChartRange): Promise<SeriesResult> {
   const r = rangeSpec(range);
-  const rows = await hass.callWS<Record<string, StatRow[]>>({
-    type: 'recorder/statistics_during_period',
-    start_time: new Date(r.start).toISOString(),
-    end_time: new Date(r.end).toISOString(),
-    statistic_ids: ids,
-    period: r.period,
-    types: ['change'],
-    units: { energy: 'kWh' },
-  });
+  const [rows, live] = await Promise.all([
+    hass.callWS<Record<string, StatRow[]>>({
+      type: 'recorder/statistics_during_period',
+      start_time: new Date(r.start).toISOString(),
+      end_time: new Date(r.end).toISOString(),
+      statistic_ids: ids,
+      period: r.period,
+      types: ['change'],
+      units: { energy: 'kWh' },
+    }),
+    r.period === '5minute' ? null : runningHour(hass, ids, 'change'),
+  ]);
   const sums = new Map<number, number>();
   for (const id of ids) {
     for (const row of rows[id] ?? []) {
       const t = ts(row.start);
       sums.set(t, (sums.get(t) ?? 0) + (Number(row.change) || 0));
     }
+  }
+  if (live) {
+    // Hourly view: the running hour's own bar (unless HA already compiled it); daily view: today.
+    const t = r.period === 'hour' ? live.start : r.end - r.step;
+    if (r.period !== 'hour' || !sums.has(t)) sums.set(t, (sums.get(t) ?? 0) + statChanges(live.rows, ids));
   }
   const past: Point[] = [];
   for (let t = r.start; t < r.end; t += r.step) past.push({ t, v: Math.max(0, sums.get(t) ?? 0) });
@@ -140,15 +167,23 @@ export async function loadDewPoint(
 /** Mean power per hour/day for sensors without an energy statistic. */
 export async function loadPower(hass: HomeAssistant, id: string, range: ChartRange): Promise<SeriesResult> {
   const r = rangeSpec(range);
-  const rows = await hass.callWS<Record<string, StatRow[]>>({
-    type: 'recorder/statistics_during_period',
-    start_time: new Date(r.start).toISOString(),
-    end_time: new Date(r.end).toISOString(),
-    statistic_ids: [id],
-    period: r.period,
-    types: ['mean'],
-  });
+  const [rows, live] = await Promise.all([
+    hass.callWS<Record<string, StatRow[]>>({
+      type: 'recorder/statistics_during_period',
+      start_time: new Date(r.start).toISOString(),
+      end_time: new Date(r.end).toISOString(),
+      statistic_ids: [id],
+      period: r.period,
+      types: ['mean'],
+    }),
+    r.period === 'hour' ? runningHour(hass, [id], 'mean') : null,
+  ]);
   const past = (rows[id] ?? []).map((row) => ({ t: ts(row.start), v: Math.abs(Number(row.mean)) })).filter((p) => Number.isFinite(p.v));
+  if (live && !past.some((p) => p.t === live.start)) {
+    // Running hour: mean of its finished 5-minute means.
+    const vals = (live.rows[id] ?? []).map((row) => Math.abs(Number(row.mean))).filter(Number.isFinite);
+    if (vals.length) past.push({ t: live.start, v: vals.reduce((a, b) => a + b, 0) / vals.length });
+  }
   return { past, start: r.start, end: r.end, step: r.step };
 }
 
@@ -163,14 +198,24 @@ export async function loadEnergyToday(
   const costIds = tariff && tariff.importPrice === null ? tariff.costStats : [];
   const compIds = tariff && tariff.exportPrice === null ? tariff.compensationStats : [];
   const all = [...ids.solar, ...ids.import, ...ids.export, ...ids.batteryOut, ...ids.batteryIn, ...costIds, ...compIds];
-  const rows = await hass.callWS<Record<string, { change?: number | null }[]>>({
-    type: 'recorder/statistics_during_period',
-    start_time: midnight.toISOString(),
-    statistic_ids: all,
-    period: 'hour',
-    types: ['change'],
-    units: { energy: 'kWh' },
-  });
+  const [hours, live] = await Promise.all([
+    hass.callWS<Record<string, StatRow[]>>({
+      type: 'recorder/statistics_during_period',
+      start_time: midnight.toISOString(),
+      statistic_ids: all,
+      period: 'hour',
+      types: ['change'],
+      units: { energy: 'kWh' },
+    }),
+    runningHour(hass, all, 'change'),
+  ]);
+  // Finished hours plus the running hour (skipped if HA already compiled it).
+  const rows: Record<string, StatRow[]> = {};
+  for (const id of all) {
+    const done = hours[id] ?? [];
+    const partial = done.some((r) => ts(r.start) === live.start) ? [] : live.rows[id] ?? [];
+    if (hours[id] || live.rows[id]) rows[id] = [...done, ...partial];
+  }
   return {
     pv: statChanges(rows, ids.solar),
     import: statChanges(rows, ids.import),

@@ -367,6 +367,9 @@ explicitly; a configured room still auto-fills the fields you leave out.
   readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → mean power curve
   with average and energy used: 4 h (5-minute statistics), 24 h (hourly), 7 / 30 days
   (daily). The top six are shown; *Alle anzeigen* lists every consumer above 1 W.
+- HA writes hourly statistics only after an hour has ended, so every energy chart, the
+  24 h power curves and the *Heute* totals add the running hour from 5-minute statistics
+  (bar 18–19 Uhr at 18:47 shows 18:00–18:45).
 
 ### What Schutz shows
 
@@ -425,7 +428,7 @@ Each room has one airing state, shown the same way on Übersicht (icon on the pi
 
 | State | When | Look |
 |---|---|---|
-| Empfohlen | `sensor.<slug>_luftung` = *Jetzt lüften*, window closed | blue wind icon |
+| Empfohlen | `sensor.<slug>_luftung` = *Jetzt lüften*, window closed | blue wind icon; the pill keeps its own tint (orange while heating) |
 | Lüftet | window open, within the recommended duration (`sensor.stossluften_dauer`) + 5 min grace | blue window icon with the time left, pill blue |
 | Zu lange offen | open past duration + 5 min (*Zeit um*), or open ≥ 5 min while the room says *Nicht lüften* (*bringt nichts*) | red window icon with the open time, pill red, *Fenster schließen* in Aktuell |
 | Sensor? | sensor unavailable, or open ≥ 30 min while it is ≥ 3 K colder outside and the room neither cooled (< 0.3 K) nor changed humidity (< 3 points) | grey dashed window icon, *Fenstersensor prüfen* in Aktuell |
@@ -433,6 +436,9 @@ Each room has one airing state, shown the same way on Übersicht (icon on the pi
 
 *1 h ignorieren* writes into `input_text.fenster_ignorieren` (create it as a text helper,
 max 255), so the snooze applies on every phone; without the helper the button is hidden.
+Pill tint is the same on Übersicht, Klima and in the room card: red = window open too long,
+blue = airing runs (window open), orange = heating, otherwise none.
+
 The stuck-sensor check loads 5-minute statistics of the rooms with a window open ≥ 30 min.
 
 ### Heating check
