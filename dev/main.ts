@@ -93,7 +93,7 @@ hass.callWS = (async (msg: Record<string, any>) => {
     }
     return out;
   }
-  const step = msg.period === 'day' ? 86400_000 : 3600_000;
+  const step = msg.period === 'day' ? 86400_000 : msg.period === '5minute' ? 300_000 : 3600_000;
   const out: Record<string, { start: number; mean: number }[]> = {};
   for (const id of msg.statistic_ids as string[]) {
     const isT = id.endsWith('_temperature');

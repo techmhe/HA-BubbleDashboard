@@ -335,3 +335,8 @@ export function consumptionSeries(parts: {
     return { t, v: consumption(p, i, e, o, n).consumed };
   });
 }
+
+/** Energy in kWh from mean power per bucket (W) and the bucket size in ms. */
+export function powerEnergyKWh(points: { t: number; v: number }[], step: number): number {
+  return points.reduce((sum, p) => sum + (p.v * step) / 3600_000 / 1000, 0);
+}

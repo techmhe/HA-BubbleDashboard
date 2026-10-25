@@ -3,16 +3,23 @@ import { sheet } from '../components/ui';
 import { trendFigure } from '../components/trend';
 import { I } from '../icons';
 import { loadConsumption, loadCost, loadEnergy, loadEnergyShare, loadPower, type ChartRange } from '../data/series';
-import { batteryStatIds, consumerEnergyStat, energyStatIds, gridTariff, type ShareKind } from '../logic/energy';
+import { batteryStatIds, energyStatIds, gridTariff, powerEnergyKWh, type ShareKind } from '../logic/energy';
 import { ent } from '../logic/entities';
 import { friendlyName, fmt, num } from '../logic/util';
 import type { PageContext, SheetState } from '../pages/context';
+
+const HOUR = 3600_000;
 
 const RANGES: { id: ChartRange; name: string }[] = [
   { id: '24h', name: '24 h' },
   { id: '7d', name: '7 Tage' },
   { id: '30d', name: '30 Tage' },
 ];
+
+/** Power curves get a finer 4 h window on top (5-minute statistics). */
+export function chartRanges(kind: string): { id: ChartRange; name: string }[] {
+  return kind === 'W' ? [{ id: '4h', name: '4 h' }, ...RANGES] : RANGES;
+}
 
 const ROLES: Record<string, { name: string; color: string; ids: 'solar' | 'import' | 'export' }> = {
   pv: { name: 'PV erzeugt', color: '#ffd60a', ids: 'solar' },
@@ -31,7 +38,8 @@ function labels(range: ChartRange, start: number, end: number): string[] {
   const out: string[] = [];
   for (let i = 0; i < 5; i++) {
     const d = new Date(start + ((end - start) * i) / 5);
-    if (range === '24h') out.push(`${String(d.getHours()).padStart(2, '0')} Uhr`);
+    if (range === '4h') out.push(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
+    else if (range === '24h') out.push(`${String(d.getHours()).padStart(2, '0')} Uhr`);
     else if (range === '7d') out.push(d.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', ''));
     else out.push(`${d.getDate()}.${d.getMonth() + 1}.`);
   }
@@ -40,8 +48,8 @@ function labels(range: ChartRange, start: number, end: number): string[] {
 
 /**
  * Chart sheet for the Energie page. Kinds:
- * - kWh: energy per hour/day (PV, grid import/export, house consumption, a consumer with an energy statistic)
- * - W: mean power (a consumer without an energy statistic)
+ * - kWh: energy per hour/day (PV, grid import/export, house consumption)
+ * - W: mean power curve of a single consumer (incl. "Nicht erfasst"), with a 4 h window
  * - share: autarky / self-use in percent
  * The battery has its own sheet: energy charged and discharged.
  */
@@ -79,12 +87,8 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     title = name ?? ctx.config.names?.[key] ?? friendlyName(ctx.hass, key).replace(/\s*(device\s+)?(power|leistung)$/i, '');
     color = '#ff9f0a';
     needsPrefs = false;
-    const stat = consumerEnergyStat(ctx.hass, key, prefs);
-    if (stat) load = () => loadEnergy(ctx.hass, [stat], range);
-    else {
-      kind = 'W';
-      load = () => loadPower(ctx.hass, key, range);
-    }
+    kind = 'W';
+    load = () => loadPower(ctx.hass, key, range);
   }
   const unit = kind === 'share' ? '%' : kind;
   const data = load
@@ -99,9 +103,9 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
         ? `Summe ${fmt(sum, 2)} €${data.total ? ` · Vergütung ${fmt(data.total, 2)} €` : ''}`
       : kind === 'kWh'
         ? `Summe ${fmt(sum, sum < 10 ? 2 : 1)} kWh`
-        : `Ø ${fmt(sum / data.past.length)} W`;
-  const per = range === '24h' ? 'Stunde' : 'Tag';
-  const subtitle = { kWh: `kWh pro ${per}`, W: 'mittlere Leistung', share: `Anteil pro ${per}`, '€': `Netzbezug in € pro ${per}` }[kind];
+        : `Ø ${fmt(sum / data.past.length)} W · ${fmt(powerEnergyKWh(data.past, data.step ?? HOUR), 2)} kWh`;
+  const per = range === '4h' ? '5 Min' : range === '24h' ? 'Stunde' : 'Tag';
+  const subtitle = { kWh: `kWh pro ${per}`, W: `mittlere Leistung pro ${per}`, share: `Anteil pro ${per}`, '€': `Netzbezug in € pro ${per}` }[kind];
 
   return sheet({
     title,
@@ -112,8 +116,8 @@ export function energyChartSheet(ctx: PageContext, key: string, range: ChartRang
     onClose: ctx.closeSheet,
     onBack: back ? () => ctx.openSheet(back) : undefined,
     body: html`
-      <div class="tabs3" role="tablist" aria-label="Zeitraum">
-        ${RANGES.map((r) => html`<button role="tab" aria-selected=${r.id === range} class=${r.id === range ? 'sel' : ''}
+      <div class="tabs3" role="tablist" aria-label="Zeitraum" style=${`grid-template-columns:repeat(${chartRanges(kind).length},minmax(0,1fr))`}>
+        ${chartRanges(kind).map((r) => html`<button role="tab" aria-selected=${r.id === range} class=${r.id === range ? 'sel' : ''}
           @click=${() => ctx.openSheet({ id: 'energyChart', key, range: r.id, name, back })}>${r.name}</button>`)}
       </div>
       ${trendFigure({

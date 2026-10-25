@@ -6,7 +6,7 @@ import type { HomeAssistant } from '../types';
 const HOUR = 3600_000;
 const DAY = 24 * HOUR;
 
-export type ChartRange = '24h' | '7d' | '30d';
+export type ChartRange = '4h' | '24h' | '7d' | '30d';
 
 export interface SeriesResult {
   past: Point[];
@@ -27,6 +27,12 @@ type StatRow = { start: number | string; change?: number | null; mean?: number |
 const ts = (v: number | string) => (typeof v === 'number' ? v : Date.parse(v));
 
 function rangeSpec(range: ChartRange, now = Date.now()) {
+  if (range === '4h') {
+    // Short-term statistics (kept ~10 days by the recorder): 48 points.
+    const step = 5 * 60_000;
+    const end = Math.ceil(now / step) * step;
+    return { start: end - 4 * HOUR, end, period: '5minute' as const, step };
+  }
   if (range === '24h') {
     const end = Math.ceil(now / HOUR) * HOUR;
     return { start: end - 24 * HOUR, end, period: 'hour' as const, step: HOUR };

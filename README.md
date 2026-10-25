@@ -265,9 +265,9 @@ explicitly; a configured room still auto-fills the fields you leave out.
   *Gespart*. Tap → grid cost in € per hour/day.
 - *Aktuell*: every `*_power` sensor that sits in an area, one per device (measured
   before Powercalc), without the grid meter, PV, battery and house devices, phase and PoE
-  readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → chart from the
-  device's energy statistic (energy dashboard entry or the device's energy sensor), else
-  mean power. The top six are shown; *Alle anzeigen* lists every consumer above 1 W.
+  readings; plus *Nicht erfasst*. Largest first, all values positive. Tap → mean power curve
+  with average and energy used: 4 h (5-minute statistics), 24 h (hourly), 7 / 30 days
+  (daily). The top six are shown; *Alle anzeigen* lists every consumer above 1 W.
 
 ### What Schutz shows
 
