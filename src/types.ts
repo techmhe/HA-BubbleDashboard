@@ -114,5 +114,7 @@ export interface CardConfig {
   exclude?: { openings?: string[]; consumers?: string[] };
   /** Home battery limits (SoC %), to explain why it is idle: discharge stops at `reserve`, charging at `full`. */
   battery?: { reserve?: number; full?: number };
+  /** Stuck-valve check: limits, or false to switch it off. */
+  heating_check?: Partial<import('./logic/heating-check').HeatingCheckOptions> | false;
   entities?: Partial<Record<import('./logic/entities').EntityKey, string>> & { filter_alarms?: string[] };
 }

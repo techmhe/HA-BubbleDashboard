@@ -144,6 +144,12 @@ exclude:                # entity ids or integrations (platforms) to leave out
 battery:                # home battery limits (SoC %); an idle battery shows *Reserve* / *voll*
   reserve: 25           # discharge stops here (e.g. the zero-feed-in automation's min SoC)
   full: 95              # charging stops here (default 100)
+heating_check:          # stuck-valve check (defaults shown); `heating_check: false` turns it off
+  hours: 2              # window the rise is measured over
+  min_rise: 1           # K
+  max_power: 150        # mean room power (W) above which appliances explain the warmth
+  max_pv: 300           # mean PV power (W) above which the sun explains it
+  max_hum_rise: 10      # humidity jump (points) that means a shower or cooking
 names:                  # display-name overrides
   switch.nspanelbuerom_relay_1: Deckenlampe
   switch.nspanelbueroa_relay_1: Deckenlampe
@@ -183,7 +189,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   hold: arm away with confirm). Long-press = 500 ms with haptic feedback.
 - **Aktuell** (two columns: urgent items and items with a button full width first, the rest as
   half tiles) shows only what applies, else *Alles ruhig*: alarm triggered, front door open
-  ≥ 5 min, DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
+  ≥ 5 min, *Heizung prüfen* (see Heating check below), DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
   running (live countdown of `timer.luften` plus the open windows), windows open ≥ 20 min, appliance done (`input_boolean.*_fertig`, *OK* turns it
   off), Robby error / consumable at ≤ 0 min, waste the day before and on the day,
   filter alarms and `*filter_life` < 10 %, batteries < 15 % (skipping Robby, phones, `_plus`).
@@ -206,7 +212,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   (sets `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`,
   `input_select.alle_raume_dauer`, then runs `script.alle_raume_anwenden`).
 - Rooms per floor with −/Soll/+, state *heizt* / *Lüften empfohlen* / *lüftet* (window open) / *Soll erreicht* / *Aus*, AQ dot and
-  purifier fan icon, plus a blue window chip while the room's window is open. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
+  purifier fan icon, plus a blue window chip while the room's window is open and an orange *!* chip from the heating check. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
   area's floor with Kühlen / Trocknen / Aus; tap opens the AC sheet: target −/+, modes,
   fan, presets, swing, the device's switches (outdoor quiet mode first), self-cleaning,
   power from `ac_power` (default `sensor.klimaanlage_power`).
@@ -321,6 +327,18 @@ means) from long-term statistics, falling back to raw history.
 Tapping the dew point fact opens a dew point chart (24 h / 3 days / 7 days from history): the
 room line, the outdoor dew point, and green bands where the room's `sensor.<slug>_luftung` said
 "Jetzt lüften" (dark) or "Lüften möglich" (light).
+
+### Heating check
+
+Every 10 minutes the card looks for rooms that keep getting warmer although their thermostat
+does not call for heat, a hint at a stuck valve. A room is flagged when, over the last
+`hours`: it rose by at least `min_rise` K and is above its target (or its thermostat is off),
+the thermostat did not heat and the window stayed closed (both also during the hour before),
+the room's power sensors averaged at most `max_power` W (dryer, gaming PC), PV averaged at
+most `max_pv` W (sun) and humidity did not jump by `max_hum_rise` points (shower). It loads
+5-minute statistics and the thermostat/window history in two requests. Flagged rooms show
+in *Aktuell* (tap → room card), as an orange chip on the Klima pill and in the room card's
+state line.
 
 All charts (energy, costs, battery, dew point, room history, weather) can be read by finger:
 tap or drag along the chart and a line, a dot and a bubble show the time and value of the

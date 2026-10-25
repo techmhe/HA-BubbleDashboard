@@ -5,6 +5,7 @@ import type { EnergyPrefs, EnergyTotals } from '../logic/energy';
 import type { SceneConfig } from '../logic/devices';
 import type { ChartRange, SeriesResult, DewRange } from '../data/series';
 import type { Room } from '../logic/rooms';
+import type { HeatingAlert } from '../logic/heating-check';
 import type { CardConfig, HomeAssistant, PageId } from '../types';
 import type { ConfirmOptions } from '../components/ui';
 
@@ -96,6 +97,8 @@ export interface PageContext {
   forecast(): ForecastData;
   /** Energy dashboard config and today's totals (loaded on demand, refreshed every 5 min). */
   energy(): EnergyInfo;
+  /** Rooms that keep warming without calling for heat (loaded on demand, refreshed every 10 min). */
+  heating(): HeatingAlert[];
   /** Cached chart data under `key`; `load` runs when missing or older than `maxAgeMs` (default 5 min). */
   series(key: string, load: () => Promise<SeriesResult>, maxAgeMs?: number): SeriesData;
   /** Stored states of UI scenes (loaded once; empty without admin rights). */

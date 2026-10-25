@@ -13,6 +13,7 @@ function renderRoom(ctx: PageContext, room: Room) {
   const c = roomClimate(ctx.hass, room, ctx.target(room.climate));
   const accent = c.heating ? 'heat' : c.vent ? 'vent' : '';
   const climate = room.climate;
+  const heat = ctx.heating().find((a) => a.slug === room.slug);
   return html`
     <div class="kroom ${accent}">
       <button class="kroom-main" @click=${() => ctx.openSheet({ id: 'room', slug: room.slug })}>
@@ -29,6 +30,10 @@ function renderRoom(ctx: PageContext, room: Room) {
               : nothing}
             ${c.windowOpen
               ? html`<span class="winchip" title="Fenster offen" aria-label="Fenster offen">${icon(I.window, 11, '#5ac8fa', 2.6)}</span>`
+              : nothing}
+            ${heat
+              ? html`<span class="heatchip" title="Heizung prüfen: +${fmt(heat.rise, 1)}° in ${heat.hours} h ohne Heizbedarf"
+                  aria-label="Heizung prüfen">${icon(I.thermo, 11, '#ff9f0a', 2.6)}!</span>`
               : nothing}
           </span>
           <span class="kroom-sub">${temp(c.cur)}° · ${c.hum ?? '–'} % · ${c.label}</span>
@@ -243,6 +248,19 @@ export const climateStyles = css`
     50% {
       box-shadow: 0 0 0 4px rgba(90, 200, 250, 0.28);
     }
+  }
+  .heatchip {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+    height: 18px;
+    padding: 0 6px 0 4px;
+    border-radius: 9px;
+    background: rgba(255, 159, 10, 0.22);
+    color: #ff9f0a;
+    font-size: 11px;
+    font-weight: 800;
   }
   .winchip {
     flex-shrink: 0;

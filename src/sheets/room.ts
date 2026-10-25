@@ -17,7 +17,10 @@ export function roomSheet(ctx: PageContext, slug: string) {
   const climate = room.climate;
   const color = c.heating ? '#ff9f0a' : c.vent ? '#5ac8fa' : 'rgba(255,255,255,0.16)';
   const glow = c.heating ? 'rgba(255,159,10,0.2)' : c.vent ? 'rgba(90,200,250,0.2)' : 'rgba(255,255,255,0.06)';
-  const stateLine = c.off ? 'Aus' : c.heating ? `heizt${c.valve !== null ? ` · Ventile ${c.valve} %` : ''}` : 'Soll erreicht';
+  const heat = ctx.heating().find((a) => a.slug === room.slug);
+  const stateLine = heat
+    ? `Heizung prüfen · +${fmt(heat.rise, 1)}° in ${heat.hours} h ohne Heizbedarf`
+    : c.off ? 'Aus' : c.heating ? `heizt${c.valve !== null ? ` · Ventile ${c.valve} %` : ''}` : 'Soll erreicht';
   const scenes = roomScenes(hass, room);
   const active = activeScenes(hass, scenes.map((s) => s.id), ctx.sceneConfigs(), ctx.now);
   const devices = roomDevices(hass, room, ctx.config.names);
@@ -60,7 +63,7 @@ export function roomSheet(ctx: PageContext, slug: string) {
         <div class="tcontrol">
           <button class="bigstep" aria-label="Soll senken" ?disabled=${!climate} @click=${() => climate && ctx.stepTarget(climate, -0.5)}>−</button>
           <div class="tcenter">
-            <div class="tstate" style="color:${c.heating ? '#ffd29a' : 'rgba(255,255,255,0.75)'}">
+            <div class="tstate" style="color:${heat ? '#ff9f0a' : c.heating ? '#ffd29a' : 'rgba(255,255,255,0.75)'}">
               ${c.heating ? icon(IC.flame, 13, '#ffd29a', 2.4) : nothing}${stateLine}
             </div>
             <div class="tbig" style="color:${c.heating ? '#ffc061' : '#fff'}">${temp(c.target)}°</div>

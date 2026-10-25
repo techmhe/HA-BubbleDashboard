@@ -48,7 +48,7 @@ function statusActions(ctx: PageContext, b: StatusBubble) {
 function itemTap(ctx: PageContext, n: NowItem): (() => void) | undefined {
   const t = n.tap;
   if (!t) return undefined;
-  if (typeof t === 'object') return () => ctx.moreInfo(t.moreInfo);
+  if (typeof t === 'object') return 'room' in t ? () => ctx.openSheet({ id: 'room', slug: t.room }) : () => ctx.moreInfo(t.moreInfo);
   switch (t) {
     case 'airing':
       return () => ctx.openSheet({ id: 'airing' });
@@ -90,7 +90,7 @@ export function renderOverview(ctx: PageContext) {
   const weatherId = ent(config, 'weather');
   const w = weatherInfo(hass, weatherId);
   const bubbles = statusBubbles(hass, config);
-  const items = nowItems(hass, config, ctx.rooms, now);
+  const items = nowItems(hass, config, ctx.rooms, now, ctx.heating());
   const rooms = roomSummaries(hass, ctx.rooms);
 
   return html`

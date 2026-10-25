@@ -5,6 +5,7 @@ import { ent, filterAlarmIds, scriptService } from './entities';
 import { weatherWarnings } from './weather';
 import { airingInfo, clock } from './climate';
 import { robbyStatus } from './robby';
+import type { HeatingAlert } from './heating-check';
 import { deviceName, durationText, fmt, friendlyName, minutesSince, num, state } from './util';
 
 export const DEVICE_LABEL = 'dashboard_gerat';
@@ -137,7 +138,7 @@ export type NowAction =
   | { kind: 'service'; label: string; domain: string; service: string; data: Record<string, unknown>; target?: { entity_id: string | string[] } }
   | { kind: 'none' };
 
-export type NowTap = 'airing' | 'weather' | 'robby' | 'alarm' | 'rooms' | 'care' | { moreInfo: string } | null;
+export type NowTap = 'airing' | 'weather' | 'robby' | 'alarm' | 'rooms' | 'care' | { moreInfo: string } | { room: string } | null;
 
 export interface NowItem {
   id: string;
@@ -165,7 +166,7 @@ function item(id: string, title: string, text: string, icon: string, c: readonly
 
 const isOpen = (hass: HomeAssistant, id?: string) => !!id && state(hass, id) === 'on';
 
-export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[], now: Date): NowItem[] {
+export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[], now: Date, heating: HeatingAlert[] = []): NowItem[] {
   const out: NowItem[] = [];
   const S = hass.states;
   const frontDoor = ent(config, 'front_door');
@@ -179,6 +180,12 @@ export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[],
   // Front door open > 5 min
   if (isOpen(hass, frontDoor) && minutesSince(hass, frontDoor, now) >= DOOR_OPEN_MIN) {
     out.push(item('door', 'Haustür offen', `seit ${durationText(minutesSince(hass, frontDoor, now))}`, I.door, C.red, { moreInfo: frontDoor }));
+  }
+
+  // Rooms that keep warming without calling for heat (stuck valve?)
+  if (heating.length) {
+    const list = heating.map((a) => `${a.name} +${fmt(a.rise, 1)}°`).join(' · ');
+    out.push(item('heat', 'Heizung prüfen', `${list} in ${heating[0].hours} h ohne Heizbedarf`, I.thermo, C.orange, { room: heating[0].slug }));
   }
 
   // Official DWD warnings in force; current gusts as fallback without them
@@ -387,7 +394,7 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
 
 
 /** Items that keep a full-width row: urgent ones, so their text stays readable. */
-const WIDE = new Set(['alarm', 'door', 'warn']);
+const WIDE = new Set(['alarm', 'door', 'warn', 'heat']);
 
 /**
  * Two-column layout for "Aktuell": urgent and actionable items full width first, the rest as

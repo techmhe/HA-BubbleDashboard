@@ -71,6 +71,13 @@ function hasDeviceLabel(hass: HomeAssistant, id: string, labels?: string[]): boo
  * (kuche_esszimmer = kuche + esszimmer).
  */
 export function roomPower(hass: HomeAssistant, room: Room): number | null {
+  const ids = roomPowerIds(hass, room);
+  const values = ids.map((id) => num(hass, id)).filter((v): v is number => v !== null);
+  return values.length ? values.reduce((a, b) => a + b, 0) : null;
+}
+
+/** The power sensors that make up a room's power (see roomPower). */
+export function roomPowerIds(hass: HomeAssistant, room: Room): string[] {
   let ids = room.power;
   if (!ids?.length) {
     const sensors = powerSensors(hass);
@@ -81,8 +88,7 @@ export function roomPower(hass: HomeAssistant, room: Room): number | null {
       ids = [...new Set(keys.map((k) => `sensor.${k}_leistung`).filter((id) => sensors.has(id)))];
     }
   }
-  const values = ids.map((id) => num(hass, id)).filter((v): v is number => v !== null);
-  return values.length ? values.reduce((a, b) => a + b, 0) : null;
+  return ids;
 }
 
 /** Room power sensors: labelled `raumverbrauch` if any carry the label, else every `sensor.*_leistung`. */

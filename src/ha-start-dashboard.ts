@@ -14,7 +14,9 @@ import { lensBox, tabAt } from './logic/gestures';
 import { applyHeader, removeHeader, type HeaderMode } from './header';
 import type { CardConfig, HomeAssistant, PageId } from './types';
 import { loadEnergyToday } from './data/series';
-import { batteryStatIds, energyStatIds, gridTariff, type EnergyPrefs } from './logic/energy';
+import { loadHeatingAlerts } from './data/heating-check';
+import type { HeatingAlert } from './logic/heating-check';
+import { batteryStatIds, energyStatIds, gridTariff, pvSensors, type EnergyPrefs } from './logic/energy';
 import type { SceneConfig } from './logic/devices';
 import type { EnergyInfo, SeriesData } from './pages/context';
 import type { AllRoomsState, ForecastData, HistoryData, HistoryRange, PageContext, SheetState, Target } from './pages/context';
@@ -96,6 +98,7 @@ export class HaStartDashboard extends LitElement {
     _hdr: { state: true },
     _energy: { state: true },
     _series: { state: true },
+    _heating: { state: true },
     _scenes: { state: true },
     _navDrag: { state: true },
   };
@@ -121,6 +124,7 @@ export class HaStartDashboard extends LitElement {
   private _energyAt = 0;
   private _energyLoading = false;
   private _series: Record<string, SeriesData & { at: number }> = {};
+  private _heating: { at: number; loading: boolean; alerts: HeatingAlert[] } = { at: 0, loading: false, alerts: [] };
   private _navDrag: { left: number; width: number; hover: number } | null = null;
   private _scenes: Record<string, SceneConfig | undefined> | null = null;
   private _forecast: ForecastData = { loading: false, hourly: [], daily: [], at: 0 };
@@ -348,6 +352,23 @@ export class HaStartDashboard extends LitElement {
     }
   }
 
+  /** Heating check (stuck valve), refreshed every 10 min; off with `heating_check: false`. */
+  private _heatingAlerts(): HeatingAlert[] {
+    const cfg = this._config!.heating_check;
+    if (cfg === false) return [];
+    const h = this._heating;
+    if (!h.loading && Date.now() - h.at > 10 * 60_000) {
+      this._heating = { ...h, loading: true };
+      loadHeatingAlerts(this.hass!, resolveRooms(this.hass!, this._config!), pvSensors(this._config!, this._energy.prefs), cfg ?? {})
+        .then((alerts) => (this._heating = { at: Date.now(), loading: false, alerts }))
+        .catch((err) => {
+          console.warn('[ha-start-dashboard] heating check', err);
+          this._heating = { ...this._heating, loading: false, at: Date.now() };
+        });
+    }
+    return h.alerts;
+  }
+
   private _energyInfo(): EnergyInfo {
     if (!this._energyLoading && Date.now() - this._energyAt > 5 * 60_000) {
       this._energyLoading = true;
@@ -434,6 +455,7 @@ export class HaStartDashboard extends LitElement {
       history: (slug, range) => this._historyFor(slug, range),
       forecast: () => this._forecastData(),
       energy: () => this._energyInfo(),
+      heating: () => this._heatingAlerts(),
       sceneConfigs: () => this._sceneConfigs(),
       series: (key, load, maxAge) => this._seriesData(key, load, maxAge),
       allRooms: this._allRooms,
