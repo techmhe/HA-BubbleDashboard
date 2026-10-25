@@ -99,6 +99,7 @@ entities:               # override any entity/script; defaults shown are this ho
   airing_timer: timer.luften
   airing_duration: sensor.stossluften_dauer
   airing_start: script.luften_starten
+  window_snooze: input_text.fenster_ignorieren      # "1 h ignorieren" for window warnings
   preset_all: script.heizung_preset_alle
   all_rooms_apply: script.alle_raume_anwenden
   all_rooms_temperature: input_number.alle_raume_temperatur
@@ -186,6 +187,7 @@ the defaults; each can be changed under `entities:` (see Configuration).
 | Room power | `sensor.<slug>_leistung` (label `raumverbrauch`, `state_class: measurement`) | Räume pill, heating check (appliances) |
 | Outdoor | `sensor.aussen_temperature`, `sensor.aussen_taupunkt_messung`, weather entity | Klima outdoor pill |
 | Airing | `timer.luften`, `sensor.stossluften_dauer` (minutes), `script.luften_starten` | countdown, airing sheet, *Start* |
+| Window snooze | `input_text.fenster_ignorieren` (text helper, max 255) | *1 h ignorieren* on window warnings |
 | Heating | VTherm climates (`preset_temperatures`, `valve_open_percent`, `sensor.<climate>_power_percent`), `input_boolean.heizbetrieb`, `script.heizung_preset_alle` | Klima, room card, heating check |
 | All rooms | `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`, `input_select.alle_raume_dauer`, `script.alle_raume_anwenden` | *Alle Räume einstellen* |
 | Devices | label `dashboard_gerat`; `script.gerat_verzogert_ausschalten` (fields `entity`, `minutes`) | Räume, room card, *Ausschalten in* |
@@ -274,13 +276,16 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - **Aktuell** (two columns: urgent items and items with a button full width first, the rest as
   half tiles) shows only what applies, else *Alles ruhig*: alarm triggered, front door open
   ≥ 5 min, *Heizung prüfen* (see Heating check below), DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
-  running (live countdown of `timer.luften` plus the open windows), windows open ≥ 20 min, appliance done (`input_boolean.*_fertig`, *OK* turns it
+  running (live countdown of `timer.luften` plus the open windows), *Fenster schließen* /
+  *Fenstersensor prüfen* per room (see Airing states; *1 h ignorieren* via
+  `input_text.fenster_ignorieren`), appliance done (`input_boolean.*_fertig`, *OK* turns it
   off), Robby error / consumable at ≤ 0 min, waste the day before and on the day,
   filter alarms and `*filter_life` < 10 %, batteries < 15 % (skipping Robby, phones, `_plus`).
   Filters and batteries open the *Wartung* sheet: *Getauscht* presses the device's Battery
   Notes `*_battery_replaced` button, *Erledigt* a filter reset button on the device (where
   none exists, the sheet says to reset it on the device).
-- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* / *lüftet* (window open), a blue airing icon when airing is recommended, and
+- **Zusammenfassung**: one pill per room with temperature, humidity, *heizt* (only without a
+  window mark) and the airing state as an icon (see Airing states), and
   an air-quality dot only for rooms with a PM2.5 sensor (green ≤ 12, yellow ≤ 35, red > 35).
 
 ### What Klima shows
@@ -295,8 +300,9 @@ explicitly; a configured room still auto-fills the fields you leave out.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*
   (sets `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`,
   `input_select.alle_raume_dauer`, then runs `script.alle_raume_anwenden`).
-- Rooms per floor with −/Soll/+, state *heizt* / *lüftet* (window open) / *Soll erreicht* / *Aus*, a blue airing chip when airing is recommended, AQ dot and
-  purifier fan icon, plus a blue window chip while the room's window is open and an orange *!* chip from the heating check. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
+- Rooms per floor with −/Soll/+, state *heizt* / *Soll erreicht* / *Aus* or the airing state (*lüftet 3:12*, *offen 25 min*,
+  *Sensor?*, *offen*), a chip for the airing state next to the name (see Airing states), AQ dot and
+  purifier fan icon, and an orange *!* chip from the heating check. The AC (`ac:`, default `climate.flur_1_og_klimaanlage`) sits in its
   area's floor with Kühlen / Trocknen / Aus; tap opens the AC sheet: target −/+, modes,
   fan, presets, swing, the device's switches (outdoor quiet mode first), self-cleaning,
   power from `ac_power` (default `sensor.klimaanlage_power`).
@@ -404,13 +410,30 @@ explicitly; a configured room still auto-fills the fields you leave out.
 Room card: −/+ target (the big number; the current temperature below as *Ist*), *heizt · Ventile x %* (`valve_open_percent`), presets with
 `preset_temperatures`, the area's scenes (an active scene glows: every entity still matches
 the stored scene state, read from the scene config for UI scenes; otherwise the last
-activated scene while its entities stay untouched), PM2.5 / dew point / window facts, airing status +
+activated scene while its entities stay untouched), PM2.5 / dew point / window facts (window by airing state), airing status +
 start, and the room's devices (`dashboard_gerat` + purifier; tap toggles). The
 temperature pill opens the history sheet: 24 h / 7 days (hourly means) / 30 days (daily
 means) from long-term statistics, falling back to raw history.
 Tapping the dew point fact opens a dew point chart (24 h / 3 days / 7 days from history): the
 room line, the outdoor dew point, and green bands where the room's `sensor.<slug>_luftung` said
 "Jetzt lüften" (dark) or "Lüften möglich" (light).
+
+### Airing states
+
+Each room has one airing state, shown the same way on Übersicht (icon on the pill), Klima
+(chip and text) and in the room card (window fact):
+
+| State | When | Look |
+|---|---|---|
+| Empfohlen | `sensor.<slug>_luftung` = *Jetzt lüften*, window closed | blue wind icon |
+| Lüftet | window open, within the recommended duration (`sensor.stossluften_dauer`) + 5 min grace | blue window icon with the time left, pill blue |
+| Zu lange offen | open past duration + 5 min (*Zeit um*), or open ≥ 5 min while the room says *Nicht lüften* (*bringt nichts*) | red window icon with the open time, pill red, *Fenster schließen* in Aktuell |
+| Sensor? | sensor unavailable, or open ≥ 30 min while it is ≥ 3 K colder outside and the room neither cooled (< 0.3 K) nor changed humidity (< 3 points) | grey dashed window icon, *Fenstersensor prüfen* in Aktuell |
+| Offen (ignoriert) | *1 h ignorieren* was tapped | grey window icon, no Aktuell item |
+
+*1 h ignorieren* writes into `input_text.fenster_ignorieren` (create it as a text helper,
+max 255), so the snooze applies on every phone; without the helper the button is hidden.
+The stuck-sensor check loads 5-minute statistics of the rooms with a window open ≥ 30 min.
 
 ### Heating check
 

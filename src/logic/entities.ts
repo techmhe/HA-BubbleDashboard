@@ -25,6 +25,8 @@ export const ENTITY_DEFAULTS = {
   airing_timer: 'timer.luften',
   airing_duration: 'sensor.stossluften_dauer',
   airing_start: 'script.luften_starten',
+  /** input_text with snoozed window warnings ("1 h ignorieren"), shared by every phone. */
+  window_snooze: 'input_text.fenster_ignorieren',
   preset_all: 'script.heizung_preset_alle',
   all_rooms_apply: 'script.alle_raume_anwenden',
   all_rooms_temperature: 'input_number.alle_raume_temperatur',

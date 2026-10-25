@@ -5,13 +5,51 @@ import {
   airingInfo, average, climateSummary, clock, entityFloor, floorGroups, outdoor, PRESETS, roomClimate, temp, type FloorGroup,
 } from '../logic/climate';
 import type { Room } from '../logic/rooms';
+import { shortOpen, type WindowState } from '../logic/window-state';
 import { fmt, state } from '../logic/util';
 import { ent } from '../logic/entities';
 import type { PageContext } from './context';
 
+/** Chip next to the room name: wind = airing recommended, window = open (blue ok, red too long, grey doubtful). */
+function winChip(w: WindowState) {
+  const chip = (path: string, color: string, bg: string, label: string, extra = '', size = 11) =>
+    html`<span class="winchip ${extra}" style="background:${bg}" title=${label} aria-label=${label}>${icon(path, size, color, 2.6)}</span>`;
+  switch (w.kind) {
+    case 'recommend':
+      return chip(I.wind, '#5ac8fa', 'rgba(90,200,250,0.2)', 'Lüften empfohlen', '', 12);
+    case 'airing':
+      return chip(I.window, '#5ac8fa', 'rgba(90,200,250,0.2)', 'Lüftet');
+    case 'overdue':
+      return chip(I.window, '#ff6b61', 'rgba(255,69,58,0.24)', `Fenster offen seit ${w.openMin} min · ${w.reason}`);
+    case 'stuck':
+      return chip(I.window, '#aeb4c0', 'transparent', 'Fenstersensor prüfen', 'doubt');
+    case 'open':
+      return chip(I.window, '#aeb4c0', 'rgba(255,255,255,0.1)', 'Fenster offen (ignoriert)');
+    default:
+      return nothing;
+  }
+}
+
+/** Short state text for the pill while a window is involved; null keeps the climate label. */
+function winLabel(w: WindowState): string | null {
+  switch (w.kind) {
+    case 'airing':
+      return w.remaining > 0 ? `lüftet ${clock(w.remaining)}` : 'lüftet';
+    case 'overdue':
+      return `offen ${shortOpen(w.openMin)}`;
+    case 'stuck':
+      return 'Sensor?';
+    case 'open':
+      return 'offen';
+    default:
+      return null;
+  }
+}
+
 function renderRoom(ctx: PageContext, room: Room) {
   const c = roomClimate(ctx.hass, room, ctx.target(room.climate));
-  const accent = c.heating ? 'heat' : c.vent ? 'vent' : '';
+  const w = ctx.window(room);
+  const accent = w.kind === 'overdue' ? 'alert' : c.heating ? 'heat' : c.vent ? 'vent' : '';
   const climate = room.climate;
   const heat = ctx.heating().find((a) => a.slug === room.slug);
   return html`
@@ -28,18 +66,13 @@ function renderRoom(ctx: PageContext, room: Room) {
                   ${c.fanOn ? icon(IC.fan, 11, '#7ee8a0', 2.6) : nothing}
                 </span>`
               : nothing}
-            ${c.windowOpen
-              ? html`<span class="winchip" title="Fenster offen" aria-label="Fenster offen">${icon(I.window, 11, '#5ac8fa', 2.6)}</span>`
-              : nothing}
-            ${c.recommend && !c.windowOpen
-              ? html`<span class="winchip" title="Lüften empfohlen" aria-label="Lüften empfohlen">${icon(I.wind, 12, '#5ac8fa', 2.4)}</span>`
-              : nothing}
+            ${winChip(w)}
             ${heat
               ? html`<span class="heatchip" title="Heizung prüfen: +${fmt(heat.rise, 1)}° in ${heat.hours} h ohne Heizbedarf"
                   aria-label="Heizung prüfen">${icon(I.thermo, 11, '#ff9f0a', 2.6)}!</span>`
               : nothing}
           </span>
-          <span class="kroom-sub">${temp(c.cur)}° · ${c.hum ?? '–'} % · ${c.label}</span>
+          <span class="kroom-sub">${temp(c.cur)}° · ${c.hum ?? '–'} % · ${winLabel(w) ?? c.label}</span>
         </span>
       </button>
       ${climate
@@ -298,6 +331,18 @@ export const climateStyles = css`
   }
   .kroom.heat {
     background: linear-gradient(90deg, rgba(255, 159, 10, 0.24), rgba(255, 255, 255, 0.06) 65%);
+  }
+  .kroom.alert {
+    background: linear-gradient(90deg, rgba(255, 69, 58, 0.24), rgba(255, 255, 255, 0.06) 65%);
+  }
+  .kroom.alert .kroom-circle {
+    background: #ff453a;
+  }
+  .kroom.alert .kroom-sub {
+    color: #ff8a80;
+  }
+  .winchip.doubt {
+    border: 1px dashed rgba(174, 180, 192, 0.8);
   }
   .kroom.vent {
     background: linear-gradient(90deg, rgba(90, 200, 250, 0.22), rgba(255, 255, 255, 0.06) 65%);

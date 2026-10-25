@@ -7,6 +7,8 @@ import {
   type NowItem, type StatusBubble,
 } from '../logic/overview';
 import { ent } from '../logic/entities';
+import { clock } from '../logic/climate';
+import { shortOpen, type WindowState } from '../logic/window-state';
 import type { PageContext } from './context';
 
 function statusActions(ctx: PageContext, b: StatusBubble) {
@@ -42,6 +44,26 @@ function statusActions(ctx: PageContext, b: StatusBubble) {
           onConfirm: () => ctx.call('alarm_control_panel', 'alarm_arm_away', {}, { entity_id: ent(config, 'alarm') }),
         }),
       };
+  }
+}
+
+/** Airing state on a room pill: an icon (wind = recommended, window = open) and a short value. */
+function winMark(w: WindowState) {
+  const mark = (path: string, color: string, label: string, text = '') =>
+    html`<span class="room-air" style="color:${color}" title=${label} aria-label=${label}>${icon(path, 13, color, 2.4)}${text}</span>`;
+  switch (w.kind) {
+    case 'recommend':
+      return mark(I.wind, '#5ac8fa', 'Lüften empfohlen');
+    case 'airing':
+      return mark(I.window, '#5ac8fa', 'Lüftet', w.remaining > 0 ? clock(w.remaining) : '');
+    case 'overdue':
+      return mark(I.window, '#ff6b61', `Fenster offen seit ${w.openMin} min`, w.openMin < 60 ? `${w.openMin}′` : shortOpen(w.openMin));
+    case 'stuck':
+      return mark(I.window, '#aeb4c0', 'Fenstersensor prüfen', '?');
+    case 'open':
+      return mark(I.window, '#aeb4c0', 'Fenster offen');
+    default:
+      return nothing;
   }
 }
 
@@ -90,8 +112,8 @@ export function renderOverview(ctx: PageContext) {
   const weatherId = ent(config, 'weather');
   const w = weatherInfo(hass, weatherId);
   const bubbles = statusBubbles(hass, config);
-  const items = nowItems(hass, config, ctx.rooms, now, ctx.heating());
-  const rooms = roomSummaries(hass, ctx.rooms);
+  const items = nowItems(hass, config, ctx.rooms, now, ctx.heating(), (r) => ctx.window(r));
+  const rooms = roomSummaries(hass, ctx.rooms, (r) => ctx.window(r));
 
   return html`
     <div class="overview">
@@ -149,16 +171,14 @@ export function renderOverview(ctx: PageContext) {
         </div>
         <div class="sum-grid">
           ${rooms.map((r) => {
-            const accent = r.vent ? 'vent' : r.heating ? 'heat' : '';
+            const accent = r.win.kind === 'overdue' ? 'alert' : r.vent || r.win.kind === 'airing' ? 'vent' : r.heating ? 'heat' : '';
             return html`
               <button class="room ${accent}" @click=${() => ctx.openSheet({ id: 'room', slug: r.room.slug })}
                 aria-label="${r.room.name}: ${r.temp} Grad, ${r.hum} Prozent">
                 <span class="circle room-circle">${icon(r.icon, 16, accent ? '#141008' : '#fff', 2)}</span>
                 <span class="room-text">
                   <span class="room-name"><span class="ellipsis">${r.room.name}</span>${r.aq ? html`<span class="dot" style="background:${r.aq}"></span>` : nothing}</span>
-                  <span class="room-sub">${r.hum} %${r.note ? ` · ${r.note}` : ''}${r.recommend
-                    ? html` · <span class="room-air" title="Lüften empfohlen" aria-label="Lüften empfohlen">${icon(I.wind, 13, '#5ac8fa', 2.4)}</span>`
-                    : nothing}</span>
+                  <span class="room-sub">${r.hum} %${r.note ? ` · ${r.note}` : ''}${winMark(r.win)}</span>
                 </span>
                 <span class="room-temp">${r.temp}°</span>
               </button>
@@ -342,7 +362,17 @@ export const overviewStyles = css`
   }
   .room-air {
     display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 5px;
     vertical-align: -2px;
+    font-weight: 700;
+  }
+  .room.alert {
+    background: rgba(255, 69, 58, 0.14);
+  }
+  .room.alert .room-circle {
+    background: #ff453a;
   }
   .room-sub {
     display: block;

@@ -81,14 +81,15 @@ describe('Aktuell', () => {
     expect(nowItems(h, cfg, resolveRooms(h, cfg), NOW)[0]).toMatchObject({ title: 'Lüften läuft', action: undefined });
   });
 
-  it('reports windows open for 20+ minutes and the front door after 5 minutes', () => {
+  it('asks to close windows open past the airing time (+5 min grace) and reports the front door after 5 minutes', () => {
     const h = makeHass({
       'binary_sensor.fenster_wohnzimmer': { state: 'on', minutesAgo: 34 },
       'binary_sensor.fenster_schlafzimmer': { state: 'on', minutesAgo: 5 },
       'binary_sensor.fenstersensor_haustur_contact': { state: 'on', minutesAgo: 6 },
     });
     const items = nowItems(h, cfg, resolveRooms(h, cfg), NOW);
-    expect(items.find((i) => i.id === 'windows')).toMatchObject({ title: 'Fenster offen', text: 'Wohnzimmer 34 min' });
+    expect(items.find((i) => i.id === 'window:wohnzimmer')).toMatchObject({ title: 'Fenster schließen', text: 'Wohnzimmer · 34 min · Zeit um' });
+    expect(items.some((i) => i.id === 'window:schlafzimmer')).toBe(false);
     expect(items.find((i) => i.id === 'door')).toMatchObject({ title: 'Haustür offen', text: 'seit 6 min' });
   });
 

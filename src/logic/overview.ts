@@ -6,12 +6,12 @@ import { weatherWarnings } from './weather';
 import { airingInfo, clock } from './climate';
 import { robbyStatus } from './robby';
 import type { HeatingAlert } from './heating-check';
+import { snoozeValue, windowState, type WindowState } from './window-state';
 import { deviceName, durationText, fmt, friendlyName, minutesSince, num, state } from './util';
 
 export const DEVICE_LABEL = 'dashboard_gerat';
 
 const STORM_KMH = 60;
-const WINDOW_OPEN_MIN = 20;
 const DOOR_OPEN_MIN = 5;
 const BATTERY_LOW = 15;
 const FILTER_LIFE_LOW = 10;
@@ -158,6 +158,7 @@ const C = {
   green: ['#7ee8a0', 'rgba(126,232,160,0.18)'],
   red: ['#ff453a', 'rgba(255,69,58,0.3)'],
   yellow: ['#ffd60a', 'rgba(255,214,10,0.22)'],
+  grey: ['#aeb4c0', 'rgba(255,255,255,0.12)'],
 } as const;
 
 function item(id: string, title: string, text: string, icon: string, c: readonly [string, string], tap: NowTap, action?: NowItem['action']): NowItem {
@@ -166,7 +167,10 @@ function item(id: string, title: string, text: string, icon: string, c: readonly
 
 const isOpen = (hass: HomeAssistant, id?: string) => !!id && state(hass, id) === 'on';
 
-export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[], now: Date, heating: HeatingAlert[] = []): NowItem[] {
+export function nowItems(
+  hass: HomeAssistant, config: CardConfig, rooms: Room[], now: Date, heating: HeatingAlert[] = [],
+  win: (room: Room) => WindowState = (room) => windowState(hass, room, config, now),
+): NowItem[] {
   const out: NowItem[] = [];
   const S = hass.states;
   const frontDoor = ent(config, 'front_door');
@@ -223,15 +227,24 @@ export function nowItems(hass: HomeAssistant, config: CardConfig, rooms: Room[],
     }
   }
 
-  // Windows open > 20 min (front door handled above)
-  const longOpen = rooms
-    .filter((r) => r.window && r.window !== frontDoor && isOpen(hass, r.window))
-    .map((r) => ({ r, min: minutesSince(hass, r.window!, now) }))
-    .filter((x) => x.min >= WINDOW_OPEN_MIN);
-  if (longOpen.length) {
-    const title = longOpen.length === 1 ? 'Fenster offen' : `${longOpen.length} Fenster offen`;
-    const text = longOpen.map((x) => `${x.r.name} ${durationText(x.min)}`).join(' · ');
-    out.push(item('windows', title, text, I.window, C.blue, 'airing'));
+  // Windows open past the airing time, or whose sensor looks stuck (front door handled above)
+  const snoozeId = ent(config, 'window_snooze');
+  for (const r of rooms) {
+    if (!r.window || r.window === frontDoor) continue;
+    const ws = win(r);
+    if (ws.kind !== 'overdue' && ws.kind !== 'stuck') continue;
+    const ignore: NowItem['action'] = S[snoozeId]
+      ? {
+          kind: 'service', label: '1 h ignorieren', domain: 'input_text', service: 'set_value', target: { entity_id: snoozeId },
+          data: { value: snoozeValue(S[snoozeId].state, r.window, now.getTime() + 3600_000, now.getTime()) },
+        }
+      : undefined;
+    if (ws.kind === 'overdue') {
+      out.push(item(`window:${r.slug}`, 'Fenster schließen', `${r.name} · ${durationText(ws.openMin)} · ${ws.reason}`, I.window, C.red, { room: r.slug }, ignore));
+    } else {
+      const why = state(hass, r.window) === 'unavailable' ? 'Sensor nicht erreichbar' : 'meldet offen, Raum bleibt gleich';
+      out.push(item(`sensor:${r.slug}`, 'Fenstersensor prüfen', `${r.name} · ${why}`, I.window, C.grey, { room: r.slug }, ignore));
+    }
   }
 
   // Appliances done
@@ -364,6 +377,8 @@ export interface RoomSummary {
   note: string;
   /** Airing recommended (shown as an icon). */
   recommend: boolean;
+  /** Airing state of the room (icon + time on the pill). */
+  win: WindowState;
   aq: string | null;
 }
 
@@ -374,13 +389,15 @@ export function aqColor(pm25: number | null): string | null {
   return '#ff453a';
 }
 
-export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[] {
+export function roomSummaries(
+  hass: HomeAssistant, rooms: Room[], win: (room: Room) => WindowState = (room) => windowState(hass, room, {} as CardConfig, new Date()),
+): RoomSummary[] {
   return rooms.map((room) => {
     const t = num(hass, room.temperature) ?? (room.climate ? Number(hass.states[room.climate]?.attributes.current_temperature) : NaN);
     const h = num(hass, room.humidity);
     const heating = !!room.climate && hass.states[room.climate]?.attributes.hvac_action === 'heating';
     const vent = state(hass, room.airing) === 'Jetzt lüften';
-    const windowOpen = !!room.window && state(hass, room.window) === 'on';
+    const ws = win(room);
     return {
       room,
       icon: roomIcon(room.name, room.icon),
@@ -388,8 +405,10 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
       hum: h !== null ? fmt(Math.round(h)) : '–',
       heating,
       vent,
-      note: windowOpen ? 'lüftet' : heating ? 'heizt' : '',
-      recommend: vent && !windowOpen,
+      // The window mark wins the little space; the pill's orange tint still shows heating.
+      note: heating && ws.kind === 'none' ? 'heizt' : '',
+      recommend: ws.kind === 'recommend',
+      win: ws,
       aq: room.pm25 ? aqColor(num(hass, room.pm25)) : null,
     };
   });
@@ -397,14 +416,14 @@ export function roomSummaries(hass: HomeAssistant, rooms: Room[]): RoomSummary[]
 
 
 /** Items that keep a full-width row: urgent ones, so their text stays readable. */
-const WIDE = new Set(['alarm', 'door', 'warn', 'heat']);
+const WIDE = new Set(['alarm', 'door', 'warn', 'heat', 'window', 'sensor']);
 
 /**
  * Two-column layout for "Aktuell": urgent and actionable items full width first, the rest as
  * half tiles in their order; a lone half tile at the end takes the full width.
  */
 export function nowLayout(items: NowItem[]): { item: NowItem; wide: boolean }[] {
-  const wide = items.filter((i) => i.action || WIDE.has(i.id));
+  const wide = items.filter((i) => i.action || WIDE.has(i.id.split(':')[0]));
   const half = items.filter((i) => !wide.includes(i));
   return [
     ...wide.map((item) => ({ item, wide: true })),

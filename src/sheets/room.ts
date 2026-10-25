@@ -2,12 +2,30 @@ import { css, html, nothing } from 'lit';
 import { hold } from '../components/hold';
 import { icon, mdi, SCENE_COLORS, sheet } from '../components/ui';
 import { deviceIcon, I, IC, PRESET_ICONS, roomIcon } from '../icons';
-import { PRESETS, roomClimate, temp } from '../logic/climate';
+import { clock, PRESETS, roomClimate, temp } from '../logic/climate';
+import type { WindowState } from '../logic/window-state';
 import { ent } from '../logic/entities';
 import { activeScenes, lightTint, roomDevices, roomScenes } from '../logic/devices';
-import { fmt, num, state } from '../logic/util';
+import { durationText, fmt, num, state } from '../logic/util';
 import type { PageContext } from '../pages/context';
 import { toggleDevice } from './device';
+
+/** Window fact in the room card, by airing state. */
+function windowFact(w: WindowState) {
+  const f = (value: string, c: string, tint: string) => ({ value, label: 'Fenster', icon: I.window, c, tint });
+  switch (w.kind) {
+    case 'airing':
+      return f(w.remaining > 0 ? `lüftet ${clock(w.remaining)}` : 'lüftet', '#5ac8fa', 'rgba(90,200,250,0.14)');
+    case 'overdue':
+      return f(`offen ${durationText(w.openMin)} · ${w.reason}`, '#ff6b61', 'rgba(255,69,58,0.14)');
+    case 'stuck':
+      return f('Sensor prüfen', '#aeb4c0', 'rgba(255,255,255,0.07)');
+    case 'open':
+      return f('offen (ignoriert)', '#aeb4c0', 'rgba(255,255,255,0.07)');
+    default:
+      return f('zu', '#7ee8a0', 'rgba(255,255,255,0.07)');
+  }
+}
 
 export function roomSheet(ctx: PageContext, slug: string) {
   const { hass } = ctx;
@@ -35,11 +53,7 @@ export function roomSheet(ctx: PageContext, slug: string) {
       ? { value: `${fmt(c.dew, 1)}°`, label: 'Taupunkt', icon: IC.drop, c: '#8fd8ff', tint: 'rgba(143,216,255,0.12)',
           tap: () => ctx.openSheet({ id: 'dew', slug, range: '24h' }) }
       : null,
-    room.window
-      ? c.windowOpen
-        ? { value: 'offen', label: 'Fenster', icon: I.window, c: '#ff453a', tint: 'rgba(255,69,58,0.14)' }
-        : { value: 'zu', label: 'Fenster', icon: I.window, c: '#7ee8a0', tint: 'rgba(255,255,255,0.07)' }
-      : null,
+    room.window ? windowFact(ctx.window(room)) : null,
   ].filter((f): f is NonNullable<typeof f> => !!f);
 
   const airText = [c.dew !== null ? `Taupunkt ${fmt(c.dew, 1)}°` : '', outDew !== null ? `außen ${fmt(outDew, 1)}°` : ''].filter(Boolean).join(' vs. ');

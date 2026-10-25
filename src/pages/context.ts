@@ -6,6 +6,7 @@ import type { SceneConfig } from '../logic/devices';
 import type { ChartRange, SeriesResult, DewRange } from '../data/series';
 import type { Room } from '../logic/rooms';
 import type { HeatingAlert } from '../logic/heating-check';
+import type { WindowState } from '../logic/window-state';
 import type { CardConfig, HomeAssistant, PageId } from '../types';
 import type { ConfirmOptions } from '../components/ui';
 
@@ -99,6 +100,8 @@ export interface PageContext {
   energy(): EnergyInfo;
   /** Rooms that keep warming without calling for heat (loaded on demand, refreshed every 10 min). */
   heating(): HeatingAlert[];
+  /** Airing state of a room (recommend / airing / overdue / stuck / open), incl. sensor check and snoozes. */
+  window(room: Room): WindowState;
   /** Cached chart data under `key`; `load` runs when missing or older than `maxAgeMs` (default 5 min). */
   series(key: string, load: () => Promise<SeriesResult>, maxAgeMs?: number): SeriesData;
   /** Stored states of UI scenes (loaded once; empty without admin rights). */

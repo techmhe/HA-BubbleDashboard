@@ -16,6 +16,8 @@ import type { CardConfig, HomeAssistant, PageId } from './types';
 import { loadEnergyToday } from './data/series';
 import { loadHeatingAlerts } from './data/heating-check';
 import type { HeatingAlert } from './logic/heating-check';
+import { loadStuckWindows, longOpenRooms } from './data/window-check';
+import { isSnoozed, parseSnooze, windowState, type WindowState } from './logic/window-state';
 import { batteryStatIds, energyStatIds, gridTariff, pvSensors, type EnergyPrefs } from './logic/energy';
 import type { SceneConfig } from './logic/devices';
 import type { EnergyInfo, SeriesData } from './pages/context';
@@ -99,6 +101,7 @@ export class HaStartDashboard extends LitElement {
     _energy: { state: true },
     _series: { state: true },
     _heating: { state: true },
+    _stuck: { state: true },
     _scenes: { state: true },
     _navDrag: { state: true },
   };
@@ -125,6 +128,8 @@ export class HaStartDashboard extends LitElement {
   private _energyLoading = false;
   private _series: Record<string, SeriesData & { at: number }> = {};
   private _heating: { at: number; loading: boolean; alerts: HeatingAlert[] } = { at: 0, loading: false, alerts: [] };
+  private _stuck: { at: number; key: string; loading: boolean; slugs: string[] } = { at: 0, key: '', loading: false, slugs: [] };
+  private _winMemo?: { hass: HomeAssistant; now: Date; rooms: Room[]; key: string };
   private _navDrag: { left: number; width: number; hover: number } | null = null;
   private _scenes: Record<string, SceneConfig | undefined> | null = null;
   private _forecast: ForecastData = { loading: false, hourly: [], daily: [], at: 0 };
@@ -369,6 +374,34 @@ export class HaStartDashboard extends LitElement {
     return h.alerts;
   }
 
+  /** Airing state of a room, incl. the stuck-sensor check (refreshed every 10 min) and snoozes. */
+  private _windowState(room: Room): WindowState {
+    const hass = this.hass!;
+    const config = this._config!;
+    const now = this._now;
+    let memo = this._winMemo;
+    if (!memo || memo.hass !== hass || memo.now !== now) {
+      const rooms = resolveRooms(hass, config);
+      memo = this._winMemo = { hass, now, rooms, key: longOpenRooms(hass, rooms, now.getTime()).map((r) => r.slug).join(',') };
+    }
+    const { rooms, key } = memo;
+    const st = this._stuck;
+    if (!st.loading && (st.key !== key || Date.now() - st.at > 10 * 60_000)) {
+      this._stuck = { ...st, key, loading: true };
+      loadStuckWindows(hass, rooms, config)
+        .then((slugs) => (this._stuck = { at: Date.now(), key, loading: false, slugs }))
+        .catch((err) => {
+          console.warn('[ha-start-dashboard] window check', err);
+          this._stuck = { ...this._stuck, at: Date.now(), loading: false };
+        });
+    }
+    const snoozes = parseSnooze(hass.states[ent(config, 'window_snooze')]?.state);
+    return windowState(hass, room, config, now, {
+      stuck: key ? st.key === key && st.slugs.includes(room.slug) : false,
+      snoozed: !!room.window && isSnoozed(snoozes, room.window, now.getTime()),
+    });
+  }
+
   private _energyInfo(): EnergyInfo {
     if (!this._energyLoading && Date.now() - this._energyAt > 5 * 60_000) {
       this._energyLoading = true;
@@ -456,6 +489,7 @@ export class HaStartDashboard extends LitElement {
       forecast: () => this._forecastData(),
       energy: () => this._energyInfo(),
       heating: () => this._heatingAlerts(),
+      window: (room) => this._windowState(room),
       sceneConfigs: () => this._sceneConfigs(),
       series: (key, load, maxAge) => this._seriesData(key, load, maxAge),
       allRooms: this._allRooms,

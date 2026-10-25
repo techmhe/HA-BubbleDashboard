@@ -18,10 +18,9 @@ describe('review fixes', () => {
   it('tells recommended airing apart from an open window on the overview pills', () => {
     const h = makeHass({ 'binary_sensor.fenster_flur_1_og': { state: 'on' } });
     const s = roomSummaries(h, resolveRooms(h, cfg));
-    const note = (slug: string) => s.find((r) => r.room.slug === slug)!.note;
-    const anna = s.find((r) => r.room.slug === 'arbeitszimmer_anna')!;
-    expect(anna).toMatchObject({ note: 'heizt', recommend: true });
-    expect(note('flur_1_og')).toBe('lüftet');
+    const of = (slug: string) => s.find((r) => r.room.slug === slug)!;
+    expect(of('arbeitszimmer_anna')).toMatchObject({ note: '', recommend: true });
+    expect(of('flur_1_og')).toMatchObject({ recommend: false, win: { kind: 'overdue' } });
   });
 
   it('says Geladen once Robby is full', () => {
