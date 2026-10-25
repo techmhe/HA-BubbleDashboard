@@ -4273,9 +4273,11 @@ function na(e, t, n = !1) {
               ${s === null ? E : C`<span class="muted">${Math.round(s)} %</span>`}
               ${t.power === null ? E : C`<span class="pw"><svg width="11" height="11" viewBox="0 0 24 24" fill="#ffc061" aria-hidden="true"><path d=${k.bolt}></path></svg>${K(t.power)}</span>`}
             </button>` : E}
+        ${n ? t.scenes.map((t) => C`<button class="roff" aria-label="${a.name}: alles aus" title="Alles aus"
+              @click=${() => e.call("scene", "turn_on", {}, { entity_id: t.id })}>${N(j.power, 15, "#fff", 2.3)}</button>`) : E}
       </div>
 
-      ${n ? C`<div class="rgrid">${t.scenes.map((t, n) => ra(e, t, n, r))}${t.devices.map((t) => ia(e, t))}</div>` : C`${t.scenes.length ? C`<div class="rgrid" role="group" aria-label="Szenen ${a.name}">
+      ${n ? C`<div class="rgrid">${t.devices.map((t) => ia(e, t))}</div>` : C`${t.scenes.length ? C`<div class="rgrid" role="group" aria-label="Szenen ${a.name}">
                 ${t.scenes.map((t, n) => ra(e, t, n, r))}
               </div>` : E}
           ${t.devices.length ? C`<div class="rgrid">${t.devices.map((t) => ia(e, t))}</div>` : E}`}
@@ -4395,6 +4397,16 @@ var aa = o`
   .rcard.compact .rscene {
     height: 44px;
     border-radius: 22px;
+  }
+  .roff {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .rtop {
     display: flex;
@@ -7972,7 +7984,7 @@ var ws = o`
     min-width: 0;
     text-align: left;
   }
-`, Ts, Es = "0.12.1", $ = [
+`, Ts, Es = "0.12.2", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",

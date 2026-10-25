@@ -71,10 +71,14 @@ function roomCard(ctx: PageContext, v: RoomView, compact = false) {
                 : nothing}
             </button>`
           : nothing}
+        ${compact
+          ? v.scenes.map((sc) => html`<button class="roff" aria-label="${room.name}: alles aus" title="Alles aus"
+              @click=${() => ctx.call('scene', 'turn_on', {}, { entity_id: sc.id })}>${icon(IC.power, 15, '#fff', 2.3)}</button>`)
+          : nothing}
       </div>
 
       ${compact
-        ? html`<div class="rgrid">${v.scenes.map((sc, i) => sceneButton(ctx, sc, i, activeIds))}${v.devices.map((d) => deviceTile(ctx, d))}</div>`
+        ? html`<div class="rgrid">${v.devices.map((d) => deviceTile(ctx, d))}</div>`
         : html`${v.scenes.length
             ? html`<div class="rgrid" role="group" aria-label="Szenen ${room.name}">
                 ${v.scenes.map((sc, i) => sceneButton(ctx, sc, i, activeIds))}
@@ -201,6 +205,16 @@ export const roomsStyles = css`
   .rcard.compact .rscene {
     height: 44px;
     border-radius: 22px;
+  }
+  .roff {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .rtop {
     display: flex;
