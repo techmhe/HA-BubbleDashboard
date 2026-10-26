@@ -60,25 +60,28 @@ const CLOUD = 'M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7';
 const SUN_DISC = 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8';
 const SUN_RAYS = 'M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4';
 const DROPS = 'M8 18l-1 3M12 18l-1 3M16 18l-1 3';
-const FLAKES = 'M8 19h.01M12 19h.01M16 19h.01M10 22h.01M14 22h.01';
+const DROPS_LATE = 'M10 18l-1 3M14 18l-1 3';
+const FLAKES = 'M8 19h.01M12 19h.01M16 19h.01';
+const FLAKES_LATE = 'M10 19h.01M14 19h.01';
 const BOLT = 'M13 12l-3 5h4l-3 5';
 const CLOUD_STORM = 'M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4';
 
 /** Weather icon: rain/snow fall under a still cloud, clouds drift, sun rays turn (20 s), lightning flashes every 6 s. */
 export function weatherAnim(condition: string, size: number, stroke: string): TemplateResult {
   // Falling parts live in a clipped area under the cloud so they never cross the cloud body.
-  const falling = (cls: string, d: string) =>
+  // Two layers half a cycle apart read as continuous fall.
+  const falling = (cls: string, d: string, late: string) =>
     svg`<clipPath id="wx-under"><rect x="0" y="16.5" width="24" height="7.5"></rect></clipPath>
-      <g clip-path="url(#wx-under)"><path class=${cls} d=${d}></path></g>`;
+      <g clip-path="url(#wx-under)"><path class=${cls} d=${d}></path><path class="${cls} late" d=${late}></path></g>`;
   switch (condition) {
     case 'rainy':
     case 'pouring':
-      return frame(size, stroke, svg`<path d=${CLOUD}></path>${falling('rain', DROPS)}`, 2);
+      return frame(size, stroke, svg`<path d=${CLOUD}></path>${falling('rain', DROPS, DROPS_LATE)}`, 2);
     case 'lightning-rainy':
-      return frame(size, stroke, svg`<path d=${CLOUD_STORM}></path><path d=${BOLT}></path>${falling('rain', DROPS)}`, 2);
+      return frame(size, stroke, svg`<path d=${CLOUD_STORM}></path><path d=${BOLT}></path>${falling('rain', DROPS, DROPS_LATE)}`, 2);
     case 'snowy':
     case 'snowy-rainy':
-      return frame(size, stroke, svg`<path d=${CLOUD}></path>${falling('snow', FLAKES)}`, 2);
+      return frame(size, stroke, svg`<path d=${CLOUD}></path>${falling('snow', FLAKES, FLAKES_LATE)}`, 2);
     case 'cloudy':
     case 'partlycloudy':
       return frame(size, stroke, svg`<path class="drift" d=${I.cloud}></path>`, 2);

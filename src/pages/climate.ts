@@ -1,7 +1,7 @@
 import { css, html, nothing } from 'lit';
-import { fanIcon, fanLevel } from '../components/motion';
+import { fanIcon, fanLevel, weatherAnim } from '../components/motion';
 import { icon } from '../components/ui';
-import { I, IC, PRESET_ICONS, roomIcon, weatherIcon } from '../icons';
+import { I, IC, PRESET_ICONS, roomIcon } from '../icons';
 import {
   airingInfo, average, climateSummary, clock, entityFloor, floorGroups, outdoor, PRESETS, roomClimate, temp, type FloorGroup,
 } from '../logic/climate';
@@ -163,7 +163,7 @@ export function renderClimate(ctx: PageContext) {
       </header>
 
       <button class="pill outdoor" @click=${() => ctx.openSheet({ id: 'airing' })}>
-        <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${icon(weatherIcon(weather), 20, '#8fd0ff', 2)}</span>
+        <span class="circle" style="width:44px;height:44px;background:rgba(143,208,255,0.2)">${weatherAnim(weather, 20, '#8fd0ff')}</span>
         <span class="grow"><span class="t1">${out.title}</span><span class="t2">${out.sub}</span></span>
         ${airing.active
           ? html`<span class="air-badge running" aria-label="Lüften läuft, noch ${clock(airing.remaining)}">${icon(I.wind, 14, '#06202c', 2.4)}${clock(airing.remaining)}</span>`

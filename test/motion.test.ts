@@ -150,3 +150,29 @@ describe('final review fixes', () => {
     expect(t).not.toContain('flash');
   });
 });
+
+describe('smooth weather motion', () => {
+  const css = String(baseStyles.cssText);
+
+  it('the Klima outdoor circle animates the current condition', () => {
+    expect(templateText(renderClimate(ctx(makeHass())))).toMatch(/\brain\b/);
+    const sunny = templateText(renderClimate(ctx(makeHass({ 'weather.musterstadt': { state: 'sunny' } }))));
+    expect(sunny).not.toMatch(/\brain\b/);
+    expect(sunny).toContain('rays');
+  });
+
+  it('rain and snow fall in two staggered layers', () => {
+    for (const [c, cls] of [['rainy', 'rain'], ['snowy', 'snow']]) {
+      const t = templateText(weatherAnim(c, 20, '#fff'));
+      expect(t.match(new RegExp(`\\b${cls}\\b`, 'g'))?.length, c).toBeGreaterThanOrEqual(2);
+      expect(t, c).toContain('late');
+    }
+    expect(css).toMatch(/\.late\b[^{]*\{[^}]*animation-delay:/);
+  });
+
+  it('falling parts fade in and out so the loop restart is invisible', () => {
+    const fall = css.match(/@keyframes fall\s*\{([\s\S]*?)@keyframes/)?.[1] ?? '';
+    expect(fall).toMatch(/(0%|from)[^{]*\{[^}]*opacity:\s*0;/);
+    expect(fall).toMatch(/(100%|to)[^{]*\{[^}]*opacity:\s*0;/);
+  });
+});

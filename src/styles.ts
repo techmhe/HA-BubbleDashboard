@@ -142,10 +142,16 @@ export const baseStyles = css`
     animation: breathe 3s ease-in-out infinite;
   }
   .rain {
-    animation: fall 0.9s linear infinite;
+    animation: fall 1.2s ease-in infinite;
+  }
+  .rain.late {
+    animation-delay: -0.6s;
   }
   .snow {
-    animation: fall 2s linear infinite;
+    animation: fall 2.4s linear infinite;
+  }
+  .snow.late {
+    animation-delay: -1.2s;
   }
   .drift {
     animation: drift 6s ease-in-out infinite;
@@ -157,13 +163,17 @@ export const baseStyles = css`
     animation: flash 6s linear infinite;
   }
   @keyframes fall {
-    from {
-      opacity: 1;
-      transform: translateY(-3px);
+    0% {
+      opacity: 0;
+      transform: translateY(-4px);
     }
-    to {
-      opacity: 0.2;
-      transform: translateY(3px);
+    25%,
+    70% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(4px);
     }
   }
   @keyframes drift {
