@@ -2516,7 +2516,7 @@ var wr = o`
     animation: wobble 1.2s ease-in-out infinite;
   }
   .breathe {
-    animation: breathe 3s ease-in-out infinite;
+    animation: breathe 5s ease-in-out infinite;
   }
   .rain {
     animation: fall 2s ease-in infinite;
@@ -10002,7 +10002,7 @@ var Tu = o`
   .pr-cam ha-camera-stream { display: block; width: 100%; }
   .pr-chip { position: absolute; left: 12px; top: 12px; display: flex; align-items: center; gap: 5px; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 11px; font-weight: 600; background: rgba(0, 0, 0, 0.55); }
   .pr-dotl { width: 7px; height: 7px; border-radius: 4px; background: #ff453a; }
-`, Eu, Du = "0.20.1", $ = [
+`, Eu, Du = "0.20.2", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",

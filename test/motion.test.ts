@@ -188,3 +188,9 @@ describe('calm weather motion', () => {
     expect(css).toMatch(/\.snow\.late\s*\{[^}]*animation-delay:\s*-1\.8s/);
   });
 });
+
+describe('calm heating glow', () => {
+  it('a heating room circle breathes once every 5 s', () => {
+    expect(String(baseStyles.cssText)).toMatch(/\.breathe\s*\{[^}]*animation:\s*breathe\s+5s\b/);
+  });
+});

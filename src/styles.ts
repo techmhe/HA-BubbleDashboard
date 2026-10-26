@@ -139,7 +139,7 @@ export const baseStyles = css`
     animation: wobble 1.2s ease-in-out infinite;
   }
   .breathe {
-    animation: breathe 3s ease-in-out infinite;
+    animation: breathe 5s ease-in-out infinite;
   }
   .rain {
     animation: fall 2s ease-in infinite;
