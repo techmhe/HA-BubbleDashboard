@@ -142,16 +142,16 @@ export const baseStyles = css`
     animation: breathe 3s ease-in-out infinite;
   }
   .rain {
-    animation: fall 1.2s ease-in infinite;
+    animation: fall 2s ease-in infinite;
   }
   .rain.late {
-    animation-delay: -0.6s;
+    animation-delay: -1s;
   }
   .snow {
-    animation: fall 2.4s linear infinite;
+    animation: fall 3.6s linear infinite;
   }
   .snow.late {
-    animation-delay: -1.2s;
+    animation-delay: -1.8s;
   }
   .drift {
     animation: drift 6s ease-in-out infinite;

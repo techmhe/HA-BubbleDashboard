@@ -176,3 +176,15 @@ describe('smooth weather motion', () => {
     expect(fall).toMatch(/(100%|to)[^{]*\{[^}]*opacity:\s*0;/);
   });
 });
+
+describe('calm weather motion', () => {
+  const css = String(baseStyles.cssText);
+  const dur = (cls: string) => Number(css.match(new RegExp(`\\.${cls}\\s*\\{[^}]*animation:\\s*fall\\s+([\\d.]+)s`))?.[1]);
+
+  it('rain falls at 2 s per drop and snow at 3.6 s, each with a half-cycle second layer', () => {
+    expect(dur('rain')).toBe(2);
+    expect(dur('snow')).toBe(3.6);
+    expect(css).toMatch(/\.rain\.late\s*\{[^}]*animation-delay:\s*-1s/);
+    expect(css).toMatch(/\.snow\.late\s*\{[^}]*animation-delay:\s*-1\.8s/);
+  });
+});
