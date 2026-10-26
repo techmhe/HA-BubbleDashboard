@@ -1,4 +1,5 @@
 import { css, html, nothing } from 'lit';
+import { fanIcon, fanLevel } from '../components/motion';
 import { icon } from '../components/ui';
 import { I, IC, PRESET_ICONS, roomIcon, weatherIcon } from '../icons';
 import {
@@ -55,7 +56,7 @@ function renderRoom(ctx: PageContext, room: Room) {
   return html`
     <div class="kroom ${accent}">
       <button class="kroom-main" @click=${() => ctx.openSheet({ id: 'room', slug: room.slug })}>
-        <span class="circle kroom-circle">${icon(roomIcon(room.name, room.icon), 19, accent ? '#141008' : '#fff', 2)}</span>
+        <span class="circle kroom-circle ${accent === 'heat' ? 'breathe' : ''}">${icon(roomIcon(room.name, room.icon), 19, accent ? '#141008' : '#fff', 2)}</span>
         <span class="kroom-text">
           <span class="kroom-name">
             <span class="ellipsis">${room.name}</span>
@@ -63,7 +64,7 @@ function renderRoom(ctx: PageContext, room: Room) {
               ? html`<span class="aqchip" title=${c.pm25 !== null ? `PM2.5 ${fmt(c.pm25)} µg/m³` : 'Luftreiniger an'}
                   style="background:${c.aq ? c.aq + '2e' : 'rgba(48,209,88,0.18)'}">
                   ${c.aq ? html`<span class="dot" style="width:6px;height:6px;background:${c.aq}"></span>` : nothing}
-                  ${c.fanOn ? icon(IC.fan, 11, '#7ee8a0', 2.6) : nothing}
+                  ${c.fanOn ? fanIcon(true, fanLevel('on', ctx.hass.states[room.purifier ?? '']?.attributes ?? {}), 11, '#7ee8a0', 2.6) : nothing}
                 </span>`
               : nothing}
             ${winChip(w)}

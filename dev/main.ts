@@ -36,7 +36,20 @@ if (q.has('busy')) {
 // ?technik: printer, Pi-hole, guest WLAN and Uptime Kuma; ?technik=down adds a failing service.
 const technik = q.has('technik');
 if (q.get('technik') === 'down') overrides = { ...overrides, [monitorStatus('Nextcloud')]: { state: 'down', minutesAgo: 12 } };
-const hass = makeHass(overrides, now, { ...ROOM_EXTRAS, ...ENERGY_EXTRAS, ...SECURITY_EXTRAS, ...M5_EXTRAS, ...(technik ? technikDefs() : {}) });
+// ?health: an offline Alarmo motion sensor and an unavailable room temperature.
+const health = q.has('health');
+const MOTION = 'binary_sensor.bewegung_flur_og';
+if (health) overrides = { ...overrides, 'sensor.badezimmer_temperature': { state: 'unavailable' } };
+// ?appliances: the dishwasher runs at 2 200 W (history: started 40 minutes ago).
+const appliances = q.has('appliances');
+if (appliances) overrides = { ...overrides, 'sensor.spulmaschine_power': { state: '2200', minutesAgo: 1 } };
+// The fixture weather is rainy, so the weather icon shows rain in every scenario.
+const extra = {
+  ...ROOM_EXTRAS, ...ENERGY_EXTRAS, ...SECURITY_EXTRAS, ...M5_EXTRAS, ...(technik ? technikDefs() : {}),
+  ...(health ? { [MOTION]: ['unavailable', { device_class: 'motion', friendly_name: 'Bewegung Flur OG' }, 30] as [string, Record<string, unknown>, number] } : {}),
+  ...(appliances ? { 'sensor.spulmaschine_power': ['2200', { friendly_name: 'Spülmaschine Power', unit_of_measurement: 'W', device_class: 'power' }, 1] as [string, Record<string, unknown>, number] } : {}),
+};
+const hass = makeHass(overrides, now, extra);
 hass.user = { id: 'u-max', name: 'Max', is_admin: true };
 if (technik) {
   hass.devices[PRINTER] = { id: PRINTER, area_id: null, name: 'x2d_musterdrucker' };
@@ -52,6 +65,13 @@ hass.callService = async (domain, service, data, target) => {
 hass.callWS = (async (msg: Record<string, any>) => {
   if (msg.type === 'call_service' && msg.service === 'get_forecasts') {
     return { response: { [msg.target.entity_id]: { forecast: msg.service_data.type === 'hourly' ? HOURLY : DAILY } } };
+  }
+  if (msg.type === 'alarmo/sensors') {
+    return { [MOTION]: { type: 'motion', enabled: true } };
+  }
+  if (msg.type === 'history/history_during_period' && (msg.entity_ids as string[]).includes('sensor.spulmaschine_power')) {
+    const t0 = Date.now() - 40 * 60_000;
+    return { 'sensor.spulmaschine_power': [{ s: '0', lu: (t0 - 3600_000) / 1000 }, { s: '2200', lu: t0 / 1000 }] };
   }
   if (msg.type === 'energy/get_prefs') {
     return {

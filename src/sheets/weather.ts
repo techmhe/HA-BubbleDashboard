@@ -1,11 +1,12 @@
 import { css, html, nothing } from 'lit';
+import { weatherAnim } from '../components/motion';
 import { icon, sheet } from '../components/ui';
 import { I, IC, weatherIcon } from '../icons';
 import { ent } from '../logic/entities';
-import { dailyRows, dayDetail, hourlySlots, pollenInfo, rainNow, stormHint, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
+import { dailyRows, dayDetail, hourlySlots, pollenInfo, rainNow, WEATHER_METRICS, weatherNow, weatherWarnings, type WeatherMetric } from '../logic/weather';
 import { loadWeatherMetric, loadWeatherRain } from '../data/series';
 import { trendFigure } from '../components/trend';
-import { fmt, num } from '../logic/util';
+import { fmt } from '../logic/util';
 import type { PageContext } from '../pages/context';
 
 const BLUE = '#8fd0ff';
@@ -29,7 +30,6 @@ export function weatherSheet(ctx: PageContext) {
   const hours = hourlySlots(fc.hourly, ctx.now);
   const days = dailyRows(fc.daily);
   const warnings = weatherWarnings(hass, config, ctx.now);
-  const storm = warnings.length ? null : stormHint(fc.daily, num(hass, ent(config, 'gusts')), ctx.now);
   const pollen = pollenInfo(hass, config);
   const pollenColor = !pollen || pollen.level === 0 ? '#7ee8a0' : pollen.level < 2 ? '#ffd60a' : '#ff9f0a';
 
@@ -39,6 +39,7 @@ export function weatherSheet(ctx: PageContext) {
     color: BLUE,
     glow: 'rgba(90,140,220,0.35)',
     iconPath: weatherIcon(now.condition),
+    iconTemplate: weatherAnim(now.condition, 20, '#0a1a2a'),
     iconStroke: '#0a1a2a',
     onClose: ctx.closeSheet,
     body: html`
@@ -71,13 +72,6 @@ export function weatherSheet(ctx: PageContext) {
             ${open ? html`<span class="w-at">${w.text}</span>` : nothing}
           </button>`;
       })}
-
-      ${storm
-        ? html`<div class="w-warn">
-            <span class="circle" style="width:40px;height:40px;background:#bf9bff">${icon(I.storm, 18, '#1d1030', 2.2)}</span>
-            <span><span class="w-wt">${storm.title}</span><span class="w-ws">${storm.text}</span></span>
-          </div>`
-        : nothing}
 
       ${fc.loading && !fc.hourly.length
         ? html`<div class="w-msg">Vorhersage wird geladen …</div>`

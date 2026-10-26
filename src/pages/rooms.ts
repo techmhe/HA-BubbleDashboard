@@ -1,7 +1,8 @@
 import { css, html, nothing } from 'lit';
 import { hold } from '../components/hold';
+import { deviceGlyph } from '../components/motion';
 import { icon, mdi, SCENE_COLORS } from '../components/ui';
-import { deviceIcon, I, IC, roomIcon } from '../icons';
+import { I, IC, roomIcon } from '../icons';
 import { temp } from '../logic/climate';
 import { lightTint, watts, type DeviceInfo, type SceneInfo } from '../logic/devices';
 import { applyRoomsFilter, roomsFilters, roomsHeader, roomsView, type RoomView } from '../logic/rooms-page';
@@ -109,7 +110,7 @@ function deviceTile(ctx: PageContext, d: DeviceInfo) {
   return html`<button class="rdev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${tint}` : ''}
     aria-label="${d.name}: ${d.tileState}"
     ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id }) })}>
-    <span class="circle" style=${circ(d.on ? col : 'rgba(255,255,255,0.1)', 32)}>${icon(deviceIcon(d.id, d.name), 15, stroke, 2.2)}</span>
+    <span class="circle" style=${circ(d.on ? col : 'rgba(255,255,255,0.1)', 32)}>${deviceGlyph(d, ctx.hass.states[d.id]?.attributes, 15, stroke, 2.2)}</span>
     <span class="rdtext">
       <span class="ellipsis rdname">${d.name}</span>
       <span class="rdstate" style="color:${d.on ? (lt ? lt.text : '#9af0b5') : 'rgba(255,255,255,0.55)'}">${d.tileState}</span>

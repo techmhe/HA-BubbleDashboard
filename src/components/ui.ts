@@ -23,6 +23,8 @@ export interface SheetOptions {
   color: string;
   glow: string;
   iconPath: string;
+  /** Used instead of `iconPath` when set (e.g. an animated glyph). */
+  iconTemplate?: TemplateResult;
   iconStroke?: string;
   onClose: () => void;
   body: TemplateResult;
@@ -50,7 +52,7 @@ export function sheet(o: SheetOptions): TemplateResult {
       <header class="sheet-head">
         ${o.onBack
           ? html`<button class="close back" aria-label="Zurück" @click=${o.onBack}>${icon('M15 5l-7 7 7 7', 18, '#fff', 2.4)}</button>`
-          : html`<span class="circle" style="width:44px;height:44px;background:${o.color}">${icon(o.iconPath, 20, o.iconStroke ?? '#141008', 2)}</span>`}
+          : html`<span class="circle" style="width:44px;height:44px;background:${o.color}">${o.iconTemplate ?? icon(o.iconPath, 20, o.iconStroke ?? '#141008', 2)}</span>`}
         <span class="sheet-title">
           <h1 class="ellipsis">${o.title}</h1>
           ${o.subtitle ? html`<span class="sheet-sub">${o.subtitle}</span>` : ''}

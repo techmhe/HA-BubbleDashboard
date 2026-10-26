@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ent, ENTITY_DEFAULTS, filterAlarmIds, scriptService } from '../src/logic/entities';
+import { ent, filterAlarmIds, scriptService } from '../src/logic/entities';
 import { nowItems, statusBubbles } from '../src/logic/overview';
 import { resolveRooms } from '../src/logic/rooms';
 import { makeHass, NOW } from './fixture';
@@ -8,7 +8,6 @@ const cfg = { type: 'custom:ha-start-dashboard' };
 
 describe('configurable entities', () => {
   it('falls back to the defaults', () => {
-    expect(ent(cfg, 'gusts')).toBe(ENTITY_DEFAULTS.gusts);
     expect(filterAlarmIds(cfg)).toContain('binary_sensor.flur_1_og_klimaanlage_filteralarm');
   });
   it('prefers entities: over legacy top-level keys over defaults', () => {
@@ -24,8 +23,9 @@ describe('configurable entities', () => {
     const b = statusBubbles(h, { ...cfg, entities: { grid_import: 'sensor.my_import' } });
     expect(b[2].value).toBe('42 W');
     const g = makeHass({ 'sensor.boeen': { state: '70' } });
-    const items = nowItems(g, { ...cfg, entities: { gusts: 'sensor.boeen' } }, resolveRooms(g, cfg), NOW);
-    expect(items.find((i) => i.id === 'storm')?.text).toBe('Böen bis 70 km/h');
+    const legacy: Record<string, string> = { gusts: 'sensor.boeen' }; // removed key from older configs, must be ignored
+    const items = nowItems(g, { ...cfg, entities: legacy }, resolveRooms(g, cfg), NOW);
+    expect(items.find((i) => i.id === 'storm')).toBeUndefined();
   });
 });
 

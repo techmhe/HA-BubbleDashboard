@@ -1,6 +1,6 @@
 # Sensor Health, DWD-only Warnings, Running Appliances and Motion Implementation Plan
 
-Status: ready
+Status: done
 Spec: docs/specs/2026-10-26-health-appliances-motion.md
 Branch: plan/health-appliances-motion
 Review: final
@@ -43,7 +43,7 @@ assertions).
 
 ## Tasks
 
-- [ ] **Task 1: DWD-only weather warnings**
+- [x] **Task 1: DWD-only weather warnings**
 
   **Files:** modify `src/logic/overview.ts` (storm branch ~l.201-210, `STORM_KMH`),
   `src/logic/weather.ts` (`STORM_GUST`, `stormHint`), `src/sheets/weather.ts` (storm row),
@@ -66,7 +66,7 @@ assertions).
   5. Run `npm run check`. Expected: exit 0.
   6. Commit: `feat(weather): use DWD warnings only`.
 
-- [ ] **Task 2: Sensor health items**
+- [x] **Task 2: Sensor health items**
 
   **Files:** create `src/logic/health.ts`; modify `src/types.ts` (`CardConfig.health`),
   `src/pages/context.ts` (`alarmoSensors`), `src/ha-start-dashboard.ts` (loader),
@@ -105,7 +105,7 @@ assertions).
   5. Run `npm run check`. Expected: exit 0.
   6. Commit: `feat(overview): warn about offline sensors`.
 
-- [ ] **Task 3: Backup warning**
+- [x] **Task 3: Backup warning**
 
   **Files:** modify `src/logic/technik.ts` (`backupState`), `src/logic/technik-now.ts`,
   `src/sheets/technik.ts` (row), `src/logic/entities.ts` (`backup_last` key); test
@@ -126,7 +126,7 @@ assertions).
   4. Run `npm run check`. Expected: exit 0.
   5. Commit: `feat(technik): stale backup warning`.
 
-- [ ] **Task 4: Running appliances**
+- [x] **Task 4: Running appliances**
 
   **Files:** create `src/logic/appliances.ts`; modify `src/types.ts`
   (`CardConfig.appliances`), `src/pages/context.ts` (`applianceRuns`),
@@ -157,7 +157,7 @@ assertions).
   4. Run `npm run check`. Expected: exit 0.
   5. Commit: `feat(overview): show running appliances`.
 
-- [ ] **Task 5: Device micro-animations**
+- [x] **Task 5: Device micro-animations**
 
   **Files:** create `src/components/motion.ts`; modify `src/styles.ts` (keyframes), the
   purifier/dehumidifier icon spots (`src/pages/rooms.ts`, `src/sheets/room.ts`,
@@ -185,7 +185,7 @@ assertions).
   4. Run `npm run check`. Expected: exit 0.
   5. Commit: `feat(ui): state-driven device animations`.
 
-- [ ] **Task 6: Animated weather icon**
+- [x] **Task 6: Animated weather icon**
 
   **Files:** modify `src/components/motion.ts` (`weatherAnim`), `src/components/ui.ts`
   (`SheetOptions.iconTemplate?: TemplateResult`, used instead of `iconPath` when set),
@@ -206,7 +206,7 @@ assertions).
   4. Run `npm run check`. Expected: exit 0.
   5. Commit: `feat(weather): animated weather icon`.
 
-- [ ] **Task 7: Docs, dev preview, visual check**
+- [x] **Task 7: Docs, dev preview, visual check**
 
   **Files:** modify `README.md` (health options `health.extra/exclude`, backup row and
   36 h rule, `appliances:` option and run rule, animations and reduced motion, DWD-only),

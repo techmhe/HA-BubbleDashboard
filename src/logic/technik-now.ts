@@ -2,8 +2,8 @@ import type { CardConfig, HomeAssistant } from '../types';
 import { I } from '../icons';
 import type { NowItem } from './overview';
 import { clockOf, findPrinter, hoursClock, JOB_MAX_H, printerJob, printerState } from './printer';
-import { isTechUser, pihole, services, technikProblems } from './technik';
-import { fmt, num, state } from './util';
+import { backupState, isTechUser, pihole, services, technikProblems } from './technik';
+import { durationText, fmt, num, state } from './util';
 
 const PURPLE = ['#bf9bff', 'rgba(191,155,255,0.26)'] as const;
 const GREEN = ['#30d158', 'rgba(48,209,88,0.24)'] as const;
@@ -31,6 +31,15 @@ export function sinceText(ms: number, now: Date): string {
   if (diff <= 0) return time;
   if (diff === 1) return `gestern ${time}`;
   return `${d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })} ${time}`;
+}
+
+/** Backup time: "14:05", "gestern 14:05" or "5.3. 14:05" (no leading zeros in the date). */
+export function backupWhen(ms: number, now: Date): string {
+  const d = new Date(ms);
+  const day = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  if (Math.round((day(now) - day(d)) / 86_400_000) <= 1) return sinceText(ms, now);
+  const time = d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  return `${d.getDate()}.${d.getMonth() + 1}. ${time}`;
 }
 
 function printerItems(hass: HomeAssistant, config: CardConfig, now: Date, ctx: TechnikItemCtx): NowItem[] {
@@ -89,9 +98,12 @@ export function technikItems(hass: HomeAssistant, config: CardConfig, now: Date,
       action: { kind: 'service', label: 'Einschalten', domain: 'switch', service: 'turn_on', data: {}, target: { entity_id: ph.entity } },
     });
   }
+  const backup = backupState(hass, config, now);
+  if (backup?.stale) {
+    out.push(base('backup', 'Backup veraltet', `letztes erfolgreiches vor ${durationText(Math.round(backup.ageH * 60))}`, I.alert, RED, { moreInfo: backup.entity }));
+  }
   return out;
 }
-
 
 /** Problems for the red dot and the Technik headline (services down, Pi-hole off, printer error). */
 export function technikProblemCount(hass: HomeAssistant, config: CardConfig, now: Date, ctx: TechnikItemCtx): number {

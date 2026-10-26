@@ -218,21 +218,6 @@ export function dayDetail(day: ForecastItem, hourly: ForecastItem[]): DayDetail 
   };
 }
 
-export const STORM_GUST = 60;
-
-/** Storm hint: gusts now, else the first forecast day with gusts ≥ 60 km/h. */
-export function stormHint(daily: ForecastItem[], gustNow: number | null, now: Date): { title: string; text: string } | null {
-  if (gustNow !== null && gustNow >= STORM_GUST) return { title: 'Jetzt stürmisch', text: `Böen bis ${Math.round(gustNow)} km/h` };
-  const d = daily.find((x) => (x.wind_gust_speed ?? 0) >= STORM_GUST);
-  if (!d) return null;
-  const date = new Date(d.datetime);
-  const name = sameDay(date, now) ? 'Heute' : date.toLocaleDateString('de-DE', { weekday: 'long' });
-  return {
-    title: `${name} stürmisch`,
-    text: `Böen bis ${Math.round(d.wind_gust_speed!)} km/h${d.precipitation ? ` · ${mm(d.precipitation)} mm Regen` : ''}`,
-  };
-}
-
 export interface PollenInfo {
   level: number;
   title: string;

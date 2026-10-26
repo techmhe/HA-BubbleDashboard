@@ -1,7 +1,8 @@
 import { css, html, nothing } from 'lit';
 import { hold } from '../components/hold';
+import { deviceGlyph } from '../components/motion';
 import { icon, mdi, SCENE_COLORS, sheet } from '../components/ui';
-import { deviceIcon, I, IC, PRESET_ICONS, roomIcon } from '../icons';
+import { I, IC, PRESET_ICONS, roomIcon } from '../icons';
 import { clock, PRESETS, roomClimate, temp } from '../logic/climate';
 import { roomAccent, type WindowState } from '../logic/window-state';
 import { ent } from '../logic/entities';
@@ -148,7 +149,7 @@ export function roomSheet(ctx: PageContext, slug: string) {
               const col = lt ? lt.color : '#30d158';
               return html`<button class="dev ${d.on ? 'on' : ''} ${d.unavailable ? 'na' : ''}" style=${d.on ? `background:${lt ? lt.bg : `${col}24`}` : ''}
                 ${hold({ tap: () => toggleDevice(ctx, d.id), hold: () => ctx.openSheet({ id: 'device', entity: d.id, back: { id: 'room', slug } }) })}>
-                <span class="circle" style="width:38px;height:38px;background:${d.on ? col : 'rgba(255,255,255,0.12)'}">${icon(deviceIcon(d.id, d.name), 16, d.on ? (lt ? lt.icon : '#0b1a10') : '#fff', 2)}</span>
+                <span class="circle" style="width:38px;height:38px;background:${d.on ? col : 'rgba(255,255,255,0.12)'}">${deviceGlyph(d, ctx.hass.states[d.id]?.attributes, 16, d.on ? (lt ? lt.icon : '#0b1a10') : '#fff', 2)}</span>
                 <span class="devtext"><span class="t1s ellipsis">${d.name}</span><span class="t2s ellipsis">${d.status}</span></span>
               </button>`;
             })}

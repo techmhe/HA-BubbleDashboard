@@ -1,5 +1,6 @@
 import { css, html, nothing } from 'lit';
 import { hold } from '../components/hold';
+import { applianceIcon, weatherAnim } from '../components/motion';
 import { icon } from '../components/ui';
 import { I } from '../icons';
 import {
@@ -99,7 +100,7 @@ function renderItem(ctx: PageContext, n: NowItem, wide = true) {
   return html`
     <div class="now ${wide ? 'wide' : ''}" style="background: linear-gradient(90deg, ${n.tint}, rgba(255,255,255,0.05) ${wide ? 75 : 100}%)">
       <button class="now-main" ?disabled=${!tap} @click=${() => tap?.()}>
-        <span class="circle" style="width:34px;height:34px;background:${n.color}">${icon(n.icon, 16, '#101010')}</span>
+        <span class="circle" style="width:34px;height:34px;background:${n.color}">${n.appliance ? applianceIcon(n.appliance, true, 16, '#101010') : icon(n.icon, 16, '#101010')}</span>
         <span class="now-text">
           <span class="now-title ellipsis">${n.title}</span>
           <span class="now-sub ellipsis">${n.text}</span>
@@ -125,7 +126,7 @@ export function renderOverview(ctx: PageContext) {
   const w = weatherInfo(hass, weatherId);
   const bubbles = statusBubbles(hass, config);
   const items = [
-    ...nowItems(hass, config, ctx.rooms, now, ctx.heating(), (r) => ctx.window(r)),
+    ...nowItems(hass, config, ctx.rooms, now, ctx.heating(), (r) => ctx.window(r), ctx.alarmoSensors?.() ?? [], ctx.applianceRuns?.() ?? {}),
     ...technikItems(hass, config, now, { dismissed: ctx.dismissed, pauseUntil: ctx.piholePause }),
   ];
   const rooms = roomSummaries(hass, ctx.rooms, (r) => ctx.window(r));
@@ -146,7 +147,7 @@ export function renderOverview(ctx: PageContext) {
             </button>`
           : nothing}
         <button class="weather" aria-label="Wetter öffnen" @click=${() => ctx.openSheet({ id: 'weather' })}>
-          <span class="circle" style="width:40px;height:40px;background:rgba(143,208,255,0.2)">${icon(w.icon, 20, '#8fd0ff', 2)}</span>
+          <span class="circle" style="width:40px;height:40px;background:rgba(143,208,255,0.2)">${weatherAnim(hass.states[weatherId]?.state ?? '', 20, '#8fd0ff')}</span>
           <span>
             <span class="wp-temp">${w.temp}</span>
             <span class="wp-label">${w.label}</span>
@@ -158,7 +159,7 @@ export function renderOverview(ctx: PageContext) {
       <div class="status">
         ${bubbles.map((b) => html`
           <button class="bubble" aria-label="${b.label}: ${b.value}" ${hold(statusActions(ctx, b))}>
-            <span class="circle" style="width:34px;height:34px;background:${b.color}">${icon(b.icon, 17, '#111')}</span>
+            <span class="circle ${b.wobble ? 'wobble' : ''}" style="width:34px;height:34px;background:${b.color}">${icon(b.icon, 17, '#111')}</span>
             <span class="b-value ellipsis">${b.value}</span>
             <span class="b-label ellipsis">${b.label}</span>
           </button>
@@ -367,6 +368,11 @@ export const overviewStyles = css`
     display: block;
     font-size: 13px;
     font-weight: 600;
+  }
+  /* Half-width tiles: smaller title so "Waschmaschine läuft" fits at 390 px. */
+  .now:not(.wide) .now-title {
+    font-size: 11px;
+    letter-spacing: -0.1px;
   }
   .now-sub {
     display: block;

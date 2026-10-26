@@ -2,9 +2,9 @@ import { css, html, nothing } from 'lit';
 import { icon, sheet } from '../components/ui';
 import { I, IC } from '../icons';
 import { findPrinter, powerLocked, printerState, type Printer, type PrinterState } from '../logic/printer';
-import { guestWifi, isTechUser, pihole, services, type GuestWifi, type PiholeState, type ServiceRow, type Services } from '../logic/technik';
-import { sinceText, technikProblemCount } from '../logic/technik-now';
-import { fmt, state } from '../logic/util';
+import { backupState, guestWifi, isTechUser, pihole, services, type BackupState, type GuestWifi, type PiholeState, type ServiceRow, type Services } from '../logic/technik';
+import { backupWhen, sinceText, technikProblemCount } from '../logic/technik-now';
+import { durationText, fmt, state } from '../logic/util';
 import type { PageContext } from '../pages/context';
 
 const GREEN = '#30d158';
@@ -145,6 +145,20 @@ export function powerButton(ctx: PageContext, p: Printer, s: PrinterState, cls =
     </button>`;
 }
 
+function backupRow(ctx: PageContext, b: BackupState) {
+  const sameDay = new Date(b.at).toDateString() === ctx.now.toDateString();
+  const when = backupWhen(b.at, ctx.now);
+  const text = b.stale ? `letztes erfolgreiches vor ${durationText(Math.round(b.ageH * 60))}` : `letztes erfolgreiches ${sameDay ? 'heute ' : ''}${when}`;
+  const c = b.stale ? RED : GREEN;
+  return html`
+    <div class="tk-row ${b.stale ? 'tk-alert' : ''}">
+      <button class="tk-grow tk-line" @click=${() => ctx.moreInfo(b.entity)}>
+        <span class="circle" style="width:40px;height:40px;background:${c}">${icon(b.stale ? I.alert : I.check, 18, b.stale ? '#1f0606' : '#06200e', 2.2)}</span>
+        <span class="tk-grow"><span class="tk-title">Backup</span><span class="tk-sub">${text}</span></span>
+      </button>
+    </div>`;
+}
+
 function printerRow(ctx: PageContext, p: Printer, s: PrinterState) {
   return html`
     <div class="tk-row tk-printer">
@@ -164,6 +178,7 @@ export function technikSheet(ctx: PageContext) {
   const ph = pihole(hass, config, now, ctx.piholePause);
   const svc = services(hass, config, now);
   const g = guestWifi(hass, config);
+  const b = backupState(hass, config, now);
   const p = findPrinter(hass, config);
   const ps = p ? printerState(hass, p, now, ctx.dismissed) : undefined;
   return sheet({
@@ -178,6 +193,7 @@ export function technikSheet(ctx: PageContext) {
       ${ph ? adBlocker(ctx, ph) : nothing}
       ${svc.total ? serviceCard(ctx, svc) : nothing}
       ${g ? guestCard(ctx, g) : nothing}
+      ${b ? backupRow(ctx, b) : nothing}
       ${p && ps ? printerRow(ctx, p, ps) : nothing}
     `,
   });

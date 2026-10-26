@@ -27,3 +27,11 @@ describe('Aktuell layout for technical items', () => {
     ]);
   });
 });
+
+describe('half-width tile title', () => {
+  it('is smaller than the wide title so "Waschmaschine läuft" fits at 390 px', async () => {
+    const { overviewStyles } = await import('../src/pages/overview');
+    const css = overviewStyles.cssText;
+    expect(css).toMatch(/\.now:not\(\.wide\) \.now-title\s*\{[^}]*font-size:\s*11px/);
+  });
+});

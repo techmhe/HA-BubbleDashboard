@@ -195,6 +195,31 @@ export function guestWifi(hass: HomeAssistant, config: CardConfig): GuestWifi | 
   };
 }
 
+// ---------- Backup ----------
+
+export const BACKUP_STALE_H = 36;
+
+export interface BackupState {
+  entity: string;
+  /** Time of the last successful automatic backup (ms). */
+  at: number;
+  ageH: number;
+  stale: boolean;
+}
+
+/** Last successful automatic backup: `entities.backup_last`, else the `backup` platform sensor. */
+export function backupState(hass: HomeAssistant, config: CardConfig, now: Date): BackupState | null {
+  if (!technikConfig(config)) return null;
+  const entity = config.entities?.backup_last
+    ?? platformEntities(hass, 'backup').find((e) => e.translation_key === 'last_successful_automatic_backup')?.entity_id;
+  const st = entity ? hass.states[entity] : undefined;
+  if (!entity || !st) return null;
+  const at = Date.parse(st.state);
+  if (Number.isNaN(at)) return null;
+  const ageH = (now.getTime() - at) / 3600_000;
+  return { entity, at, ageH, stale: ageH > BACKUP_STALE_H };
+}
+
 // ---------- Summary ----------
 
 /** True when any technical source exists (printer, Pi-hole, guest WLAN or a monitor). */
@@ -205,7 +230,8 @@ export function hasTechnik(hass: HomeAssistant, config: CardConfig): boolean {
   return printer || !!piholeEntity(hass, config) || !!guestWifi(hass, config) || services(hass, config, new Date()).total > 0;
 }
 
-/** Problems for the red dot and the sheet headline. */
+/** Problems for the red dot and the sheet headline (services down, Pi-hole off, printer error, stale backup). */
 export function technikProblems(hass: HomeAssistant, config: CardConfig, now: Date, printerError: boolean, pauseUntil?: number): number {
-  return services(hass, config, now).down.length + (pihole(hass, config, now, pauseUntil)?.problem ? 1 : 0) + (printerError ? 1 : 0);
+  return services(hass, config, now).down.length + (pihole(hass, config, now, pauseUntil)?.problem ? 1 : 0) + (printerError ? 1 : 0)
+    + (backupState(hass, config, now)?.stale ? 1 : 0);
 }

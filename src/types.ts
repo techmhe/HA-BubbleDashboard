@@ -120,7 +120,15 @@ export interface CardConfig {
   battery?: { reserve?: number; full?: number };
   /** Stuck-valve check: limits, or false to switch it off. */
   heating_check?: Partial<import('./logic/heating-check').HeatingCheckOptions> | false;
-  entities?: Partial<Record<import('./logic/entities').EntityKey, string>> & { filter_alarms?: string[] };
+  /** Offline sensor warnings: extra entities to watch, entities to leave out. */
+  health?: { extra?: string[]; exclude?: string[] };
+  /** Washer, dryer, dishwasher etc.; replaces the detection from `input_boolean.<slug>_fertig` + `sensor.<slug>_power`. */
+  appliances?: { name: string; power: string; done: string }[];
+  entities?: Partial<Record<import('./logic/entities').EntityKey, string>> & {
+    filter_alarms?: string[];
+    /** Sensor with the last successful backup (default: the `backup` integration's sensor). */
+    backup_last?: string;
+  };
   /** Technik button, sheets and Aktuell items; false turns them off for everyone. */
   technik?: TechnikConfig | false;
 }

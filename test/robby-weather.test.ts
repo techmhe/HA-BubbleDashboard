@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { consumables, robbyMaps, robbyPrograms, robbySelection, robbyStatus, startLabel } from '../src/logic/robby';
-import { compass, dailyRows, hourlySlots, pollenInfo, stormHint, weatherNow } from '../src/logic/weather';
+import { compass, dailyRows, hourlySlots, pollenInfo, weatherNow } from '../src/logic/weather';
 import { NOW } from './fixture';
 import { DAILY, HOURLY, makeM5Hass } from './fixture-m5';
 
@@ -30,12 +30,6 @@ describe('weather', () => {
     expect(d.map((x) => x.rain)).toEqual(['3,4 mm', '24,6 mm', '1,5 mm', '', '', '', '']);
     expect(d[0]).toMatchObject({ min: 8, max: 9, left: 10, width: 10 });
     expect(d[3]).toMatchObject({ min: 11, max: 17, left: 40, width: 60 });
-  });
-
-  it('warns about the first stormy day, or now', () => {
-    expect(stormHint(DAILY, 41, NOW)).toEqual({ title: 'Sonntag stürmisch', text: 'Böen bis 78 km/h · 24,6 mm Regen' });
-    expect(stormHint(DAILY, 72, NOW)).toEqual({ title: 'Jetzt stürmisch', text: 'Böen bis 72 km/h' });
-    expect(stormHint(DAILY.map((d) => ({ ...d, wind_gust_speed: 30 })), 20, NOW)).toBeNull();
   });
 
   it('reports pollen', () => {

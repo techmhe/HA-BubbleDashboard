@@ -119,7 +119,6 @@ describe('Aktuell', () => {
     });
     const items = nowItems(h, cfg, resolveRooms(h, cfg), NOW);
     expect(items[0].id).toBe('alarm');
-    expect(items.find((i) => i.id === 'storm')!.text).toBe('Böen bis 78 km/h');
     expect(items.find((i) => i.id === 'battery')).toMatchObject({ title: 'Batterie schwach' });
     expect(items.find((i) => i.id === 'filter')!.text).toContain('Klimaanlage Filteralarm');
     expect(items.find((i) => i.id === 'filter')!.text).toContain('0 %');

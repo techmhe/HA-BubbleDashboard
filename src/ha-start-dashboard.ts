@@ -17,6 +17,8 @@ import type { CardConfig, HomeAssistant, PageId } from './types';
 import { loadEnergyToday } from './data/series';
 import { loadHeatingAlerts } from './data/heating-check';
 import type { HeatingAlert } from './logic/heating-check';
+import { shouldLoadAlarmo, type AlarmoSensor } from './logic/health';
+import { findAppliances, type PowerPoint } from './logic/appliances';
 import { loadStuckWindows, longOpenRooms } from './data/window-check';
 import { isSnoozed, parseSnooze, windowState, type WindowState } from './logic/window-state';
 import { batteryStatIds, energyStatIds, gridTariff, pvSensors, type EnergyPrefs } from './logic/energy';
@@ -133,6 +135,8 @@ export class HaStartDashboard extends LitElement {
   private _energyLoading = false;
   private _series: Record<string, SeriesData & { at: number }> = {};
   private _heating: { at: number; loading: boolean; alerts: HeatingAlert[] } = { at: 0, loading: false, alerts: [] };
+  private _alarmo: { at: number; loading: boolean; sensors: AlarmoSensor[] } = { at: 0, loading: false, sensors: [] };
+  private _appliances: { loaded: boolean; runs: Record<string, PowerPoint[]> } = { loaded: false, runs: {} };
   private _stuck: { at: number; key: string; loading: boolean; slugs: string[] } = { at: 0, key: '', loading: false, slugs: [] };
   private _winMemo?: { hass: HomeAssistant; now: Date; rooms: Room[]; key: string };
   private _navDrag: { left: number; width: number; hover: number } | null = null;
@@ -382,6 +386,64 @@ export class HaStartDashboard extends LitElement {
     return h.alerts;
   }
 
+  /** Alarmo's sensors for the offline check, refreshed every 30 min; empty when the call is not allowed. */
+  private _alarmoSensors(): AlarmoSensor[] {
+    const a = this._alarmo;
+    if (!a.loading && Date.now() - a.at > 30 * 60_000 && !shouldLoadAlarmo(this.hass!)) {
+      this._alarmo = { at: Date.now(), loading: false, sensors: [] };
+    } else if (!a.loading && Date.now() - a.at > 30 * 60_000) {
+      this._alarmo = { ...a, loading: true };
+      this.hass!
+        .callWS<Record<string, { type?: string; enabled?: boolean }>>({ type: 'alarmo/sensors' })
+        .then((res) =>
+          Object.entries(res ?? {}).map(([entity_id, s]) => ({ entity_id, type: String(s?.type ?? ''), enabled: s?.enabled !== false })),
+        )
+        .catch(() => [] as AlarmoSensor[])
+        .then((sensors) => (this._alarmo = { at: Date.now(), loading: false, sensors }));
+    }
+    return a.sensors;
+  }
+
+  /** Power history of the appliances (6 h, fetched once; `{}` on error), extended by live state changes. */
+  private _applianceRuns(): Record<string, PowerPoint[]> {
+    const hass = this.hass!;
+    const a = this._appliances;
+    const ids = findAppliances(hass, this._config!).map((x) => x.power);
+    if (!a.loaded && ids.length) {
+      a.loaded = true;
+      const start = new Date(Date.now() - 6 * 3600_000).toISOString();
+      hass
+        .callWS<Record<string, { s: string; lu?: number; lc?: number }[]>>({
+          type: 'history/history_during_period', start_time: start, entity_ids: ids,
+          minimal_response: true, no_attributes: true, significant_changes_only: false,
+        })
+        .then((res) => {
+          for (const id of ids) {
+            const pts = (res?.[id] ?? [])
+              .map((e) => ({ t: (e.lu ?? e.lc ?? 0) * 1000, w: Number(e.s) }))
+              .filter((p) => p.t > 0 && Number.isFinite(p.w));
+            a.runs[id] = [...pts, ...(a.runs[id] ?? []).filter((p) => !pts.length || p.t > pts[pts.length - 1].t)];
+          }
+          this.requestUpdate();
+        })
+        .catch(() => undefined);
+    }
+    // Live changes since the fetch (or without one).
+    if (a.loaded) {
+      for (const id of ids) {
+        const st = hass.states[id];
+        const w = Number(st?.state);
+        const t = st ? new Date(st.last_changed).getTime() : 0;
+        const pts = a.runs[id];
+        if (!pts || !st || !Number.isFinite(w) || !Number.isFinite(t)) continue;
+        if (!pts.length || t > pts[pts.length - 1].t) pts.push({ t, w });
+        const from = Date.now() - 6 * 3600_000;
+        while (pts.length > 1 && pts[1].t < from) pts.shift();
+      }
+    }
+    return a.runs;
+  }
+
   /** Airing state of a room, incl. the stuck-sensor check (refreshed every 10 min) and snoozes. */
   private _windowState(room: Room): WindowState {
     const hass = this.hass!;
@@ -497,6 +559,8 @@ export class HaStartDashboard extends LitElement {
       forecast: () => this._forecastData(),
       energy: () => this._energyInfo(),
       heating: () => this._heatingAlerts(),
+      alarmoSensors: () => this._alarmoSensors(),
+      applianceRuns: () => this._applianceRuns(),
       window: (room) => this._windowState(room),
       sceneConfigs: () => this._sceneConfigs(),
       series: (key, load, maxAge) => this._seriesData(key, load, maxAge),

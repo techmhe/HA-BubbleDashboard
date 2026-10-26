@@ -6,12 +6,13 @@ import { weatherWarnings } from './weather';
 import { airingInfo, clock } from './climate';
 import { robbyStatus } from './robby';
 import type { HeatingAlert } from './heating-check';
+import { applianceRun, findAppliances, type Appliance, type PowerPoint } from './appliances';
+import { healthItems, type AlarmoSensor } from './health';
 import { snoozeValue, windowState, type WindowState } from './window-state';
 import { deviceName, durationText, fmt, friendlyName, minutesSince, num, state } from './util';
 
 export const DEVICE_LABEL = 'dashboard_gerat';
 
-const STORM_KMH = 60;
 const DOOR_OPEN_MIN = 5;
 const BATTERY_LOW = 15;
 const FILTER_LIFE_LOW = 10;
@@ -74,6 +75,8 @@ export interface StatusBubble {
   label: string;
   icon: string;
   color: string;
+  /** Icon circle wobbles (Robby while cleaning). */
+  wobble?: boolean;
 }
 
 const VACUUM_STATES: Record<string, string> = {
@@ -125,7 +128,7 @@ export function statusBubbles(hass: HomeAssistant, config: CardConfig): StatusBu
   const grid = gridPower(hass, config);
   const full = vac === 'docked' && (robbyStatus(hass, config).battery ?? 0) >= 100;
   return [
-    { key: 'robby', value: full ? 'Geladen' : (VACUUM_STATES[vac] ?? vac), label: 'Robby', icon: I.vacuum, color: vac === 'error' ? '#ff453a' : '#ffffff' },
+    { key: 'robby', value: full ? 'Geladen' : (VACUUM_STATES[vac] ?? vac), label: 'Robby', icon: I.vacuum, color: vac === 'error' ? '#ff453a' : '#ffffff', wobble: vac === 'cleaning' },
     { key: 'light', value: `${lightsOn(hass).length} an`, label: 'Licht', icon: I.bulb, color: '#ffd60a' },
     { key: 'energy', value: grid.value, label: grid.label, icon: I.bolt, color: grid.label === 'Einspeisung' ? '#30d158' : '#ff9f0a' },
     { key: 'alarm', value: ALARM_STATES[alarm] ?? alarm, label: 'Alarm', icon: alarmIcon(alarm), color: alarm === 'triggered' ? '#ff453a' : '#bf9bff' },
@@ -154,6 +157,8 @@ export interface NowItem {
   progress?: number;
   /** Short value right-aligned in the row, e.g. remaining time. */
   value?: string;
+  /** Running appliance: its kind picks the animated icon. */
+  appliance?: Appliance['kind'];
   tap: NowTap;
 }
 
@@ -176,6 +181,8 @@ const isOpen = (hass: HomeAssistant, id?: string) => !!id && state(hass, id) ===
 export function nowItems(
   hass: HomeAssistant, config: CardConfig, rooms: Room[], now: Date, heating: HeatingAlert[] = [],
   win: (room: Room) => WindowState = (room) => windowState(hass, room, config, now),
+  alarmo: AlarmoSensor[] = [],
+  applianceRuns: Record<string, PowerPoint[]> = {},
 ): NowItem[] {
   const out: NowItem[] = [];
   const S = hass.states;
@@ -198,15 +205,12 @@ export function nowItems(
     out.push(item('heat', 'Heizung prüfen', `${list} in ${heating[0].hours} h ohne Heizbedarf`, I.thermo, C.orange, { room: heating[0].slug }));
   }
 
-  // Official DWD warnings in force; current gusts as fallback without them
+  // Official DWD warnings in force
   const warnings = weatherWarnings(hass, config, now).filter((w) => w.current);
-  const gust = num(hass, ent(config, 'gusts'));
   if (warnings.length) {
     const [top, ...rest] = warnings;
     const text = [top.when, ...rest.map((w) => `${w.title} ${w.when}`)].filter(Boolean).join(' · ');
     out.push(item('warn', `${top.level >= 3 ? 'Unwetterwarnung' : 'Warnung'}: ${top.title}`, text, I.storm, [top.color, `${top.color}44`], 'weather'));
-  } else if (gust !== null && gust >= STORM_KMH) {
-    out.push(item('storm', 'Sturmböen', `Böen bis ${fmt(Math.round(gust))} km/h`, I.storm, C.purple, 'weather'));
   }
 
   // Airing
@@ -253,6 +257,8 @@ export function nowItems(
     }
   }
 
+  out.push(...healthItems(hass, config, rooms, now, alarmo));
+
   // Appliances done
   for (const id of Object.keys(S).filter((k) => /^input_boolean\..+_fertig$/.test(k))) {
     if (S[id].state !== 'on') continue;
@@ -262,6 +268,15 @@ export function nowItems(
         kind: 'service', label: 'OK', domain: 'input_boolean', service: 'turn_off', data: {}, target: { entity_id: id },
       }),
     );
+  }
+
+  // Appliances running (the done item above wins)
+  for (const a of findAppliances(hass, config)) {
+    const run = applianceRun(hass, a, now, applianceRuns[a.power]);
+    if (!run.running) continue;
+    const watts = `${fmt(run.power)} W`;
+    const text = run.since === undefined ? watts : `seit ${new Date(run.since).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })} · ${watts}`;
+    out.push({ ...item(`appliance:${a.slug}`, `${a.name} läuft`, text, I.washer, C.blue, { moreInfo: a.power }), appliance: a.kind });
   }
 
   // Robby error / maintenance
@@ -422,7 +437,7 @@ export function roomSummaries(
 
 
 /** Items that keep a full-width row: urgent ones, so their text stays readable. */
-const WIDE = new Set(['alarm', 'door', 'warn', 'heat', 'window', 'sensor', 'print', 'print-done', 'print-error', 'services', 'pihole']);
+const WIDE = new Set(['alarm', 'door', 'warn', 'heat', 'window', 'sensor', 'health', 'health-many', 'print', 'print-done', 'print-error', 'services', 'pihole', 'backup']);
 
 /**
  * Two-column layout for "Aktuell": urgent and actionable items full width first, the rest as

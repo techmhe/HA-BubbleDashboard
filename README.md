@@ -83,7 +83,6 @@ load_font: true         # inject the Rubik web font into the page
 header: hide            # HA toolbar: hide | blend (transparent) | default; back in edit mode (?edit=1)
 entities:               # override any entity/script; defaults shown are this home's
   weather: weather.musterstadt
-  gusts: sensor.musterstadt_windboen
   precipitation: sensor.musterstadt_niederschlag   # DWD rain now (mm/h); optional
   alarm: alarm_control_panel.alarmo
   vacuum: vacuum.robby
@@ -128,6 +127,7 @@ entities:               # override any entity/script; defaults shown are this ho
   vacuum_map_script: script.robby_karte_wahlen           # field karte
   vacuum_room_script: script.robby_raum_umschalten       # field segment
   vacuum_clean_script: script.robby_auswahl_reinigen
+  backup_last: sensor.backup_letztes_erfolgreiches_automatisches_backup   # default: the `backup` integration's sensor
   filter_alarms:
     - binary_sensor.flur_1_og_klimaanlage_filteralarm
     - binary_sensor.klima_eg_filter_cleaning_reminder
@@ -140,6 +140,11 @@ vacuum_programs:        # programme tiles; without button → vacuum.start
   - { tag: Alle, name: Karte komplett, color: '#7ee8a0' }
 pollen: []              # default: every sensor.pollenflug_*
 warnings: []            # DWD warning sensors; default: every dwd_weather_warnings sensor
+health:                 # offline-sensor check (see Sensor health)
+  extra: []             # more entities to watch, e.g. a Zigbee door sensor
+  exclude: []           # entities to leave out, e.g. a sensor that is offline on purpose
+appliances:             # omit for auto-detection (see Running appliances)
+  - { name: Spülmaschine, power: sensor.spulmaschine_power, done: input_boolean.spulmaschine_fertig }
 exclude:                # entity ids or integrations (platforms) to leave out
   openings: []          # always excluded: versatile_thermostat, bambu_lab
   consumers: []
@@ -192,7 +197,7 @@ the defaults; each can be changed under `entities:` (see Configuration).
 | Heating | VTherm climates (`preset_temperatures`, `valve_open_percent`, `sensor.<climate>_power_percent`), `input_boolean.heizbetrieb`, `script.heizung_preset_alle` | Klima, room card, heating check |
 | All rooms | `input_number.alle_raume_temperatur`, `input_text.alle_raume_auswahl`, `input_select.alle_raume_dauer`, `script.alle_raume_anwenden` | *Alle Räume einstellen* |
 | Devices | label `dashboard_gerat`; `script.gerat_verzogert_ausschalten` (fields `entity`, `minutes`) | Räume, room card, *Ausschalten in* |
-| Appliances | `input_boolean.<name>_fertig`, switched on by your own automation | *fertig* item with *OK* |
+| Appliances | `input_boolean.<name>_fertig` (switched on by your own automation) and `sensor.<name>_power` | *läuft* item, *fertig* item with *OK* |
 | Waste | `sensor.naechster_abfalltermin` (attribute `daysTo`) | waste item |
 | Energy | HA's energy dashboard (solar, grid with prices, battery, device consumption), grid/battery/house power sensors, `sensor.stromverbrauch_nicht_erfasst` | Energie page |
 | Robby | vacuum, status/battery/error sensors, map/mode/mop selects, `input_text.robby_raumauswahl`, `input_number.robby_durchgange`, Robby scripts | Robby sheet |
@@ -276,7 +281,7 @@ explicitly; a configured room still auto-fills the fields you leave out.
   hold: arm away with confirm). Long-press = 500 ms with haptic feedback.
 - **Aktuell** (two columns: urgent items and items with a button full width first, the rest as
   half tiles) shows only what applies, else *Alles ruhig*: alarm triggered, front door open
-  ≥ 5 min, *Heizung prüfen* (see Heating check below), DWD warnings in force (else gusts ≥ 60 km/h), airing recommended (*Start* → `script.luften_starten`) or
+  ≥ 5 min, *Heizung prüfen* (see Heating check below), DWD warnings in force, airing recommended (*Start* → `script.luften_starten`) or
   running (live countdown of `timer.luften` plus the open windows), *Fenster schließen* /
   *Fenstersensor prüfen* per room (see Airing states; *1 h ignorieren* via
   `input_text.fenster_ignorieren`), appliance done (`input_boolean.*_fertig`, *OK* turns it
@@ -401,13 +406,13 @@ explicitly; a configured room still auto-fills the fields you leave out.
   `vacuum_selection`), mode tiles, suction (`vacuum.set_fan_speed`, hidden for mop only),
   water (hidden for vacuum only), passes 1×/2×, *N Räume starten* (`vacuum_clean_script`).
   All state lives in HA, so the Bubble build and the card stay in sync.
-- **Weather** (weather pill, storm item): now with today's range and rain, chips (rain now,
+- **Weather** (weather pill, warning item): now with today's range and rain, chips (rain now,
   humidity, wind + direction, pressure, UV, visibility; tap → chart of the last 24 h from
   history and the next 24 h from the hourly forecast; rain as hourly bars, the past from the
   `precipitation` sensor's statistics, without the sensor only the forecast), DWD warnings (current and advance, from the core
   `dwd_weather_warnings` integration; repeats of one type are merged into one row with the
-  highest level and the full time span; compact rows, tap shows the DWD text) or else a storm
-  hint (gusts ≥ 60 km/h now or the first forecast day), 6 slots every 2 h, 7 days on a shared
+  highest level and the full time span; compact rows, tap shows the DWD text; no warnings
+  from DWD means none shown, there is no gust fallback), 6 slots every 2 h, 7 days on a shared
   temperature scale (tap a day → its rain, sunshine, wind and gusts, humidity, UV, 3-hourly
   slots and temperature curve with hourly rain bars as far as the hourly forecast reaches), pollen.
   Forecasts come from `weather.get_forecasts` (hourly + daily), cached for 15 minutes.
@@ -451,7 +456,9 @@ pause 5 min / 1 h, off), Dienste (Uptime Kuma monitors, only problems listed, th
 opens the printer sheet. A red dot on the button means a service is down (≥ 3 min), Pi-hole
 has been off for ≥ 70 min or the printer reports an error. *Aktuell* gets the matching items
 (print running with a progress bar, print finished with OK, print error, services down,
-Werbeblocker aus).
+Werbeblocker aus). The sheet also has a *Backup* row with the last successful automatic backup
+(`entities.backup_last`, default the `backup` integration's sensor); older than 36 hours turns the
+dot red and adds a *Backup veraltet* item.
 
 Everything is auto-detected; every key is optional:
 
@@ -480,6 +487,40 @@ technik:                       # or `technik: false` to switch the feature off
   disabled by default in HA. Enable both on the WLAN device to get the QR code and the
   new-password button; without them the card shows only on/off and the client count.
 
+### Sensor health
+
+*Aktuell* warns when sensors report `unavailable`: Alarmo's sensors (read through the
+`alarmo/sensors` WebSocket call; tamper sensors and disabled ones are skipped), the room
+temperature sensors, the front door and everything in `health.extra`, minus `health.exclude`.
+Each offline sensor gets an item (*Bewegungsmelder prüfen*, *Türsensor prüfen*,
+*Fenstersensor prüfen*, *Temperatursensor prüfen*) with its room; above three the items collapse
+into one *N Sensoren offline* item that names the rooms. Room windows are covered by the window
+warnings, and the *1 h ignorieren* snooze (`input_text.fenster_ignorieren`) also silences
+a sensor warning.
+
+### Running appliances
+
+An appliance is an `input_boolean.<slug>_fertig` with a matching `sensor.<slug>_power`
+(washer, dryer, dishwasher, anything else). While it draws at least 10 W, *Aktuell* shows
+*<name> läuft* with the start time and the current power. A pause below 10 W shorter than
+15 minutes (drying phase, heating pause) still counts as running; once the done flag turns
+on, the item becomes *fertig* with *OK*. The start time comes from the last 6 hours of power
+history. Override the detection when the names differ:
+
+```yaml
+appliances:
+  - { name: Waschmaschine, power: sensor.waschmaschine_steckdose_power, done: input_boolean.waschmaschine_fertig }
+```
+
+### Animations
+
+State drives small animations: air purifier and fan icons spin faster with the level (auto
+and sleep slowest), the washer and dryer drum tumbles while running, the dishwasher's spray
+dots pulse, the dehumidifier droplet bobs, heating rooms on Klima show a slow glow on the
+orange room circle, Robby wobbles while cleaning, and the weather icon shows rain, snow,
+drifting clouds, sun rays or lightning. Everything stops under `prefers-reduced-motion`
+(OS accessibility setting).
+
 ### Heating check
 
 Every 10 minutes the card looks for rooms that keep getting warmer although their thermostat
@@ -502,7 +543,7 @@ Vertical swipes still scroll the sheet.
 
 ```bash
 npm install
-npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?page=climate, ?busy, ?calm, ?airing)
+npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?page=climate, ?busy, ?calm, ?airing, ?technik, ?health, ?appliances)
 npm test           # vitest: status logic
 npm run check      # typecheck + tests + build
 ```

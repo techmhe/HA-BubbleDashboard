@@ -67,4 +67,11 @@ describe('DWD weather warnings', () => {
       ['Warnung: Sturmböen', 'bis 23:00 · Dauerregen bis morgen 06:00'],
     ]);
   });
+
+  it('no gust fallback', () => {
+    const h = makeHass({ 'sensor.musterstadt_windboen': { state: '90' } });
+    expect(nowItems(h, config, resolveRooms(h, config), NOW).find((i) => i.id === 'storm')).toBeUndefined();
+    const w = makeHass({ 'sensor.musterstadt_windboen': { state: '90' } }, NOW, WARN);
+    expect(nowItems(w, config, resolveRooms(w, config), NOW).find((i) => i.id === 'warn')).toBeDefined();
+  });
 });
