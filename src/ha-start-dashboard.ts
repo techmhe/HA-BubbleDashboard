@@ -40,7 +40,7 @@ import { careSheet, careStyles } from './sheets/care';
 import { acSheet, acStyles } from './sheets/ac';
 import { energyChartSheet } from './sheets/energy-chart';
 import type { ForecastItem } from './logic/weather';
-import { airingSheet, airingStyles } from './sheets/airing';
+import { airingRoomSheet, airingSheet, airingStyles } from './sheets/airing';
 import { alarmSheet, alarmStyles } from './sheets/alarm';
 import { personsSheet, personsStyles } from './sheets/persons';
 import { allRoomsSheet, allRoomsStyles, DURATIONS } from './sheets/all-rooms';
@@ -193,7 +193,7 @@ export class HaStartDashboard extends LitElement {
     if (changed.has('_sheet') || changed.has('hass') || changed.has('_piholePause')) {
       const timer = this.hass && this._config ? this.hass.states[ent(this._config, 'airing_timer')] : undefined;
       const paused = !!this._piholePause && this._piholePause > Date.now();
-      const fast = this._sheet?.id === 'airing' || timer?.state === 'active' || (this._sheet?.id === 'technik' && paused);
+      const fast = this._sheet?.id === 'airing' || this._sheet?.id === 'airingRoom' || timer?.state === 'active' || (this._sheet?.id === 'technik' && paused);
       if (fast && !this._fastTick) this._fastTick = window.setInterval(() => (this._now = new Date()), 1000);
       else if (!fast && this._fastTick) {
         window.clearInterval(this._fastTick);
@@ -742,6 +742,8 @@ export class HaStartDashboard extends LitElement {
         return historySheet(ctx, sh.slug, sh.range);
       case 'airing':
         return airingSheet(ctx);
+      case 'airingRoom':
+        return airingRoomSheet(ctx, sh.slug);
       case 'allRooms':
         return allRoomsSheet(ctx);
       case 'device':

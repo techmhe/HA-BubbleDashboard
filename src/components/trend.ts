@@ -37,6 +37,8 @@ export interface TrendOptions {
   bandColors?: Record<string, string>;
   /** Rain bars (mm per hour) along the bottom, on their own scale (temperature forecast). */
   rain?: Point[];
+  /** Dashed vertical line at a moment, labelled at the top (e.g. when airing stopped paying off). */
+  marker?: { t: number; label: string };
 }
 
 const RAIN_COLOR = '#5ac8fa';
@@ -64,6 +66,7 @@ export function trendFigure(o: TrendOptions) {
   const rain = (o.rain ?? []).filter((p) => p.v > 0);
   const rainMax = Math.max(2, ...rain.map((p) => p.v));
   const rainY = (v: number) => BOTTOM - (v / rainMax) * (BOTTOM - RAIN_TOP);
+  const mx = o.marker ? g.x(o.marker.t) : 0;
   const rainAt = new Map((o.rain ?? []).map((p) => [p.t, p.v]));
   const points = scrubPoints({
     past, future, compare, step, bars: !!(o.bars && step), start: d.start, end: d.end, x: g.x, y: g.y,
@@ -98,6 +101,13 @@ export function trendFigure(o: TrendOptions) {
                 <text x=${VW - 4} y=${g.y(v) - 4} fill="rgba(255,255,255,0.55)" font-size="10" text-anchor="end">${fmt(v, v % 1 ? 1 : 0)}${unit}</text>`)}
               ${(d.bands ?? []).map((band) => svg`<rect x=${g.x(band.from)} y=${TOP - 6} width=${Math.max(1, g.x(band.to) - g.x(band.from))}
                 height=${BOTTOM - TOP + 6} fill=${o.bandColors?.[band.level] ?? 'rgba(255,255,255,0.08)'}></rect>`)}
+              ${o.marker
+                ? svg`<g class="tr-marker">
+                    <line x1=${mx} y1=${TOP - 6} x2=${mx} y2=${BOTTOM} stroke="rgba(255,255,255,0.75)" stroke-width="1.5" stroke-dasharray="3 3"></line>
+                    <text x=${mx > W * 0.6 ? mx - 4 : mx + 4} y=${TOP - 1} fill="rgba(255,255,255,0.85)" font-size="10" font-weight="600"
+                      text-anchor=${mx > W * 0.6 ? 'end' : 'start'}>${o.marker.label}</text>
+                  </g>`
+                : nothing}
               ${cmp?.line ? svg`<polyline points=${cmp.line} fill="none" stroke=${o.compareColor ?? 'rgba(255,255,255,0.6)'} stroke-width="1.6" stroke-linejoin="round" opacity="0.9"></polyline>` : nothing}
               ${o.bars && step
                 ? svg`${past.map((p) => bar(p, o.color, 0.85, g.y))}

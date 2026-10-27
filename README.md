@@ -301,7 +301,10 @@ explicitly; a configured room still auto-fills the fields you leave out.
   (`input_boolean.heizbetrieb`).
 - Outdoor pill (`sensor.aussen_temperature`, weather humidity, `sensor.aussen_taupunkt_messung`
   vs. the rooms' mean dew point) with the airing minutes (`sensor.stossluften_dauer`), or a
-  live countdown while `timer.luften` runs; tap → airing sheet. The card does not start the
+  live countdown while `timer.luften` runs; tap → airing sheet. In the airing sheet each open
+  window and recommended room opens a room chart: temperature and humidity over the last 15 min
+  (refreshed every 30 s), green where `sensor.<slug>_luftung` said *Jetzt lüften*, and a dashed
+  line where that ended (*Taupunkt erreicht · 14:32*) or *Lüften lohnt noch*. The card does not start the
   timer on its own: an HA automation that runs `script.luften_starten` when a window opens
   makes the countdown appear automatically.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*

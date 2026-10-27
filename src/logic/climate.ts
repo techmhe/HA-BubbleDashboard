@@ -361,3 +361,15 @@ export function airingBands(rows: { s: string; lu: number }[], start: number, en
   });
   return out;
 }
+
+export type AiringVerdict = { kind: 'running' } | { kind: 'ended'; at: number } | { kind: 'none' };
+
+/**
+ * Whether airing still pays off by the dew point: running while the latest "Jetzt lüften"
+ * band reaches `end`, otherwise ended where that band stopped; none without such a band.
+ */
+export function airingVerdict(bands: AiringBand[], end: number): AiringVerdict {
+  const last = [...bands].reverse().find((b) => b.level === 'now');
+  if (!last) return { kind: 'none' };
+  return last.to >= end ? { kind: 'running' } : { kind: 'ended', at: last.to };
+}

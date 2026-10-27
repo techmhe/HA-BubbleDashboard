@@ -164,6 +164,28 @@ export async function loadDewPoint(
   };
 }
 
+/**
+ * One room sensor over the last 15 minutes (30 s steps) with the room's airing bands, for the
+ * airing sheet's room chart.
+ */
+export async function loadAiringRoom(hass: HomeAssistant, id: string, airing: string, now = Date.now()): Promise<SeriesResult> {
+  const end = now;
+  const start = end - 15 * 60_000;
+  const rows = await hass.callWS<Record<string, HistoryRow[]>>({
+    type: 'history/history_during_period',
+    start_time: new Date(start).toISOString(),
+    end_time: new Date(end).toISOString(),
+    entity_ids: [id, airing],
+    minimal_response: true,
+    no_attributes: true,
+    significant_changes_only: false,
+  });
+  const pts = (rows[id] ?? [])
+    .map((r) => ({ t: Math.max(start, Math.round(r.lu * 1000)), v: Number(r.s) }))
+    .filter((p) => Number.isFinite(p.v));
+  return { past: bucket(pts, start, end, 30_000), bands: airingBands(rows[airing] ?? [], start, end), start, end };
+}
+
 /** Mean power per hour/day for sensors without an energy statistic. */
 export async function loadPower(hass: HomeAssistant, id: string, range: ChartRange): Promise<SeriesResult> {
   const r = rangeSpec(range);

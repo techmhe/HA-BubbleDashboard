@@ -24,6 +24,8 @@ export type SheetState =
   | { id: 'room'; slug: string }
   | { id: 'history'; slug: string; range: HistoryRange }
   | { id: 'airing' }
+  /** One room from the airing sheet: last 15 min of temperature and humidity with the dew point verdict. */
+  | { id: 'airingRoom'; slug: string }
   | { id: 'allRooms' }
   | { id: 'robby' }
   | { id: 'weather' }
