@@ -362,14 +362,54 @@ export function airingBands(rows: { s: string; lu: number }[], start: number, en
   return out;
 }
 
-export type AiringVerdict = { kind: 'running' } | { kind: 'ended'; at: number } | { kind: 'none' };
+/** Saturation vapour pressure (hPa, Magnus). */
+const es = (t: number) => 6.112 * Math.exp((17.62 * t) / (243.12 + t));
+
+/** Relative humidity (%) of air with dew point `dew` at temperature `t`. */
+export function rhAtDew(t: number, dew: number): number {
+  return (100 * es(dew)) / es(t);
+}
+
+export interface AiringForecast {
+  /** Humidity (%) where airing stops paying off at the current room temperature. */
+  stopAt: number;
+  /** Percentage points left until then (≤ 0: reached). */
+  left: number;
+  /** Estimated minutes until then, from the recent fall; null while not falling. */
+  minutes: number | null;
+}
+
+/** Airing stops paying off once the indoor dew point is this close to the outdoor one (K); the HA airing sensors say "Nicht lüften" there too. */
+const DEW_MARGIN = 2;
+/** Never recommend airing below this humidity (%): drier air is uncomfortable. */
+const MIN_HUMIDITY = 45;
 
 /**
- * Whether airing still pays off by the dew point: running while the latest "Jetzt lüften"
- * band reaches `end`, otherwise ended where that band stopped; none without such a band.
+ * How far airing can still dry the room. Exchanged air pulls the indoor dew point towards the
+ * outdoor one, so the humidity falls exponentially towards the outdoor dew point at room
+ * temperature; airing stops paying off within DEW_MARGIN of it, and never below MIN_HUMIDITY.
+ * The current room temperature is used, so the limit rises while the room cools. The rate
+ * comes from the last 5 minutes.
  */
-export function airingVerdict(bands: AiringBand[], end: number): AiringVerdict {
-  const last = [...bands].reverse().find((b) => b.level === 'now');
-  if (!last) return { kind: 'none' };
-  return last.to >= end ? { kind: 'running' } : { kind: 'ended', at: last.to };
+export function airingForecast(hum: Point[], tIn: number, dewOut: number): AiringForecast | null {
+  if (!hum.length) return null;
+  const now = hum[hum.length - 1];
+  const stopAt = Math.max(MIN_HUMIDITY, rhAtDew(tIn, dewOut + DEW_MARGIN));
+  const floor = rhAtDew(tIn, dewOut);
+  const left = now.v - stopAt;
+  const past = hum.find((p) => p.t >= now.t - 5 * 60_000) ?? hum[0];
+  const dt = (now.t - past.t) / 60_000;
+  let minutes: number | null = null;
+  if (left > 0 && dt > 0 && past.v - floor > now.v - floor && now.v > floor) {
+    const k = Math.log((past.v - floor) / (now.v - floor)) / dt;
+    if (k > 0) minutes = Math.log((now.v - floor) / (stopAt - floor)) / k;
+  }
+  return { stopAt, left, minutes };
+}
+
+/** How far the room cooled (K) from its warmest point since `since` to the last point; 0 without data. */
+export function cooledBy(temps: Point[], since: number): number {
+  const after = temps.filter((p) => p.t >= since);
+  if (!after.length) return 0;
+  return Math.max(0, Math.max(...after.map((p) => p.v)) - temps[temps.length - 1].v);
 }

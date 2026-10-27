@@ -100,24 +100,17 @@ hass.callWS = (async (msg: Record<string, any>) => {
       device_consumption: [],
     };
   }
-  // Airing room chart: window opened 15 min ago, humidity drops, "Jetzt lüften" ends after 9 min.
-  if (msg.type === 'history/history_during_period' && (msg.entity_ids as string[]).some((id) => id.endsWith('_luftung'))
-    && (msg.entity_ids as string[]).some((id) => /_(temperature|humidity)$/.test(id))) {
+  // Airing room chart: window opened 15 min ago, humidity and temperature drop.
+  if (msg.type === 'history/history_during_period' && (msg.entity_ids as string[]).length === 1
+    && /_(temperature|humidity)$/.test(msg.entity_ids[0])) {
+    const id = msg.entity_ids[0] as string;
     const start = Date.parse(msg.start_time);
-    const out: Record<string, { s: string; lu: number }[]> = {};
-    for (const id of msg.entity_ids as string[]) {
-      const rows = [];
-      if (id.endsWith('_luftung')) {
-        rows.push({ s: 'Jetzt lüften', lu: (start - 600_000) / 1000 }, { s: 'Lüften möglich', lu: (start + 9 * 60_000) / 1000 });
-      } else {
-        for (let t = start, i = 0; t < Date.now(); t += 60_000, i++) {
-          const k = 1 - Math.exp(-i / 5);
-          rows.push({ s: String(id.endsWith('_humidity') ? 72 - 14 * k : 21.4 - 2.6 * k), lu: t / 1000 });
-        }
-      }
-      out[id] = rows;
+    const rows = [];
+    for (let t = start, i = 0; t < Date.now(); t += 60_000, i++) {
+      const k = 1 - Math.exp(-i / 12);
+      rows.push({ s: String(id.endsWith('_humidity') ? 78 - 18 * k : 21.4 - 2.2 * k), lu: t / 1000 });
     }
-    return out;
+    return { [id]: rows };
   }
   if (msg.type === 'history/history_during_period' && (msg.entity_ids as string[]).some((id) => id.endsWith('_taupunkt'))) {
     const start = Date.parse(msg.start_time);
