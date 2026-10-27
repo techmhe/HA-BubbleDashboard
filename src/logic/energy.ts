@@ -174,6 +174,15 @@ export function energyNow(hass: HomeAssistant, config: CardConfig, prefs?: Energ
   return coupled ? { pv, house, import: imp, export: exp, battery, coupled } : { pv, house, import: imp, export: exp, battery };
 }
 
+/** Where the house's power comes from right now: PV (direct or through the battery), stored energy, grid. */
+export function houseSources(e: EnergyNow): { pv: number; battery: number; grid: number } {
+  const pvToHouse = e.coupled ? e.pv - e.coupled.pv + e.coupled.fromPv : e.pv;
+  const stored = e.coupled ? e.coupled.fromBattery : Math.max(0, e.battery?.power ?? 0);
+  const pv = Math.min(pvToHouse, e.house);
+  const battery = Math.max(0, Math.min(stored, e.house - pv));
+  return { pv: Math.round(pv), battery: Math.round(battery), grid: Math.round(e.import) };
+}
+
 export function partOfDay(now: Date): string {
   const h = now.getHours();
   if (h >= 5 && h < 11) return 'Morgen';

@@ -356,9 +356,10 @@ explicitly; a configured room still auto-fills the fields you leave out.
   *Akku lädt*); idle at its limits it says *Reserve* or *voll* (`battery:` in the config). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
   (PV + import + battery out − export − battery in), Akku = kWh charged and discharged
   per hour/day (opens on 7 days). When the PV panels feed the battery inverter (PV sensor or its group members on the
-  battery's device, or `battery.pv_coupled: true`), PV flows down into the Akku and the Akku's
-  output flows into the house; a bar splits that output into *aus PV* (current PV) and *aus Akku*
-  (stored energy), and the Akku says *lädt* with the PV surplus it stores. *Energie-Dashboard ›*
+  battery's device, or `battery.pv_coupled: true`), the flow shows *Haus jetzt* as one bar split
+  into *Sonne*, *Akku* (stored energy) and *Netz*, and below it the chain PV → Akku → ins Haus ↔
+  Netz; the Akku says *lädt* with the PV surplus it stores or *liefert* from storage.
+  *Energie-Dashboard ›*
   opens HA's `/energy`.
 - PV now = `pv_power` plus the solar power sensors of HA's energy dashboard.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since

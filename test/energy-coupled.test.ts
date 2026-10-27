@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { energyHeadline, energyNow } from '../src/logic/energy';
+import { energyHeadline, energyNow, houseSources } from '../src/logic/energy';
 import type { PageContext } from '../src/pages/context';
-import { renderEnergy } from '../src/pages/energy';
+import { energyStyles, renderEnergy } from '../src/pages/energy';
 import { resolveRooms } from '../src/logic/rooms';
 import type { CardConfig } from '../src/types';
 import { makeHass, NOW, type Def } from './fixture';
@@ -72,20 +72,35 @@ describe('PV coupled to the battery', () => {
     expect(energyHeadline(NOW, energyNow(coupledHass('0', '410', '10', '420'), config))).toBe('Abend · Akku versorgt das Haus');
   });
 
-  it('routes PV into the battery and shows where the battery output comes from', () => {
-    const t = visibleText(renderEnergy(ctx(coupledHass('860', '786'))));
-    expect(t).toContain('Akku lädt 74 W');
-    expect(t).toContain('aus PV 786 W');
-    expect(t).toContain('aus Akku 0 W');
-    const raw = templateText(renderEnergy(ctx(coupledHass('860', '786'))));
-    expect(raw).toContain('pvline');
-    expect(raw).not.toMatch(/fline live right[^>]*#ffd60a/);
+  it('splits the house consumption by source', () => {
+    expect(houseSources(energyNow(coupledHass('860', '786'), config))).toEqual({ pv: 786, battery: 0, grid: 1654 });
+    expect(houseSources(energyNow(coupledHass('0', '410', '10', '420'), config))).toEqual({ pv: 0, battery: 410, grid: 10 });
+    const h = coupledHass('978', '786', '0', '510');
+    h.states['sensor.ruckeinspeisung_shelly_messung'].state = '276';
+    expect(houseSources(energyNow(h, config))).toEqual({ pv: 510, battery: 0, grid: 0 });
+    expect(houseSources(energyNow(coupledHass('300', '500', '120', '620'), config))).toEqual({ pv: 300, battery: 200, grid: 120 });
   });
 
-  it('at night the whole output comes from the battery', () => {
+  it('shows the house split and the chain PV, Akku, Haus, Netz', () => {
+    const t = visibleText(renderEnergy(ctx(coupledHass('860', '786'))));
+    expect(t).toMatch(/Haus jetzt 2\.440 W/);
+    expect(t).toMatch(/Sonne 786 W Akku 0 W Netz 1\.654 W/);
+    expect(t).toMatch(/860 W PV 26 % lädt 74 W 786 W ins Haus 1\.654 W Bezug/);
+    const raw = templateText(renderEnergy(ctx(coupledHass('860', '786'))));
+    expect(raw).toContain('sbar');
+    expect(raw).not.toContain('pvline');
+  });
+
+  it('at night the Akku delivers and fills the Akku part of the bar', () => {
     const t = visibleText(renderEnergy(ctx(coupledHass('0', '410', '10', '420'))));
-    expect(t).toContain('Akku liefert 410 W');
-    expect(t).toContain('aus Akku 410 W');
+    expect(t).toContain('liefert 410 W');
+    expect(t).toMatch(/Sonne 0 W Akku 410 W Netz 10 W/);
+  });
+
+  it('moves the flow dashes with transform, never by repainting the background', () => {
+    const css = String(energyStyles.cssText);
+    for (const k of css.matchAll(/@keyframes [\w-]+\s*\{[\s\S]*?\n {2}\}/g)) expect(k[0]).not.toContain('background-position');
+    expect(css).toMatch(/@keyframes dash-x[\s\S]*?transform/);
   });
 
   it('keeps the classic layout without coupling', () => {

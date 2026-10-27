@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon } from '../components/ui';
 import { deviceIcon, I } from '../icons';
 import { watts } from '../logic/devices';
-import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type BatteryCoupling, type Consumer } from '../logic/energy';
+import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, houseSources, type BatteryCoupling, type Consumer, type EnergyNow } from '../logic/energy';
 import { fmt } from '../logic/util';
 import type { PageContext } from './context';
 
@@ -27,41 +27,104 @@ function consumerIcon(c: Consumer): string {
 /** Vertical link between house and battery: 'up' = battery feeds the house, 'down' = it charges. */
 function batteryLine(color: string, dir: 'up' | 'down' | null) {
   if (!dir) return html`<div class="vline idle" style="border-color:${color}4d" aria-hidden="true"></div>`;
-  return html`<div class="vline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
+  return html`<div class="vline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="dashes"></span><span class="arrow"></span></div>`;
 }
 
 function flowLine(color: string, dir: 'left' | 'right' | null) {
   if (!dir) return html`<div class="fline idle" style="border-color:${color}4d" aria-hidden="true"></div>`;
-  return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
+  return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="dashes"></span><span class="arrow"></span></div>`;
 }
 
-/** PV behind the battery: PV flows down into the battery, the battery output flows up into the house. */
-function coupledBattery(ctx: PageContext, c: BatteryCoupling, bat: { soc: number | null; power: number }) {
-  const live = c.charge > IDLE || c.fromBattery > IDLE;
-  const state = c.charge > IDLE ? `Akku lädt ${watts(c.charge)}` : c.fromBattery > IDLE ? `Akku liefert ${watts(c.fromBattery)}` : 'Akku ruht';
-  const pvShare = c.output > 0 ? (c.fromPv / c.output) * 100 : 0;
-  const dirLine = (color: string, dir: 'up' | 'down' | null, cls: string) =>
-    dir
-      ? html`<div class="vline live ${dir} ${cls}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`
-      : html`<div class="vline idle ${cls}" style="border-color:${color}4d" aria-hidden="true"></div>`;
+type Chart = (key: string, name?: string) => void;
+type Battery = NonNullable<EnergyNow['battery']>;
+
+/** PV — Haus — Netz with the battery below the house (PV and battery each feed the house). */
+function classicFlow(ctx: PageContext, now: EnergyNow, chart: Chart) {
+  const exporting = now.export > now.import;
+  const gridW = exporting ? now.export : now.import;
+  const gridColor = exporting ? '#64d2ff' : '#ff9f0a';
+  const bat = now.battery;
   return html`
-    <div class="cflow">
-      ${dirLine('#ffd60a', c.pv > IDLE ? 'down' : null, 'pvline')}
-      ${dirLine('#30d158', c.output > IDLE ? 'up' : null, 'outline')}
-      <button class="cbat" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
-        <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
-          aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
-          <span class="circle" style="width:44px;height:44px;background:${live ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, live ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
-        </span>
-        <span class="nv">${bat.soc !== null ? `${fmt(bat.soc)} %` : ''}</span>
-        <span class="nl">${state}${!live && batteryNote(bat, ctx.config.battery) ? ` · ${batteryNote(bat, ctx.config.battery)}` : ''}</span>
-      </button>
-      ${c.output > IDLE ? html`<div class="fline live right elbow" style="--c:#30d158" aria-hidden="true"></div>` : html`<div class="fline idle elbow" style="border-color:#30d1584d" aria-hidden="true"></div>`}
-      <span class="cout"><b>${watts(c.output)}</b> ins Haus</span>
+        <div class="frow">
+          <button class="node" aria-label="PV ${watts(now.pv)}, Verlauf anzeigen" @click=${() => chart('pv')}>
+            <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 22, '#ffd60a', 2)}</span>
+            <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
+          </button>
+          ${flowLine('#ffd60a', now.pv > IDLE ? 'right' : null)}
+          <button class="node" aria-label="Haus ${watts(now.house)}, Verbrauch anzeigen" @click=${() => chart('house')}>
+            <span class="house">${icon(I.home, 22, '#101218', 2.2)}<span>${watts(now.house)}</span></span>
+            <span class="nl">Haus</span>
+          </button>
+          ${flowLine(gridColor, gridW > IDLE ? (exporting ? 'right' : 'left') : null)}
+          <button class="node" aria-label="Netz ${watts(gridW)}, Verlauf anzeigen" @click=${() => chart(exporting ? 'export' : 'import')}>
+            <span class="circle" style="width:48px;height:48px;background:${gridW > IDLE ? gridColor : 'rgba(255,255,255,0.12)'}">${icon(E.pylon, 22, gridW > IDLE ? '#1a1206' : '#fff', 2.2)}</span>
+            <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
+          </button>
+        </div>
+        ${bat
+          ? html`<button class="bnode" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
+              ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
+              <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
+                aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
+                <span class="circle" style="width:44px;height:44px;background:${Math.abs(bat.power) > IDLE ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, Math.abs(bat.power) > IDLE ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
+              </span>
+              <span class="nv">${Math.abs(bat.power) > IDLE ? watts(Math.abs(bat.power)) : '0 W'}</span>
+              <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}${Math.abs(bat.power) <= IDLE && batteryNote(bat, ctx.config.battery) ? ` · ${batteryNote(bat, ctx.config.battery)}` : ''}</span>
+            </button>`
+          : nothing}`;
+}
+
+/** Battery state under the Akku node: charging, delivering from storage, or idle. */
+function batteryState(c: BatteryCoupling, bat: Battery, ctx: PageContext): string {
+  if (c.charge > IDLE) return `lädt ${watts(c.charge)}`;
+  if (c.fromBattery > IDLE) return `liefert ${watts(c.fromBattery)}`;
+  return batteryNote(bat, ctx.config.battery) || 'ruht';
+}
+
+/** PV behind the battery: the house split by source, then the chain PV → Akku → Haus ↔ Netz. */
+function sourcesFlow(ctx: PageContext, now: EnergyNow, c: BatteryCoupling, bat: Battery, chart: Chart) {
+  const src = houseSources(now);
+  const total = Math.max(1, src.pv + src.battery + src.grid);
+  const pct = (v: number) => `${(v / total) * 100}%`;
+  const exporting = now.export > now.import;
+  const gridW = exporting ? now.export : now.import;
+  const gridColor = exporting ? '#64d2ff' : '#ff9f0a';
+  const live = c.charge > IDLE || c.fromBattery > IDLE;
+  const part = (label: string, color: string, v: number) =>
+    html`<div class="spart"><span class="nl"><i class="dot" style="background:${color}"></i>${label}</span><span class="nv">${watts(v)}</span></div>`;
+  const link = (color: string, on: boolean, dir: 'right' | 'left' = 'right') =>
+    html`<div class="clink ${on ? `live ${dir}` : 'idle'}" style="--c:${color}" aria-hidden="true"><span class="dashes"></span></div>`;
+  return html`
+    <div class="shead">
+      <span class="nl">Haus jetzt</span>
+      <button class="hv" aria-label="Haus ${watts(now.house)}, Verbrauch anzeigen" @click=${() => chart('house')}>${watts(now.house)}</button>
     </div>
-    <div class="csplit" role="img" aria-label="Akku-Ausgang: aus PV ${watts(c.fromPv)}, aus Akku ${watts(c.fromBattery)}">
-      <div class="sbar"><span class="spv" style="width:${pvShare}%"></span><span class="sst" style="width:${c.output > 0 ? 100 - pvShare : 0}%"></span></div>
-      <div class="clegend"><span><i class="dot" style="background:#ffd60a"></i>aus PV ${watts(c.fromPv)}</span><span><i class="dot" style="background:#30d158"></i>aus Akku ${watts(c.fromBattery)}</span></div>
+    <div class="sbar" role="img" aria-label="Sonne ${watts(src.pv)}, Akku ${watts(src.battery)}, Netz ${watts(src.grid)}">
+      <span style="width:${pct(src.pv)};background:#ffd60a"></span><span style="width:${pct(src.battery)};background:#30d158"></span><span style="width:${pct(src.grid)};background:#ff9f0a"></span>
+    </div>
+    <div class="sparts">${part('Sonne', '#ffd60a', src.pv)}${part('Akku', '#30d158', src.battery)}${part('Netz', '#ff9f0a', src.grid)}</div>
+    <div class="chain">
+      <button class="cnode" aria-label="PV ${watts(now.pv)}, Verlauf anzeigen" @click=${() => chart('pv')}>
+        <span class="circle" style="width:40px;height:40px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 19, '#ffd60a', 2)}</span>
+        <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
+      </button>
+      ${link('#ffd60a', c.pv > IDLE)}
+      <button class="cnode" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
+        <span class="bring small" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img" aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
+          <span class="circle" style="width:34px;height:34px;background:${live ? '#30d158' : '#1d2a22'}">${icon(E.battery, 17, live ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
+        </span>
+        <span class="nv">${bat.soc !== null ? `${fmt(bat.soc)} %` : '–'}</span><span class="nl">${batteryState(c, bat, ctx)}</span>
+      </button>
+      ${link('#30d158', c.output > IDLE)}
+      <button class="cnode" aria-label="Akku-Ausgang ${watts(c.output)}, Verbrauch anzeigen" @click=${() => chart('house')}>
+        <span class="circle" style="width:40px;height:40px;background:#fff">${icon(I.home, 19, '#101218', 2.2)}</span>
+        <span class="nv">${watts(c.output)}</span><span class="nl">ins Haus</span>
+      </button>
+      ${link(gridColor, gridW > IDLE, exporting ? 'right' : 'left')}
+      <button class="cnode" aria-label="Netz ${watts(gridW)}, Verlauf anzeigen" @click=${() => chart(exporting ? 'export' : 'import')}>
+        <span class="circle" style="width:40px;height:40px;background:${gridW > IDLE ? gridColor : 'rgba(255,255,255,0.12)'}">${icon(E.pylon, 19, gridW > IDLE ? '#1a1206' : '#fff', 2.2)}</span>
+        <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
+      </button>
     </div>`;
 }
 
@@ -79,9 +142,6 @@ export function renderEnergy(ctx: PageContext) {
   const top = ctx.consumersAll ? all : all.slice(0, SHOWN);
   const chart = (key: string, name?: string) => ctx.openSheet({ id: 'energyChart', key, range: '24h', name });
   const max = Math.max(1, ...top.map((c) => c.value));
-  const exporting = now.export > now.import;
-  const gridW = exporting ? now.export : now.import;
-  const gridColor = exporting ? '#64d2ff' : '#ff9f0a';
   const bat = now.battery;
   const coupled = now.coupled;
 
@@ -93,33 +153,7 @@ export function renderEnergy(ctx: PageContext) {
       </header>
 
       <div class="flow">
-        <div class="frow">
-          <button class="node" aria-label="PV ${watts(now.pv)}, Verlauf anzeigen" @click=${() => chart('pv')}>
-            <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 22, '#ffd60a', 2)}</span>
-            <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
-          </button>
-          ${coupled && now.pv - coupled.pv <= IDLE ? html`<span aria-hidden="true"></span>` : flowLine('#ffd60a', now.pv - (coupled?.pv ?? 0) > IDLE ? 'right' : null)}
-          <button class="node" aria-label="Haus ${watts(now.house)}, Verbrauch anzeigen" @click=${() => chart('house')}>
-            <span class="house">${icon(I.home, 22, '#101218', 2.2)}<span>${watts(now.house)}</span></span>
-            <span class="nl">Haus</span>
-          </button>
-          ${flowLine(gridColor, gridW > IDLE ? (exporting ? 'right' : 'left') : null)}
-          <button class="node" aria-label="Netz ${watts(gridW)}, Verlauf anzeigen" @click=${() => chart(exporting ? 'export' : 'import')}>
-            <span class="circle" style="width:48px;height:48px;background:${gridW > IDLE ? gridColor : 'rgba(255,255,255,0.12)'}">${icon(E.pylon, 22, gridW > IDLE ? '#1a1206' : '#fff', 2.2)}</span>
-            <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
-          </button>
-        </div>
-        ${coupled && bat ? coupledBattery(ctx, coupled, bat) : bat
-          ? html`<button class="bnode" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
-              ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
-              <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
-                aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
-                <span class="circle" style="width:44px;height:44px;background:${Math.abs(bat.power) > IDLE ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, Math.abs(bat.power) > IDLE ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
-              </span>
-              <span class="nv">${Math.abs(bat.power) > IDLE ? watts(Math.abs(bat.power)) : '0 W'}</span>
-              <span class="nl">${bat.power > IDLE ? 'Akku liefert' : bat.power < -IDLE ? 'Akku lädt' : 'Akku'}${bat.soc !== null ? ` · ${fmt(bat.soc)} %` : ''}${Math.abs(bat.power) <= IDLE && batteryNote(bat, ctx.config.battery) ? ` · ${batteryNote(bat, ctx.config.battery)}` : ''}</span>
-            </button>`
-          : nothing}
+        ${coupled && bat ? sourcesFlow(ctx, now, coupled, bat, chart) : classicFlow(ctx, now, chart)}
         <button class="elink" @click=${() => ctx.navigate('/energy')}>Energie-Dashboard ›</button>
       </div>
 
@@ -252,12 +286,32 @@ export const energyStyles = css`
   }
   .fline.live {
     height: 4px;
-    border-radius: 2px;
-    background: repeating-linear-gradient(90deg, var(--c) 0 10px, transparent 10px 16px);
-    animation: flow-right 0.8s linear infinite;
   }
-  .fline.live.left {
-    animation-name: flow-left;
+  /* Dashes move with a GPU transform (one 16 px period per cycle), so they stay smooth. */
+  .dashes {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 2px;
+  }
+  .dashes::before {
+    content: '';
+    position: absolute;
+    inset: 0 -16px;
+    background: repeating-linear-gradient(90deg, var(--c) 0 10px, transparent 10px 16px);
+    animation: dash-x 1s linear infinite;
+    will-change: transform;
+  }
+  .left > .dashes::before {
+    animation-direction: reverse;
+  }
+  .vline .dashes::before {
+    inset: -16px 0;
+    background: repeating-linear-gradient(180deg, var(--c) 0 10px, transparent 10px 16px);
+    animation-name: dash-y;
+  }
+  .vline.up > .dashes::before {
+    animation-direction: reverse;
   }
   .fline .arrow {
     position: absolute;
@@ -275,24 +329,24 @@ export const energyStyles = css`
     left: -2px;
     border-right: 10px solid var(--c);
   }
-  @keyframes flow-right {
+  @keyframes dash-x {
     from {
-      background-position: 0 0;
+      transform: translateX(-16px);
     }
     to {
-      background-position: 16px 0;
+      transform: translateX(0);
     }
   }
-  @keyframes flow-left {
+  @keyframes dash-y {
     from {
-      background-position: 16px 0;
+      transform: translateY(-16px);
     }
     to {
-      background-position: 0 0;
+      transform: translateY(0);
     }
   }
   @media (prefers-reduced-motion: reduce) {
-    .fline.live {
+    .dashes::before {
       animation: none;
     }
   }
@@ -322,14 +376,7 @@ export const energyStyles = css`
     width: 0;
     border-left: 3px dotted;
   }
-  .vline.live {
-    border-radius: 2px;
-    background: repeating-linear-gradient(180deg, var(--c) 0 8px, transparent 8px 13px);
-    animation: flow-down 0.8s linear infinite;
-  }
-  .vline.live.up {
-    animation-name: flow-up;
-  }
+
   .vline .arrow {
     position: absolute;
     left: -6px;
@@ -346,111 +393,86 @@ export const energyStyles = css`
     bottom: -6px;
     border-top: 10px solid var(--c);
   }
-  @keyframes flow-down {
-    from {
-      background-position: 0 0;
-    }
-    to {
-      background-position: 0 13px;
-    }
+
+  .shead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0 6px;
   }
-  @keyframes flow-up {
-    from {
-      background-position: 0 13px;
-    }
-    to {
-      background-position: 0 0;
-    }
+  .shead .nl {
+    font-size: 13px;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .vline.live {
-      animation: none;
-    }
+  .hv {
+    font-size: 24px;
+    font-weight: 700;
   }
-  .cflow {
+  .sbar {
+    display: flex;
+    height: 20px;
+    margin: 0 4px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .sbar span {
+    transition: width 0.6s ease;
+  }
+  .sparts {
     display: grid;
-    grid-template-columns: 70px minmax(0, 1fr) 86px minmax(0, 1fr) 70px;
-    grid-template-rows: 22px auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
   }
-  .cflow .pvline {
-    grid-column: 1;
-    grid-row: 1;
-    justify-self: center;
-    margin: 0;
+  .spart {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.05);
   }
-  .cflow .outline {
-    grid-column: 3;
-    grid-row: 1 / 3;
-    justify-self: center;
-    align-self: start;
-    height: 55px;
-    margin: 0;
+  .spart .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    margin-right: 6px;
   }
-  .cflow .pvline {
-    height: 22px;
+  .chain {
+    display: flex;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 10px 8px 8px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.04);
   }
-  .cflow .cbat {
-    grid-column: 1;
-    grid-row: 2;
+  .cnode {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    margin-top: 4px;
+    min-width: 0;
+    flex: 0 0 auto;
   }
-  .cflow .cbat .nl {
+  .cnode .nl {
+    font-size: 10px;
     white-space: nowrap;
   }
-  .cflow .elbow {
-    grid-column: 2 / 4;
-    grid-row: 2;
-    align-self: start;
-    margin: 29px 41px 0 4px;
+  .bring.small {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
   }
-  .cflow .cout {
-    grid-column: 4 / 6;
-    grid-row: 2;
-    align-self: start;
-    margin: 21px 0 0 8px;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    white-space: nowrap;
+  .clink {
+    position: relative;
+    flex: 1;
+    min-width: 12px;
+    height: 4px;
+    margin-top: 18px;
   }
-  .cflow .cout b {
-    color: #fff;
-    font-size: 14px;
-  }
-  .csplit {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 0 6px;
-  }
-  .sbar {
-    display: flex;
-    height: 8px;
-    border-radius: 4px;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.12);
-  }
-  .spv {
-    background: #ffd60a;
-  }
-  .sst {
-    background: #30d158;
-  }
-  .clegend {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-  }
-  .clegend .dot {
-    display: inline-block;
-    width: 7px;
-    height: 7px;
-    border-radius: 4px;
-    margin-right: 5px;
+  .clink.idle {
+    height: 0;
+    border-top: 3px dotted color-mix(in srgb, var(--c) 30%, transparent);
   }
   .cmore {
     align-self: center;
