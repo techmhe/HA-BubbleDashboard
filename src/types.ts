@@ -116,8 +116,12 @@ export interface CardConfig {
   pollen?: string[];
   /** Leave entities or whole integrations (platforms) out of a list. */
   exclude?: { openings?: string[]; consumers?: string[] };
-  /** Home battery limits (SoC %), to explain why it is idle: discharge stops at `reserve`, charging at `full`. */
-  battery?: { reserve?: number; full?: number };
+  /**
+   * Home battery limits (SoC %), to explain why it is idle: discharge stops at `reserve`, charging at `full`.
+   * `pv_coupled`: PV feeds the battery inverter, whose AC output reaches the house (default: detected when a PV
+   * sensor belongs to the battery's device).
+   */
+  battery?: { reserve?: number; full?: number; pv_coupled?: boolean };
   /** Stuck-valve check: limits, or false to switch it off. */
   heating_check?: Partial<import('./logic/heating-check').HeatingCheckOptions> | false;
   /** Offline sensor warnings: extra entities to watch, entities to leave out. */

@@ -151,6 +151,7 @@ exclude:                # entity ids or integrations (platforms) to leave out
 battery:                # home battery limits (SoC %); an idle battery shows *Reserve* / *voll*
   reserve: 25           # discharge stops here (e.g. the zero-feed-in automation's min SoC)
   full: 95              # charging stops here (default 100)
+  pv_coupled: true      # PV feeds the battery inverter (default: detected when a PV sensor, or a member of a PV sensor group, is on the battery's device)
 heating_check:          # stuck-valve check (defaults shown); `heating_check: false` turns it off
   hours: 2              # window the rise is measured over
   min_rise: 1           # K
@@ -354,7 +355,10 @@ explicitly; a configured room still auto-fills the fields you leave out.
   vertical line runs up while it feeds the house and down while it charges (*Akku liefert* /
   *Akku lädt*); idle at its limits it says *Reserve* or *voll* (`battery:` in the config). Each node opens a chart: PV and grid in kWh per hour/day, Haus = consumption
   (PV + import + battery out − export − battery in), Akku = kWh charged and discharged
-  per hour/day (opens on 7 days). *Energie-Dashboard ›*
+  per hour/day (opens on 7 days). When the PV panels feed the battery inverter (PV sensor or its group members on the
+  battery's device, or `battery.pv_coupled: true`), PV flows down into the Akku and the Akku's
+  output flows into the house; a bar splits that output into *aus PV* (current PV) and *aus Akku*
+  (stored energy), and the Akku says *lädt* with the PV surplus it stores. *Energie-Dashboard ›*
   opens HA's `/energy`.
 - PV now = `pv_power` plus the solar power sensors of HA's energy dashboard.
 - *Heute* from the energy dashboard statistics (all solar sources, grid import/export since
@@ -543,7 +547,7 @@ Vertical swipes still scroll the sheet.
 
 ```bash
 npm install
-npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?page=climate, ?busy, ?calm, ?airing, ?technik, ?health, ?appliances)
+npm run dev        # preview with mocked data: http://127.0.0.1:5173/ (?page=climate, ?busy, ?calm, ?airing, ?technik, ?health, ?appliances, ?page=energy&pvbattery[=night])
 npm test           # vitest: status logic
 npm run check      # typecheck + tests + build
 ```

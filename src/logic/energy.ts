@@ -10,6 +10,31 @@ export interface EnergyNow {
   export: number;
   /** power > 0: battery feeds the house, < 0: battery charges. */
   battery: { soc: number | null; power: number } | null;
+  /** Set when PV feeds the battery inverter instead of the house (see `battery.pv_coupled`). */
+  coupled?: BatteryCoupling;
+}
+
+/** PV behind the battery inverter: its AC output splits into current PV and stored energy. */
+export interface BatteryCoupling {
+  /** PV power going into the battery inverter. */
+  pv: number;
+  /** AC output of the battery inverter into the house. */
+  output: number;
+  fromPv: number;
+  fromBattery: number;
+  /** PV (and AC charging) going into the battery. */
+  charge: number;
+}
+
+export function batteryCoupling(pv: number, power: number): BatteryCoupling {
+  const output = Math.max(0, power);
+  return {
+    pv,
+    output,
+    fromPv: Math.min(pv, output),
+    fromBattery: Math.max(0, output - pv),
+    charge: Math.max(0, pv - output) + Math.max(0, -power),
+  };
 }
 
 const z = (v: number | null) => v ?? 0;
@@ -120,15 +145,33 @@ export function consumerEnergyStat(hass: HomeAssistant, powerId: string, prefs?:
   )?.entity_id;
 }
 
+/** The sensor, or one member of a sensor group (its `entity_id` attribute), belongs to the device. */
+function onDevice(hass: HomeAssistant, id: string, device: string): boolean {
+  if (hass.entities[id]?.device_id === device) return true;
+  const members = hass.states[id]?.attributes.entity_id;
+  return Array.isArray(members) && members.some((m) => hass.entities[m]?.device_id === device);
+}
+
 export function energyNow(hass: HomeAssistant, config: CardConfig, prefs?: EnergyPrefs): EnergyNow {
-  const pv = pvSensors(config, prefs).reduce((s, id) => s + Math.max(0, z(num(hass, id))), 0);
+  const sum = (ids: string[]) => ids.reduce((s, id) => s + Math.max(0, z(num(hass, id))), 0);
+  const pvIds = pvSensors(config, prefs);
+  const pv = sum(pvIds);
   const imp = Math.max(0, z(num(hass, ent(config, 'grid_import'))));
   const exp = Math.max(0, z(num(hass, ent(config, 'grid_export'))));
-  const batPower = num(hass, ent(config, 'battery_power'));
+  const batId = ent(config, 'battery_power');
+  const batPower = num(hass, batId);
   const soc = num(hass, ent(config, 'battery_soc'));
   const battery = batPower !== null || soc !== null ? { soc, power: z(batPower) } : null;
-  const house = num(hass, ent(config, 'house_power')) ?? Math.max(0, pv + imp - exp + z(battery?.power ?? null));
-  return { pv, house, import: imp, export: exp, battery };
+  const forced = config.battery?.pv_coupled;
+  const batDevice = hass.entities[batId]?.device_id;
+  const coupledIds = forced === false || !battery ? []
+    : forced === true ? pvIds
+    : pvIds.filter((id) => !!batDevice && onDevice(hass, id, batDevice));
+  const coupled = coupledIds.length ? batteryCoupling(sum(coupledIds), battery!.power) : undefined;
+  // Coupled PV reaches the house only through the battery output, so it is not added on its own.
+  const direct = pv - (coupled?.pv ?? 0);
+  const house = num(hass, ent(config, 'house_power')) ?? Math.max(0, direct + imp - exp + z(battery?.power ?? null));
+  return coupled ? { pv, house, import: imp, export: exp, battery, coupled } : { pv, house, import: imp, export: exp, battery };
 }
 
 export function partOfDay(now: Date): string {
@@ -143,9 +186,12 @@ export function partOfDay(now: Date): string {
 /** One line under "Energie": part of day + where the power comes from right now. */
 export function energyHeadline(now: Date, e: EnergyNow): string {
   const IDLE = 50;
+  // PV behind the battery reaches the house only as part of the battery output.
+  const toHouse = e.coupled ? e.pv - e.coupled.pv + e.coupled.fromPv : e.pv;
   let text: string;
   if (e.pv > IDLE && e.export > e.import) text = 'Sonne liefert, Überschuss geht ins Netz';
-  else if (e.pv > IDLE && e.import > IDLE) text = `PV deckt ${Math.min(99, Math.round((e.pv / Math.max(e.house, 1)) * 100))} %, Rest aus dem Netz`;
+  else if (e.coupled && e.pv > IDLE && toHouse <= IDLE) text = e.import > IDLE ? 'PV lädt den Akku, Strom aus dem Netz' : 'PV lädt den Akku';
+  else if (e.pv > IDLE && e.import > IDLE) text = `PV deckt ${Math.min(99, Math.round((toHouse / Math.max(e.house, 1)) * 100))} %, Rest aus dem Netz`;
   else if (e.pv > IDLE) text = 'PV deckt den Verbrauch';
   else if ((e.battery?.power ?? 0) > IDLE && e.import < IDLE) text = 'Akku versorgt das Haus';
   else text = 'PV aus, Strom kommt aus dem Netz';

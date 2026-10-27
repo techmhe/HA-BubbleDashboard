@@ -2,7 +2,7 @@ import { css, html, nothing } from 'lit';
 import { icon } from '../components/ui';
 import { deviceIcon, I } from '../icons';
 import { watts } from '../logic/devices';
-import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type Consumer } from '../logic/energy';
+import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, type BatteryCoupling, type Consumer } from '../logic/energy';
 import { fmt } from '../logic/util';
 import type { PageContext } from './context';
 
@@ -35,6 +35,36 @@ function flowLine(color: string, dir: 'left' | 'right' | null) {
   return html`<div class="fline live ${dir}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`;
 }
 
+/** PV behind the battery: PV flows down into the battery, the battery output flows up into the house. */
+function coupledBattery(ctx: PageContext, c: BatteryCoupling, bat: { soc: number | null; power: number }) {
+  const live = c.charge > IDLE || c.fromBattery > IDLE;
+  const state = c.charge > IDLE ? `Akku lädt ${watts(c.charge)}` : c.fromBattery > IDLE ? `Akku liefert ${watts(c.fromBattery)}` : 'Akku ruht';
+  const pvShare = c.output > 0 ? (c.fromPv / c.output) * 100 : 0;
+  const dirLine = (color: string, dir: 'up' | 'down' | null, cls: string) =>
+    dir
+      ? html`<div class="vline live ${dir} ${cls}" style="--c:${color}" aria-hidden="true"><span class="arrow"></span></div>`
+      : html`<div class="vline idle ${cls}" style="border-color:${color}4d" aria-hidden="true"></div>`;
+  return html`
+    <div class="cflow">
+      ${dirLine('#ffd60a', c.pv > IDLE ? 'down' : null, 'pvline')}
+      ${dirLine('#30d158', c.output > IDLE ? 'up' : null, 'outline')}
+      <button class="cbat" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
+        <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
+          aria-label="Akku${bat.soc !== null ? ` ${fmt(bat.soc)} %` : ''}">
+          <span class="circle" style="width:44px;height:44px;background:${live ? '#30d158' : '#1d2a22'}">${icon(E.battery, 20, live ? '#0b1a10' : '#7ee8a0', 2.2)}</span>
+        </span>
+        <span class="nv">${bat.soc !== null ? `${fmt(bat.soc)} %` : ''}</span>
+        <span class="nl">${state}${!live && batteryNote(bat, ctx.config.battery) ? ` · ${batteryNote(bat, ctx.config.battery)}` : ''}</span>
+      </button>
+      ${c.output > IDLE ? html`<div class="fline live right elbow" style="--c:#30d158" aria-hidden="true"></div>` : html`<div class="fline idle elbow" style="border-color:#30d1584d" aria-hidden="true"></div>`}
+      <span class="cout"><b>${watts(c.output)}</b> ins Haus</span>
+    </div>
+    <div class="csplit" role="img" aria-label="Akku-Ausgang: aus PV ${watts(c.fromPv)}, aus Akku ${watts(c.fromBattery)}">
+      <div class="sbar"><span class="spv" style="width:${pvShare}%"></span><span class="sst" style="width:${c.output > 0 ? 100 - pvShare : 0}%"></span></div>
+      <div class="clegend"><span><i class="dot" style="background:#ffd60a"></i>aus PV ${watts(c.fromPv)}</span><span><i class="dot" style="background:#30d158"></i>aus Akku ${watts(c.fromBattery)}</span></div>
+    </div>`;
+}
+
 /** Consumers shown before "Alle anzeigen". */
 const SHOWN = 6;
 
@@ -53,6 +83,7 @@ export function renderEnergy(ctx: PageContext) {
   const gridW = exporting ? now.export : now.import;
   const gridColor = exporting ? '#64d2ff' : '#ff9f0a';
   const bat = now.battery;
+  const coupled = now.coupled;
 
   return html`
     <div class="energy">
@@ -67,7 +98,7 @@ export function renderEnergy(ctx: PageContext) {
             <span class="circle" style="width:48px;height:48px;background:rgba(255,214,10,${now.pv > IDLE ? 0.32 : 0.18})">${icon(I.sun, 22, '#ffd60a', 2)}</span>
             <span class="nv">${watts(now.pv)}</span><span class="nl">PV</span>
           </button>
-          ${flowLine('#ffd60a', now.pv > IDLE ? 'right' : null)}
+          ${coupled && now.pv - coupled.pv <= IDLE ? html`<span aria-hidden="true"></span>` : flowLine('#ffd60a', now.pv - (coupled?.pv ?? 0) > IDLE ? 'right' : null)}
           <button class="node" aria-label="Haus ${watts(now.house)}, Verbrauch anzeigen" @click=${() => chart('house')}>
             <span class="house">${icon(I.home, 22, '#101218', 2.2)}<span>${watts(now.house)}</span></span>
             <span class="nl">Haus</span>
@@ -78,7 +109,7 @@ export function renderEnergy(ctx: PageContext) {
             <span class="nv">${watts(gridW)}</span><span class="nl">${exporting ? 'Einspeisung' : 'Bezug'}</span>
           </button>
         </div>
-        ${bat
+        ${coupled && bat ? coupledBattery(ctx, coupled, bat) : bat
           ? html`<button class="bnode" aria-label="Akku, geladene und entladene Energie anzeigen" @click=${() => ctx.openSheet({ id: 'energyChart', key: 'battery', range: '7d' })}>
               ${batteryLine('#30d158', bat.power > IDLE ? 'up' : bat.power < -IDLE ? 'down' : null)}
               <span class="bring" style="--soc:${Math.max(0, Math.min(100, bat.soc ?? 0))}%" role="img"
@@ -335,6 +366,91 @@ export const energyStyles = css`
     .vline.live {
       animation: none;
     }
+  }
+  .cflow {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr) 86px minmax(0, 1fr) 70px;
+    grid-template-rows: 22px auto;
+  }
+  .cflow .pvline {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: center;
+    margin: 0;
+  }
+  .cflow .outline {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    justify-self: center;
+    align-self: start;
+    height: 55px;
+    margin: 0;
+  }
+  .cflow .pvline {
+    height: 22px;
+  }
+  .cflow .cbat {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .cflow .cbat .nl {
+    white-space: nowrap;
+  }
+  .cflow .elbow {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    align-self: start;
+    margin: 29px 41px 0 4px;
+  }
+  .cflow .cout {
+    grid-column: 4 / 6;
+    grid-row: 2;
+    align-self: start;
+    margin: 21px 0 0 8px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    white-space: nowrap;
+  }
+  .cflow .cout b {
+    color: #fff;
+    font-size: 14px;
+  }
+  .csplit {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 0 6px;
+  }
+  .sbar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .spv {
+    background: #ffd60a;
+  }
+  .sst {
+    background: #30d158;
+  }
+  .clegend {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .clegend .dot {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 4px;
+    margin-right: 5px;
   }
   .cmore {
     align-self: center;

@@ -43,6 +43,20 @@ if (health) overrides = { ...overrides, 'sensor.badezimmer_temperature': { state
 // ?appliances: the dishwasher runs at 2 200 W (history: started 40 minutes ago).
 const appliances = q.has('appliances');
 if (appliances) overrides = { ...overrides, 'sensor.spulmaschine_power': { state: '2200', minutesAgo: 1 } };
+// ?pvbattery: PV feeds the battery inverter (morning: PV 860 W, output 786 W); ?pvbattery=night: output 410 W from storage.
+const pvBattery = q.has('pvbattery');
+const BAT_PV = 'sensor.marstek_venus_a_pv_aktuelle_leistung';
+const BAT_AC = 'sensor.marstek_venus_a_ac_leistung';
+if (pvBattery) {
+  const night = q.get('pvbattery') === 'night';
+  overrides = {
+    ...overrides,
+    [BAT_PV]: { state: night ? '0' : '860' },
+    [BAT_AC]: { state: night ? '410' : '786' },
+    'sensor.hausverbrauch': { state: night ? '420' : '2440' },
+    'sensor.stromverbrauch_shelly_messung': { state: night ? '10' : '1654' },
+  };
+}
 // The fixture weather is rainy, so the weather icon shows rain in every scenario.
 const extra = {
   ...ROOM_EXTRAS, ...ENERGY_EXTRAS, ...SECURITY_EXTRAS, ...M5_EXTRAS, ...(technik ? technikDefs() : {}),
@@ -51,6 +65,9 @@ const extra = {
 };
 const hass = makeHass(overrides, now, extra);
 hass.user = { id: 'u-max', name: 'Max', is_admin: true };
+if (pvBattery) {
+  for (const id of [BAT_PV, BAT_AC]) hass.entities[id] = { entity_id: id, area_id: null, labels: [], device_id: 'dev_battery', platform: 'marstek' };
+}
 if (technik) {
   hass.devices[PRINTER] = { id: PRINTER, area_id: null, name: 'x2d_musterdrucker' };
   hass.devices[AMS] = { id: AMS, area_id: null, name: 'x2d_musterdrucker_AMS_1' };
@@ -163,6 +180,7 @@ st('person.max_muster', 'home', { friendly_name: 'Max Muster', device_trackers: 
 st('person.anna_muster', 'Büro Anna', { friendly_name: 'Anna Muster', device_trackers: ['device_tracker.anna'], in_zones: ['zone.buro_anna'] });
 card.setConfig({
   type: 'custom:ha-start-dashboard', page: q.get('page') ?? 'overview', header: 'default',
+  ...(pvBattery ? { entities: { pv_power: BAT_PV } } : {}),
   ...(technik ? { technik: { printer_plug: PLUG, printer_plug_power: 'sensor.drucker_steckdose_power', printer_plug_energy: 'sensor.drucker_steckdose_energy' } } : {}),
 });
 card.hass = hass;
