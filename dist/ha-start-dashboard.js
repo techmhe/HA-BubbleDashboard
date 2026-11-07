@@ -12007,7 +12007,7 @@ var dd = o`
     border-radius: 26px;
     background: rgba(255, 255, 255, 0.06);
   }
-`, fd, pd = "0.26.0", $ = [
+`, fd, pd = "0.26.1", $ = [
 	{
 		id: "overview",
 		name: "Übersicht",
