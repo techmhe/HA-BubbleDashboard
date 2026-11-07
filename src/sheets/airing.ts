@@ -74,6 +74,8 @@ export function airingSheet(ctx: PageContext) {
 
 /** Close the window once the room cooled this much (K) while airing. */
 const COOL_LIMIT = 3;
+/** Keep the window open at least this long (min) so enough fresh air comes in. */
+const MIN_AIRING = 5;
 const hhmm = (t: number) => {
   const d = new Date(t);
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
@@ -101,10 +103,13 @@ export function airingRoomSheet(ctx: PageContext, slug: string) {
   const since = open ? Date.parse(hass.states[room.window!].last_changed) : start;
   const temps = [...(temp.past ?? []), ...(t !== null ? [{ t: ctx.now.getTime(), v: t }] : [])];
   const cooled = cooledBy(temps, since || 0);
+  const openFor = open ? (ctx.now.getTime() - since) / 60_000 : Infinity;
   const verdict = !f
     ? { text: 'Keine Taupunkt-Daten', color: 'rgba(255,255,255,0.75)' }
+    : openFor < MIN_AIRING && cooled < COOL_LIMIT
+      ? { text: `Frischluft · noch ${Math.max(1, Math.ceil(MIN_AIRING - openFor))} min`, color: '#30d158' }
     : f.left <= 0
-      ? { text: 'Ziel erreicht · Fenster kann zu', color: '#8fd8ff' }
+      ? { text: open ? 'Ziel erreicht · Fenster kann zu' : 'Ziel erreicht', color: '#8fd8ff' }
       : cooled >= COOL_LIMIT
         ? { text: `${fmt(Math.round(cooled))} K kühler · Fenster zu`, color: '#ff9f0a' }
       : { text: `noch ~${fmt(Math.round(f.left))} %${mins !== null ? ` · ca. ${mins > 60 ? '> 60' : Math.max(1, Math.ceil(mins))} min` : ''}`, color: '#30d158' };

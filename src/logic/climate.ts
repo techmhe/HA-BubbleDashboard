@@ -380,9 +380,9 @@ export interface AiringForecast {
 }
 
 /** Airing stops paying off once the indoor dew point is this close to the outdoor one (K); the HA airing sensors say "Nicht lüften" there too. */
-const DEW_MARGIN = 2;
+const DEW_MARGIN = 1;
 /** Never recommend airing below this humidity (%): drier air is uncomfortable. */
-const MIN_HUMIDITY = 45;
+const MIN_HUMIDITY = 40;
 
 /**
  * How far airing can still dry the room. Exchanged air pulls the indoor dew point towards the

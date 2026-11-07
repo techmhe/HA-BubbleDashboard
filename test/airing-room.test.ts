@@ -41,11 +41,11 @@ describe('how far airing can still dry the room', () => {
     expect(rhAtDew(20, 10)).toBeCloseTo(52.5, 0);
   });
 
-  it('stops 2 K above the outdoor dew point (where the sensor says "Nicht lüften"), never below 45 %', () => {
+  it('stops 1 K above the outdoor dew point (where the sensor says "Nicht lüften"), never below 40 %', () => {
     const pts = (v: number) => [{ t: START, v }, { t: END, v }];
-    expect(airingForecast(pts(70), 20, 8)!.stopAt).toBeCloseTo(rhAtDew(20, 10), 5);
-    expect(airingForecast(pts(70), 20, 2)!.stopAt).toBe(45);
-    expect(airingForecast(pts(70), 20, 8)!.left).toBeCloseTo(70 - rhAtDew(20, 10), 5);
+    expect(airingForecast(pts(70), 20, 8)!.stopAt).toBeCloseTo(rhAtDew(20, 9), 5);
+    expect(airingForecast(pts(70), 20, 2)!.stopAt).toBe(40);
+    expect(airingForecast(pts(70), 20, 8)!.left).toBeCloseTo(70 - rhAtDew(20, 9), 5);
     expect(airingForecast(pts(48), 20, 8)!.left).toBeLessThan(0);
   });
 
@@ -60,7 +60,7 @@ describe('how far airing can still dry the room', () => {
     const k = 0.08; // per minute
     const pts = Array.from({ length: 16 }, (_, i) => ({ t: START + i * MIN, v: floor + (90 - floor) * Math.exp(-k * i) }));
     const now = pts[15].v;
-    const expected = Math.log((now - floor) / (rhAtDew(tIn, dewOut + 2) - floor)) / k;
+    const expected = Math.log((now - floor) / (rhAtDew(tIn, dewOut + 1) - floor)) / k;
     expect(airingForecast(pts, tIn, dewOut)!.minutes).toBeCloseTo(expected, 0);
   });
 
@@ -113,8 +113,8 @@ describe('airing sheet rooms', () => {
     const t = visibleText(sheet);
     expect(t).toContain('Temperatur');
     expect(t).toContain('Luftfeuchte');
-    expect(t).toContain(`noch ~${Math.round(68 - rhAtDew(20, 10))} %`);
-    expect(t).toContain(`lüften bis ${Math.round(rhAtDew(20, 10))} %`);
+    expect(t).toContain(`noch ~${Math.round(68 - rhAtDew(20, 9))} %`);
+    expect(t).toContain(`lüften bis ${Math.round(rhAtDew(20, 9))} %`);
     expect(templateText(sheet)).toContain('tr-level');
   });
 
@@ -126,6 +126,35 @@ describe('airing sheet rooms', () => {
   it('says close the window once the room cooled by 3 K', () => {
     const hass = makeHass({ 'sensor.badezimmer_humidity': { state: '68' }, 'sensor.badezimmer_temperature': { state: '18' }, 'sensor.aussen_taupunkt_messung': { state: '8' } });
     const t = visibleText(airingRoomSheet(ctx(hass, [{ t: START, v: 21.4 }, { t: END, v: 18 }]), 'badezimmer'));
+    expect(t).toContain('3 K kühler · Fenster zu');
+  });
+});
+
+describe('minimum airing time', () => {
+  const reached = (minutesAgo: number, window = 'on') => makeHass({
+    'binary_sensor.fenster_badezimmer': { state: window, minutesAgo },
+    'sensor.badezimmer_humidity': { state: '48' }, 'sensor.badezimmer_temperature': { state: '20' }, 'sensor.aussen_taupunkt_messung': { state: '8' },
+  });
+
+  it('keeps the window open for fresh air during the first 5 minutes, even with the target reached', () => {
+    const t = visibleText(airingRoomSheet(ctx(reached(2)), 'badezimmer'));
+    expect(t).toContain('Frischluft · noch 3 min');
+    expect(t).not.toContain('Fenster kann zu');
+  });
+
+  it('says the window can close once 5 minutes are over and the target is reached', () => {
+    expect(visibleText(airingRoomSheet(ctx(reached(6)), 'badezimmer'))).toContain('Ziel erreicht · Fenster kann zu');
+  });
+
+  it('does not ask to close a window that is already closed', () => {
+    const t = visibleText(airingRoomSheet(ctx(reached(30, 'off')), 'badezimmer'));
+    expect(t).toContain('Ziel erreicht');
+    expect(t).not.toContain('Fenster kann zu');
+  });
+
+  it('still says close the window when the room cooled by 3 K within the first 5 minutes', () => {
+    const hass = makeHass({ 'binary_sensor.fenster_badezimmer': { state: 'on', minutesAgo: 3 }, 'sensor.badezimmer_humidity': { state: '68' }, 'sensor.badezimmer_temperature': { state: '18' }, 'sensor.aussen_taupunkt_messung': { state: '8' } });
+    const t = visibleText(airingRoomSheet(ctx(hass, [{ t: END - 2 * MIN, v: 21.4 }, { t: END, v: 18 }]), 'badezimmer'));
     expect(t).toContain('3 K kühler · Fenster zu');
   });
 });

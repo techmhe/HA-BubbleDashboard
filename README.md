@@ -304,9 +304,11 @@ explicitly; a configured room still auto-fills the fields you leave out.
   live countdown while `timer.luften` runs; tap → airing sheet. In the airing sheet each open
   window and recommended room opens a room chart: temperature and humidity over the last 15 min
   (refreshed every 30 s) and a dashed *lüften bis x %* line: the humidity at which the room's dew
-  point is 2 K above the outdoor one (at the current room temperature, never below 45 %). The status
-  shows *noch ~x % · ca. n min* (fitted from the last 5 minutes), *Ziel erreicht · Fenster kann zu*,
-  or *3 K kühler · Fenster zu* once the room cooled by 3 K since the window opened. The card does not start the
+  point is 1 K above the outdoor one (at the current room temperature, never below 40 %). The status
+  shows *Frischluft · noch n min* during the first 5 minutes with the window open (minimum airing
+  time for fresh air), then *noch ~x % · ca. n min* (fitted from the last 5 minutes) or *Ziel erreicht*
+  (*· Fenster kann zu* while a window is open), and *3 K kühler · Fenster zu* once the room cooled by
+  3 K since the window opened (this also ends the 5-minute minimum). The card does not start the
   timer on its own: an HA automation that runs `script.luften_starten` when a window opens
   makes the countdown appear automatically.
 - *Alle Räume*: presets via `script.heizung_preset_alle`; tune icon → *Alle Räume einstellen*
@@ -444,8 +446,8 @@ The `sensor.<slug>_luftung` template helpers (HA side) use D = room dew point �
 
 | State | Rule |
 |---|---|
-| *Jetzt lüften* | D ≥ 4 K and humidity above the mould-safe limit, at most 60 %. The limit keeps the coldest wall below 80 % surface humidity (DIN 4108-2, fRsi 0.7: wall at 70 % of the indoor/outdoor gap), e.g. about 50 % at −5 °C, 55 % at 0 °C outside |
-| *Nicht lüften* | D < 2 K or humidity < 40 %; stays until D > 3 K (hysteresis) |
+| *Jetzt lüften* | D ≥ 2 K and humidity at or above the mould-safe limit, at most 60 %. The limit keeps the coldest wall below 80 % surface humidity (DIN 4108-2, fRsi 0.7: wall at 70 % of the indoor/outdoor gap), e.g. about 50 % at −5 °C, 55 % at 0 °C outside |
+| *Nicht lüften* | D < 1 K or humidity < 40 %; stays until D > 1.5 K (hysteresis against flicker) |
 | *Lüften möglich* | everything in between |
 
 Inputs: `sensor.<slug>_temperature`, `_humidity`, `_taupunkt`, `sensor.aussen_temperature`,
