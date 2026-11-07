@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Alle Räume einstellen</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+
+</style>
+</helmet>
+<div style="position: relative; width: 1194px; height: 834px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218">
+<div aria-hidden="true" style="position: absolute; left: 0; top: 0; width: 1194px; height: 834px; pointer-events: none"><dc-import name="KlimaQuer" hint-size="1194px,834px"></dc-import></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(8,9,12,0.58)"></div>
+<aside aria-label="Alle Räume einstellen" style="position: absolute; top: 16px; right: 16px; bottom: 16px; width: 440px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 18px 16px; border-radius: 32px; background: #181a22; border: 1px solid rgba(255,255,255,0.1); box-shadow: -20px 0 60px rgba(0,0,0,0.55), 0 0 80px rgba(255,159,10,0.10)">
+<div style="flex-shrink: 0; display: flex; align-items: center; gap: 12px">
+<span style="flex-shrink: 0; width: 46px; height: 46px; border-radius: 23px; display: flex; align-items: center; justify-content: center; background: #fff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101218" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M14 4v4M8 10v4M16 16v4"></path></svg></span>
+<span style="flex: 1; min-width: 0"><h2 style="margin: 0; font-size: 20px; font-weight: 700">Alle Räume einstellen</h2><span style="display: block; font-size: 13px; color: rgba(255,255,255,0.72)">Soll, Räume und Dauer</span></span>
+<button type="button" aria-label="Schließen" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+<div style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 28px; background: linear-gradient(160deg, rgba(255,159,10,0.16), rgba(255,255,255,0.05) 60%)">
+<button type="button" aria-label="Soll senken" style="flex-shrink: 0; width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 26px; font-weight: 600">−</button>
+<span style="flex: 1; text-align: center"><span style="display: block; font-size: 40px; font-weight: 700; line-height: 1">21,0°</span><span style="display: block; margin-top: 4px; font-size: 13px; color: rgba(255,255,255,0.72)">Soll für 7 Räume</span></span>
+<button type="button" aria-label="Soll erhöhen" style="flex-shrink: 0; width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 26px; font-weight: 600">+</button>
+</div>
+<section style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 24px; background: rgba(255,255,255,0.06)">
+<div style="display: flex; align-items: center; gap: 6px"><h3 style="margin: 0; font-size: 15px; font-weight: 600; flex: 1">Räume</h3>
+<button type="button" style="height: 34px; padding: 0 14px; border-radius: 17px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 600">Alle</button>
+<button type="button" style="height: 34px; padding: 0 14px; border-radius: 17px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 600">nur OG</button>
+<button type="button" style="height: 34px; padding: 0 14px; border-radius: 17px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 13px; font-weight: 600">nur EG</button></div>
+<span style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 2px 4px 0">Obergeschoss</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px"><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Büro Anna</button><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Büro Max</button><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Badezimmer</button><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Schlafzimmer</button><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Flur 1.OG</button></div>
+<span style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 2px 4px 0">Erdgeschoss</span>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px"><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Wohnzimmer</button><button type="button" aria-pressed="true" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,159,10,0.18); color: #fff"><span style="flex-shrink: 0; width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #ff9f0a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#141008" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5 9-10"></path></svg></span>Küche & Esszimmer</button><button type="button" aria-pressed="false" style="display: flex; align-items: center; gap: 10px; height: 50px; padding: 0 12px; border-radius: 25px; border: none; font-size: 14px; font-weight: 600; text-align: left; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7)"><span style="flex-shrink: 0; width: 22px; height: 22px; border-radius: 11px; border: 2px solid rgba(255,255,255,0.25)"></span>Flur EG</button></div>
+</section>
+<section style="flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 24px; background: rgba(255,255,255,0.06)">
+<h3 style="margin: 0; font-size: 15px; font-weight: 600">Wie lange</h3>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="height: 46px; border-radius: 23px; border: none; font-size: 14px; background: rgba(255,255,255,0.08); color: #fff; font-weight: 600">Dauerhaft</button>
+<button type="button" style="height: 46px; border-radius: 23px; border: none; font-size: 14px; background: rgba(255,255,255,0.08); color: #fff; font-weight: 600">1 h</button>
+<button type="button" style="height: 46px; border-radius: 23px; border: none; font-size: 14px; background: #fff; color: #101218; font-weight: 700">2 h</button>
+<button type="button" style="height: 46px; border-radius: 23px; border: none; font-size: 14px; background: rgba(255,255,255,0.08); color: #fff; font-weight: 600">4 h</button>
+</div>
+<span style="font-size: 12px; color: rgba(255,255,255,0.6)">Danach gilt wieder der Zeitplan der Räume.</span>
+</section>
+<button type="button" style="flex-shrink: 0; height: 58px; border-radius: 29px; border: none; background: #ff9f0a; color: #141008; font-size: 16px; font-weight: 700">Für 7 Räume übernehmen</button>
+</aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

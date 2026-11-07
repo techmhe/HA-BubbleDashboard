@@ -14,7 +14,7 @@ import type { PageContext } from './context';
 import { technikItems, technikProblemCount } from '../logic/technik-now';
 import { hasTechnik, isTechUser } from '../logic/technik';
 
-function statusActions(ctx: PageContext, b: StatusBubble) {
+export function statusActions(ctx: PageContext, b: StatusBubble) {
   const { config } = ctx;
   switch (b.key) {
     case 'robby':
@@ -51,7 +51,7 @@ function statusActions(ctx: PageContext, b: StatusBubble) {
 }
 
 /** Airing state on a room pill: an icon (wind = recommended, window = open) and a short value. */
-function winMark(w: WindowState) {
+export function winMark(w: WindowState) {
   const mark = (path: string, color: string, label: string, text = '') =>
     html`<span class="room-air" style="color:${color}" title=${label} aria-label=${label}>${icon(path, 13, color, 2.4)}${text}</span>`;
   switch (w.kind) {
@@ -94,7 +94,7 @@ function itemTap(ctx: PageContext, n: NowItem): (() => void) | undefined {
   }
 }
 
-function renderItem(ctx: PageContext, n: NowItem, wide = true) {
+export function renderItem(ctx: PageContext, n: NowItem, wide = true) {
   const tap = itemTap(ctx, n);
   const act = n.action;
   return html`

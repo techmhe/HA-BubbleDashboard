@@ -25,11 +25,12 @@ import { batteryStatIds, energyStatIds, gridTariff, pvSensors, type EnergyPrefs 
 import type { SceneConfig } from './logic/devices';
 import type { EnergyInfo, SeriesData } from './pages/context';
 import type { AllRoomsState, ForecastData, HistoryData, HistoryRange, PageContext, SheetState, Target } from './pages/context';
-import { climateStyles, renderClimate } from './pages/climate';
+import { climateStyles, renderClimate, renderClimateWide } from './pages/climate';
 import { overviewStyles, renderOverview } from './pages/overview';
+import { overviewWideStyles, renderOverviewWide } from './pages/overview-wide';
 import { renderRooms, roomsStyles } from './pages/rooms';
 import { energyStyles, renderEnergy } from './pages/energy';
-import { renderSecurity, securityStyles } from './pages/security';
+import { renderSecurity, renderSecurityWide, securityStyles } from './pages/security';
 import { deviceSheet, deviceStyles } from './sheets/device';
 import { robbySheet, robbyStyles } from './sheets/robby';
 import { weatherDaySheet, weatherMetricSheet, weatherRainSheet, weatherSheet, weatherStyles } from './sheets/weather';
@@ -48,6 +49,8 @@ import { historySheet, historyStyles } from './sheets/history';
 import { roomSheet, roomStyles } from './sheets/room';
 import { technikSheet, technikStyles } from './sheets/technik';
 import { printerSheet, printerStyles } from './sheets/printer';
+import { layoutFor, type Layout } from './logic/layout';
+import { layoutStyles } from './layout-styles';
 
 declare const __VERSION__: string;
 const VERSION = typeof __VERSION__ === 'string' ? __VERSION__ : 'dev';
@@ -111,6 +114,7 @@ export class HaStartDashboard extends LitElement {
     _navDrag: { state: true },
     _dismissed: { state: true },
     _piholePause: { state: true },
+    _layout: { state: true },
   };
 
   hass?: HomeAssistant;
@@ -147,6 +151,8 @@ export class HaStartDashboard extends LitElement {
   private _allRooms: AllRoomsState = { temp: 19, selected: new Set(), duration: 'Dauerhaft' };
   private _dismissed: Dismissed = loadDismissed();
   private _piholePause?: number;
+  private _layout: Layout = 'phone';
+  private _resize?: ResizeObserver;
 
   static getStubConfig(): Partial<CardConfig> {
     return { page: 'overview' };
@@ -175,6 +181,13 @@ export class HaStartDashboard extends LitElement {
     super.connectedCallback();
     this._now = new Date();
     this._tick = window.setInterval(() => (this._now = new Date()), 30_000);
+    if (typeof ResizeObserver !== 'undefined') {
+      this._resize = new ResizeObserver((entries) => {
+        const layout = layoutFor(entries[0]?.contentRect.width ?? 0);
+        if (layout !== this._layout) this._layout = layout;
+      });
+      this._resize.observe(this);
+    }
   }
 
   disconnectedCallback() {
@@ -183,9 +196,12 @@ export class HaStartDashboard extends LitElement {
     window.clearInterval(this._fastTick);
     this._fastTick = undefined;
     removeHeader(this);
+    this._resize?.disconnect();
+    this._resize = undefined;
   }
 
   protected updated(changed: PropertyValues) {
+    if (this.getAttribute('layout') !== this._layout) this.setAttribute('layout', this._layout);
     const mode = this._config?.header ?? 'hide';
     const hdr = applyHeader(this, mode) ? mode : '';
     if (hdr !== this._hdr) this._hdr = hdr;
@@ -535,6 +551,7 @@ export class HaStartDashboard extends LitElement {
       config: this._config!,
       rooms: this._rooms,
       now: this._now,
+      layout: this._layout,
       go: (page, opts) => {
         this._page = page;
         this._sheet = null;
@@ -598,11 +615,12 @@ export class HaStartDashboard extends LitElement {
   }
 
   private _renderPage(ctx: PageContext): TemplateResult {
-    if (this._page === 'overview') return renderOverview(ctx);
-    if (this._page === 'climate') return renderClimate(ctx);
+    const big = this._layout !== 'phone';
+    if (this._page === 'overview') return big ? renderOverviewWide(ctx) : renderOverview(ctx);
+    if (this._page === 'climate') return big ? renderClimateWide(ctx) : renderClimate(ctx);
     if (this._page === 'rooms') return renderRooms(ctx);
     if (this._page === 'energy') return renderEnergy(ctx);
-    if (this._page === 'security') return renderSecurity(ctx);
+    if (this._page === 'security') return big ? renderSecurityWide(ctx) : renderSecurity(ctx);
     const page = PAGES.find((p) => p.id === this._page)!;
     return html`
       <header class="page-head">
@@ -626,6 +644,17 @@ export class HaStartDashboard extends LitElement {
     const lensStyle = drag
       ? `left:${drag.left}px;width:${drag.width}px`
       : `left:calc(6px + ${idx} * (${unit} + 4px));width:calc(2 * ${unit})`;
+    if (this._layout === 'wide') {
+      return html`
+        <nav class="nav rail" aria-label="Bereiche">
+          ${PAGES.map((p) => {
+            const active = p.id === this._page;
+            return html`<button class="tab ${active ? 'active' : ''}" aria-label=${p.name} aria-current=${active ? 'page' : 'false'}
+              @click=${() => this._selectPage(p.id)}>${icon(p.icon, 22, 'currentColor')}<span>${p.id === 'overview' ? 'Start' : p.name}</span></button>`;
+          })}
+        </nav>
+      `;
+    }
     return html`
       <nav class="nav ${drag ? 'dragging' : ''}" aria-label="Bereiche"
         @pointerdown=${this._navDown} @pointermove=${this._navMove} @pointerup=${this._navUp} @pointercancel=${this._navCancel}>
@@ -777,6 +806,7 @@ export class HaStartDashboard extends LitElement {
     baseStyles,
     sheetStyles,
     overviewStyles,
+    overviewWideStyles,
     climateStyles,
     alarmStyles,
     personsStyles,
@@ -797,6 +827,7 @@ export class HaStartDashboard extends LitElement {
     printerStyles,
     trendStyles,
     scrubStyles,
+    layoutStyles,
     css`
       .wrap {
         position: relative;

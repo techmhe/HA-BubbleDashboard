@@ -17,7 +17,7 @@ const S = {
 };
 
 
-function cameraLabel(ctx: PageContext, id: string): string {
+export function cameraLabel(ctx: PageContext, id: string): string {
   if (ctx.config.names?.[id]) return ctx.config.names[id];
   const name = friendlyName(ctx.hass, id);
   return /doorbell|klingel|haust/i.test(`${id} ${name}`) ? 'Haustür' : name;
@@ -121,6 +121,106 @@ export function renderSecurity(ctx: PageContext) {
               </div>`)}
           `
         : nothing}
+    </div>
+  `;
+}
+
+/** Schutz on tablets and wide screens: camera left, alarm and openings right (docs/design/ipad/SchutzQuer). */
+export function renderSecurityWide(ctx: PageContext) {
+  const { hass, config } = ctx;
+  const alarm = alarmInfo(hass, config, ctx.now);
+  const floors = openings(hass, config, ctx.rooms);
+  const triggered = alarm.state === 'triggered';
+  const accent = triggered ? '#ff453a' : '#bf9bff';
+  const camera = ent(config, 'camera');
+  const camState = hass.states[camera];
+  const motion = hass.states[ent(config, 'camera_motion')];
+  const person = hass.states[ent(config, 'camera_person')];
+  const muted = ctx.ui.camSound !== true;
+  const people = persons(hass, config);
+  const streamable = !!camState && camState.state !== 'unavailable' && !!customElements.get('ha-camera-stream');
+  const openCount = floors.reduce((n, f) => n + f.areas.reduce((m, a) => m + a.items.filter((o) => o.open).length, 0), 0);
+
+  const cam = camState
+    ? html`<section class="wcard sw-cam" aria-label="${cameraLabel(ctx, camera)}-Kamera">
+        <div class="sw-camhead">
+          <h2 class="grow">${cameraLabel(ctx, camera)}</h2>
+          <span class="sw-live"><span class="dot" style="background:${streamable ? '#ff453a' : '#888'}"></span>${streamable ? 'Live' : 'Offline'}</span>
+        </div>
+        <div class="cam sw-view">
+          ${streamable
+            ? html`<ha-camera-stream class="stream" .hass=${hass} .stateObj=${camState} .muted=${muted} .controls=${false}
+                allow-exoplayer></ha-camera-stream>`
+            : html`<span class="camph">${icon(S.camera, 40, 'rgba(255,255,255,0.4)', 1.6)}</span>`}
+          <span class="sw-chips">
+            ${motion ? html`<span class="cchip ${motion.state === 'on' ? 'hot' : ''}">${motion.state === 'on' ? 'Bewegung erkannt' : 'Keine Bewegung'}</span>` : nothing}
+            ${person ? html`<span class="cchip ${person.state === 'on' ? 'hot' : ''}">${person.state === 'on' ? 'Person erkannt' : 'Keine Person'}</span>` : nothing}
+          </span>
+          <span class="camtools">
+            <button aria-label=${muted ? 'Ton an' : 'Ton aus'} @click=${() => ctx.setUi({ camSound: muted })}>${icon(muted ? S.muted : S.sound, 15, '#fff', 2.2)}</button>
+            <button aria-label="Vollbild" @click=${(e: Event) => fullscreen(ctx, e, camera)}>${icon(S.full, 15, '#fff', 2.2)}</button>
+          </span>
+        </div>
+        <div class="sw-camfoot">
+          <span class="grow">${[motion, person].filter(Boolean).map((e) => `${e === motion ? 'Bewegung' : 'Person'} zuletzt ${new Date(e!.last_changed).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`).join(' · ')}</span>
+          <button class="cchip btn2" @click=${() => ctx.moreInfo(motion ? motion.entity_id : camera)}>Verlauf</button>
+        </div>
+      </section>`
+    : nothing;
+
+  return html`
+    <div class="security sw">
+      <header class="shead2">
+        <div>
+          <div class="date">${openingsSummary(floors, alarm.state)}</div>
+          <h1>Schutz</h1>
+        </div>
+        ${people.length
+          ? html`<button class="pp-pill" aria-label="Personen: ${presenceLabel(people)}, Karte öffnen" @click=${() => ctx.openSheet({ id: 'persons' })}>
+              ${people.map((p) => personAvatar(p))}
+            </button>`
+          : nothing}
+      </header>
+      <div class="sw-grid ${camState ? '' : 'nocam'}">
+        ${cam}
+        <div class="wcol">
+          ${hass.states[alarm.id]
+            ? html`<section class="wcard sw-alarm" style="background: linear-gradient(160deg, ${accent}2e, rgba(255,255,255,0.05) 65%)">
+                <div class="sw-ahead">
+                  <button class="circle" style="width:44px;height:44px;background:${accent}" aria-label="Alarm-Details"
+                    @click=${() => ctx.openSheet({ id: 'alarm' })}>${icon(alarmIcon(alarm.state), 20, '#1d1030', 2.2)}</button>
+                  <span class="grow"><span class="atitle">${alarm.label}</span>${alarm.sub ? html`<span class="asub">${alarm.sub}</span>` : nothing}</span>
+                </div>
+                <div class="sw-modes">
+                  ${ALARM_MODES.map((m) => {
+                    const active = m.state === alarm.state;
+                    return html`<button class="sw-mode ${active ? 'active' : ''}" aria-pressed=${active}
+                      @click=${() => !active && ctx.call('alarm_control_panel', m.service, {}, { entity_id: alarm.id })}>
+                      ${icon(I[m.icon], 18, active ? '#101218' : '#fff', 2.1)}${m.name}</button>`;
+                  })}
+                </div>
+              </section>`
+            : nothing}
+          ${floors.length
+            ? html`<section class="wcard sw-open" aria-labelledby="sw-open-h">
+                <div class="sw-ohead"><h2 id="sw-open-h">Fenster &amp; Türen</h2><span class=${openCount ? 'sw-bad' : 'sw-good'}>${openCount ? `${openCount} offen` : 'alles zu'}</span></div>
+                ${floors.map((f) => html`
+                  <span class="sw-floor">${f.name}</span>
+                  ${f.areas.map((a) => html`
+                    <div class="sw-row">
+                      <span class="sw-room">${a.name}</span>
+                      <span class="sw-items">
+                        ${a.items.map((o) => {
+                          const label = `${o.title} ${o.unavailable ? 'nicht erreichbar' : o.open ? 'offen' : 'zu'}`;
+                          return html`<button class="sw-item ${o.open ? 'open' : ''} ${o.unavailable ? 'na' : ''}" title=${label} aria-label=${label} @click=${() => ctx.moreInfo(o.id)}>
+                            ${icon(o.kind === 'door' ? I.door : I.window, 14, o.unavailable ? 'rgba(255,255,255,0.45)' : o.open ? '#fff' : '#7ee8a0', 2.2)}<span class="ellipsis">${o.title}</span></button>`;
+                        })}
+                      </span>
+                    </div>`)}`)}
+              </section>`
+            : nothing}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -362,5 +462,192 @@ export const securityStyles = css`
   .oicon.na {
     background: transparent;
     border: 1px dashed rgba(255, 255, 255, 0.25);
+  }
+
+  .sw {
+    gap: 14px;
+  }
+  .sw-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+  .sw-grid.nocam {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  :host([layout='tablet']) .sw-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sw-cam {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .sw-camhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+  }
+  .sw-camhead h2 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .sw-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 14px;
+    background: rgba(255, 69, 58, 0.18);
+    color: #ffb3ad;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .sw-view {
+    flex: 1;
+    min-height: 240px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+  :host([layout='tablet']) .sw-view {
+    flex: none;
+    aspect-ratio: 16 / 9;
+  }
+  .sw-view .stream {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    object-fit: contain;
+  }
+  .sw-chips {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    display: flex;
+    gap: 6px;
+  }
+  .sw-chips .cchip {
+    background: rgba(0, 0, 0, 0.5);
+  }
+  .sw-camfoot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .sw-alarm {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .sw-ahead {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .sw-modes {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .sw-mode {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 62px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .sw-mode.active {
+    background: #fff;
+    color: #101218;
+  }
+  .sw-open {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+  }
+  .sw-ohead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 4px 2px;
+  }
+  .sw-ohead h2 {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .sw-bad {
+    font-size: 12px;
+    color: #ffb3ad;
+  }
+  .sw-good {
+    font-size: 12px;
+    color: #9af0b5;
+  }
+  .sw-floor {
+    margin: 6px 6px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .sw-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 6px 6px 6px 12px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .sw-room {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .sw-items {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    min-width: 0;
+  }
+  .sw-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 150px;
+    height: 32px;
+    padding: 0 10px 0 8px;
+    border-radius: 16px;
+    background: rgba(48, 209, 88, 0.14);
+    color: #b6f5c8;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .sw-item.open {
+    background: #ff453a;
+    color: #fff;
+  }
+  .sw-item.na {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.55);
   }
 `;

@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Übersicht B iPad quer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1194px; height: 834px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(60% 40% at 0% 0%, rgba(110,90,200,0.30), transparent 70%), radial-gradient(50% 40% at 100% 70%, rgba(90,200,250,0.10), transparent 70%); display: flex; gap: 18px; padding: 22px 24px 22px 16px">
+
+<nav aria-label="Bereiche" style="align-self: center; flex-shrink: 0; width: 76px; display: flex; flex-direction: column; gap: 6px; padding: 6px; box-sizing: border-box; border-radius: 38px; background: rgba(30,32,40,0.88); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.55)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+<a href="{{n.href}}" aria-label="{{n.name}}" style="{{n.style}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{n.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg><span style="font-size: 11px; font-weight: 700">{{n.name}}</span></a>
+</sc-for>
+</nav>
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+
+<header style="flex-shrink: 0; display: flex; align-items: center; gap: 24px">
+<div style="flex-shrink: 0; padding-left: 4px">
+<div style="font-size: 14px; color: rgba(255,255,255,0.72)">Samstag, 7. November</div>
+<h1 style="margin: 2px 0 0; font-size: 28px; font-weight: 700">Guten Abend</h1>
+</div>
+<div style="flex: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{status}}" as="s" hint-placeholder-count="4">
+<a href="{{s.href}}" style="display: flex; align-items: center; gap: 10px; height: 58px; padding: 0 12px 0 8px; border-radius: 29px; background: rgba(255,255,255,0.07)">
+<span style="{{s.circle}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{s.icon}}"></path></svg></span>
+<span style="min-width: 0"><span style="display: block; font-size: 15px; font-weight: 700; white-space: nowrap">{{s.value}}</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">{{s.label}}</span></span>
+</a>
+</sc-for>
+</div>
+</header>
+
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1.3fr 1fr; gap: 16px">
+
+<div style="min-height: 0; display: flex; flex-direction: column; gap: 12px">
+<section aria-labelledby="now-h" style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<h2 id="now-h" style="margin: 0; font-size: 15px; font-weight: 600">Aktuell</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<span style="font-size: 12px; color: rgba(255,255,255,0.72)">4</span>
+</div>
+<sc-for list="{{now}}" as="n" hint-placeholder-count="4">
+<a href="{{n.href}}" style="{{n.pill}}">
+<span style="{{n.circle}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600">{{n.title}}</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.8)">{{n.text}}</span></span>
+<sc-if value="{{n.action}}" hint-placeholder-val="{{ false }}"><span style="{{n.actionStyle}}">{{n.action}}</span></sc-if>
+</a>
+</sc-for>
+</section>
+
+<a href="SchutzQuer.dc.html" aria-label="Haustür-Kamera öffnen" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border-radius: 26px; background: rgba(255,255,255,0.06)">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0 2px">
+<span style="font-size: 14px; font-weight: 600; flex: 1">Haustür</span>
+<span style="height: 24px; padding: 0 9px; border-radius: 12px; display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.8)"><span style="width: 7px; height: 7px; border-radius: 4px; background: #30d158"></span>Standbild · 5 s</span>
+</div>
+<div style="flex-shrink: 0; aspect-ratio: 4 / 3; border-radius: 16px; overflow: hidden; background: linear-gradient(175deg, #3a4356 0%, #262c39 45%, #1a1e27 100%); position: relative">
+<span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 38%; background: linear-gradient(180deg, #2b2f38, #202329)"></span>
+<span aria-hidden="true" style="position: absolute; left: 58%; bottom: 38%; width: 22%; height: 46%; border-radius: 4px 4px 0 0; background: #4a3a2c; box-shadow: inset 0 0 0 3px #3a2d22"></span>
+<span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: rgba(255,255,255,0.6)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10a3 3 0 1 0 0 6a3 3 0 1 0 0-6"></path></svg>Kamerabild</span>
+<span style="position: absolute; right: 8px; bottom: 8px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.45); padding: 3px 7px; border-radius: 8px">20:14</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px">
+<sc-for list="{{events}}" as="e" hint-placeholder-count="3">
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px"><span style="{{e.dot}}"></span><span style="flex: 1; color: rgba(255,255,255,0.85)">{{e.what}}</span><span style="color: rgba(255,255,255,0.6)">{{e.t}}</span></span>
+</sc-for>
+</div>
+</a>
+</div>
+
+<section aria-labelledby="rk-h" style="min-height: 0; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 6px 0">
+<h2 id="rk-h" style="margin: 0; font-size: 15px; font-weight: 600">Zusammenfassung</h2>
+<span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span>
+<span style="display: flex; align-items: center; gap: 3px; font-size: 11px; color: rgba(255,255,255,0.72)"><span style="width: 7px; height: 7px; border-radius: 4px; background: #30d158"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #ffd60a"></span><span style="width: 7px; height: 7px; border-radius: 4px; background: #ff453a; margin-right: 3px"></span>Luftqualität</span>
+</div>
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto repeat(3, minmax(0, 1fr)) auto repeat(2, minmax(0, 1fr)); gap: 8px">
+<span style="grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 0 8px">Obergeschoss</span>
+<sc-for list="{{og}}" as="r" hint-placeholder-count="6">
+<a href="RaumPanelQuer.dc.html" style="{{r.tile}}">
+<span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="{{r.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="{{r.valueStyle}}">{{r.value}}</span>
+</span>
+<span style="font-size: 14px; font-weight: 600; line-height: 1.2">{{r.name}}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px">
+<span style="{{r.subStyle}}">{{r.sub}}</span>
+<span style="flex: 1"></span>
+<sc-if value="{{r.lights}}" hint-placeholder-val="{{ false }}"><span style="display: flex; align-items: center; gap: 3px; color: #ffe37a"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffe37a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg>{{r.lights}}</span></sc-if>
+<span style="{{r.aq}}"></span>
+</span>
+</a>
+</sc-for>
+<span style="grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 0 8px">Erdgeschoss</span>
+<sc-for list="{{eg}}" as="r" hint-placeholder-count="4">
+<a href="RaumPanelQuer.dc.html" style="{{r.tile}}">
+<span style="display: flex; align-items: center; justify-content: space-between; gap: 8px">
+<span style="{{r.circle}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="{{r.valueStyle}}">{{r.value}}</span>
+</span>
+<span style="font-size: 14px; font-weight: 600; line-height: 1.2">{{r.name}}</span>
+<span style="display: flex; align-items: center; gap: 8px; font-size: 12px">
+<span style="{{r.subStyle}}">{{r.sub}}</span>
+<span style="flex: 1"></span>
+<sc-if value="{{r.lights}}" hint-placeholder-val="{{ false }}"><span style="display: flex; align-items: center; gap: 3px; color: #ffe37a"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffe37a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"></path></svg>{{r.lights}}</span></sc-if>
+<span style="{{r.aq}}"></span>
+</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<div style="min-height: 0; display: flex; flex-direction: column; gap: 12px">
+<a href="WetterQuer.dc.html" aria-label="Wetter öffnen" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 26px; background: linear-gradient(160deg, rgba(143,208,255,0.16), rgba(255,255,255,0.05) 60%)">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 22px; background: rgba(143,208,255,0.2); display: flex; align-items: center; justify-content: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8fd0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7M8 18l-1 3M12 18l-1 3M16 18l-1 3"></path></svg></span>
+<span style="flex: 1"><span style="display: block; font-size: 26px; font-weight: 700; line-height: 1">9°</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">Regen · 12° / 5°</span></span>
+<span style="font-size: 12px; font-weight: 600; color: #8fd0ff; text-align: right; line-height: 1.35">Regen bis 3 Uhr<br>4 mm</span>
+</div>
+<svg viewBox="0 0 280 112" width="100%" height="112" role="img" aria-label="Temperatur und Regen der nächsten 12 Stunden"><line x1="4" y1="92" x2="276" y2="92" stroke="rgba(255,255,255,0.12)"></line><rect x="8" y="74" width="8" height="18" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="29" y="66" width="8" height="26" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="51" y="83" width="8" height="9" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="93" y="88" width="8" height="4" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="114" y="72" width="8" height="20" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="136" y="59" width="8" height="33" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="157" y="79" width="8" height="13" rx="2" fill="rgba(90,200,250,0.55)"></rect><rect x="242" y="85" width="8" height="7" rx="2" fill="rgba(90,200,250,0.55)"></rect><polyline points="12,38 33,46 55,46 76,54 97,54 118,62 140,62 161,70 182,70 204,62 225,54 246,38 268,30" fill="none" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"></polyline><text x="12" y="31" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">9°</text><text x="55" y="39" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">8°</text><text x="97" y="47" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7°</text><text x="140" y="55" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">6°</text><text x="182" y="63" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">5°</text><text x="225" y="47" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">7°</text><text x="268" y="23" text-anchor="middle" font-size="10" font-weight="600" fill="#ffffff">10°</text><text x="12" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">20</text><text x="55" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">22</text><text x="97" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">0</text><text x="140" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">2</text><text x="182" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">4</text><text x="225" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">6</text><text x="268" y="108" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">8</text></svg>
+<div style="display: flex; flex-direction: column; gap: 6px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1)">
+<sc-for list="{{days}}" as="d" hint-placeholder-count="5">
+<span style="display: grid; grid-template-columns: 26px 20px 28px minmax(0, 1fr) 28px; align-items: center; gap: 8px; font-size: 13px">
+<span style="font-weight: 600">{{d.n}}</span>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{d.c}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{d.icon}}"></path></svg>
+<span style="text-align: right; color: rgba(255,255,255,0.6)">{{d.lo}}°</span>
+<span style="position: relative; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1)"><span style="{{d.bar}}"></span></span>
+<span style="font-weight: 700">{{d.hi}}°</span>
+</span>
+</sc-for>
+</div>
+</a>
+
+<a href="EnergieQuer.dc.html" aria-label="Energie öffnen" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 26px; background: rgba(255,255,255,0.06)">
+<div style="display: flex; align-items: baseline; justify-content: space-between"><span style="font-size: 13px; color: rgba(255,255,255,0.72)">Haus jetzt</span><span style="font-size: 22px; font-weight: 700">2.440 W</span></div>
+<div aria-hidden="true" style="display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px"><span style="flex: 17; background: #30d158"></span><span style="flex: 83; background: #ff9f0a"></span></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.75)"><span>Sonne 0 W</span><span style="color: #9af0b5">Akku 410 W</span><span style="color: #ffc061">Netz 2.030 W</span></div>
+<svg viewBox="0 0 280 150" width="100%" style="flex: 1; min-height: 0" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Heute: Solarertrag gegen Verbrauch"><g transform="scale(1 1.72)"><line x1="4" y1="78" x2="276" y2="78" stroke="rgba(255,255,255,0.12)"></line><path d="M4,78 L89,78 C108,78 122,27 146,27 C170,27 184,78 202,78 L276,78 Z" fill="rgba(255,214,10,0.28)" stroke="#ffd60a" stroke-width="1.5" vector-effect="non-scaling-stroke"></path><path d="M4,67.5 L60,67.5 C70,67 75,40 83,40 C91,40 96,67 106,67 L118,67 C128,66 134,31 143,31 C152,31 157,64 164,64 C168,64 171,55 174,55 C177,55 180,65 186,65 C196,65 205,22 216,22 C224,22 227,38 231,46" fill="none" stroke="#ff9f0a" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linecap="round"></path><line x1="231" y1="8" x2="231" y2="78" stroke="rgba(255,255,255,0.35)" stroke-dasharray="3 3"></line></g><text x="4" y="146" font-size="9" fill="rgba(255,255,255,0.6)">0</text><text x="72" y="146" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">6</text><text x="140" y="146" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">12</text><text x="208" y="146" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">18</text><text x="276" y="146" text-anchor="end" font-size="9" fill="rgba(255,255,255,0.6)">24</text></svg>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<span style="padding: 8px 10px; border-radius: 14px; background: rgba(255,255,255,0.06)"><span style="display: block; font-size: 11px; color: #ffe37a">PV heute</span><span style="display: block; font-size: 14px; font-weight: 700">6,4 kWh</span></span>
+<span style="padding: 8px 10px; border-radius: 14px; background: rgba(255,255,255,0.06)"><span style="display: block; font-size: 11px; color: #ffc061">Bezug</span><span style="display: block; font-size: 14px; font-weight: 700">9,1 kWh</span></span>
+<span style="padding: 8px 10px; border-radius: 14px; background: rgba(255,255,255,0.06)"><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.65)">autark</span><span style="display: block; font-size: 14px; font-weight: 700">41 %</span></span>
+</div>
+</a>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z',
+      grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      wind: 'M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8',
+      storm: 'M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4M13 12l-3 5h4l-3 5',
+      vacuum: 'M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5',
+      trash: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+      desk: 'M4 5h16v10H4zM9 19h6M12 15v4',
+      bath: 'M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0',
+      bed: 'M3 18V7M3 13h18v5M7 13v-3h5v3',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      pot: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2',
+      snow: 'M12 2v20M2 12h20M5 5l14 14M19 5 5 19',
+      tune: 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4',
+      rain: 'M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7M8 18l-1 3M12 18l-1 3M16 18l-1 3',
+      cloud: 'M7 18a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4z',
+      sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4'
+    };
+    var circ = function (bg, s) { return 'flex-shrink: 0; width: ' + s + 'px; height: ' + s + 'px; border-radius: ' + (s / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var tileBase = 'min-height: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 4px; padding: 10px 12px 10px 10px; border-radius: 22px; box-sizing: border-box; ';
+    var room = function (name, icon, temp, hum, heating, vent, aq, lights) {
+      return { name: name, icon: icon, value: temp + '°', valueStyle: 'font-size: 20px; font-weight: 700', lights: lights ? String(lights) : '',
+        sub: hum + ' %' + (vent ? ' · lüften' : (heating ? ' · heizt' : '')),
+        aq: aq ? 'flex-shrink: 0; width: 8px; height: 8px; border-radius: 4px; background: #30d158' : 'display: none',
+        subStyle: vent ? 'font-weight: 600; color: #8fd8ff' : (heating ? 'color: #ffc061' : 'color: rgba(255,255,255,0.72)'),
+        tile: tileBase + 'background: ' + (vent ? 'rgba(90,200,250,0.14)' : (heating ? 'rgba(255,159,10,0.12)' : 'rgba(255,255,255,0.07)')),
+        circle: circ(vent ? '#5ac8fa' : (heating ? '#ff9f0a' : 'rgba(255,255,255,0.12)'), 34),
+        stroke: (vent || heating) ? '#141008' : '#fff' };
+    };
+    var action = function (name, icon, value, sub) {
+      return { name: name, icon: icon, value: value, valueStyle: 'font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.75)', lights: '', sub: sub, aq: 'display: none',
+        subStyle: 'color: rgba(255,255,255,0.6)',
+        tile: tileBase + 'background: transparent; border: 1px dashed rgba(255,255,255,0.18)',
+        circle: circ('rgba(255,255,255,0.1)', 34), stroke: '#fff' };
+    };
+    var item = function (title, text, icon, color, tint, act) {
+      return { title: title, text: text, icon: icon, action: act || '', href: act === 'Start' ? 'LueftenQuer.dc.html' : (icon === I.vacuum ? 'RobbyQuer.dc.html' : (icon === I.storm ? 'WetterQuer.dc.html' : '#')),
+        pill: 'display: flex; align-items: center; gap: 10px; height: 60px; padding: 0 8px; border-radius: 30px; background: linear-gradient(90deg, ' + tint + ', rgba(255,255,255,0.05) 75%)',
+        circle: circ(color, 44),
+        actionStyle: 'height: 40px; padding: 0 16px; border-radius: 20px; display: flex; align-items: center; font-size: 14px; font-weight: 700; color: #101010; background: ' + color };
+    };
+    var nav = function (name, icon, href, active) {
+      return { name: name, icon: icon, href: href, active: active, c: active ? '#101218' : 'rgba(255,255,255,0.8)',
+        style: (active ? 'background: #fff; color: #101218' : 'color: rgba(255,255,255,0.8)') + '; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; border-radius: 32px' };
+    };
+    var day = function (n, lo, hi, icon, c) {
+      return { n: n, lo: lo, hi: hi, icon: icon, c: c,
+        bar: 'position: absolute; top: 0; bottom: 0; border-radius: 3px; background: linear-gradient(90deg, #8fd0ff, #ffd60a); left: ' + ((lo - 1) / 12 * 100) + '%; width: ' + ((hi - lo) / 12 * 100) + '%' };
+    };
+    var ev = function (what, t, color) { return { what: what, t: t, dot: 'flex-shrink: 0; width: 8px; height: 8px; border-radius: 4px; background: ' + color }; };
+    return {
+      nav: [nav('Start', I.home, 'UebersichtQuerB.dc.html', true), nav('Klima', I.thermo, 'KlimaQuer.dc.html', false), nav('Räume', I.grid, 'RaeumeQuer.dc.html', false), nav('Energie', I.bolt, 'EnergieQuer.dc.html', false), nav('Schutz', I.shield, 'SchutzQuer.dc.html', false)],
+      status: [
+        { href: 'RobbyQuer.dc.html', value: 'Dockt', label: 'Robby', icon: I.vacuum, circle: circ('#ffffff', 40) },
+        { href: 'RaeumeQuer.dc.html', value: '5 an', label: 'Licht', icon: I.bulb, circle: circ('#ffd60a', 40) },
+        { href: 'EnergieQuer.dc.html', value: '2.030 W', label: 'Netzbezug', icon: I.bolt, circle: circ('#ff9f0a', 40) },
+        { href: 'SchutzQuer.dc.html', value: 'Aus', label: 'Alarm', icon: I.shield, circle: circ('#bf9bff', 40) }
+      ],
+      now: [
+        item('Jetzt lüften', 'Bad 61 % · Büro Anna 62 %', I.wind, '#5ac8fa', 'rgba(90,200,250,0.3)', 'Start'),
+        item('Sturm am Sonntag', 'Böen bis 78 km/h', I.storm, '#bf9bff', 'rgba(191,155,255,0.26)', ''),
+        item('Robby: Wartung fällig', 'Filter & Sensoren reinigen', I.vacuum, '#ff9f0a', 'rgba(255,159,10,0.26)', ''),
+        item('Müll am Mittwoch', 'Grünschnitt, Restmüll', I.trash, '#7ee8a0', 'rgba(126,232,160,0.18)', '')
+      ],
+      events: [ev('Person erkannt', '18:42', '#ff9f0a'), ev('Bewegung', '17:10', '#5ac8fa'), ev('Klingel', '15:03', '#bf9bff')],
+      og: [room('Büro Anna', I.desk, '19,0', 62, true, true, true, 0), room('Büro Max', I.desk, '19,2', 57, false, false, true, 1), room('Badezimmer', I.bath, '19,1', 61, false, true, false, 0), room('Schlafzimmer', I.bed, '19,1', 58, true, false, false, 0), room('Flur 1.OG', I.door, '19,5', 59, false, false, false, 0), action('Klimaanlage', I.snow, 'Aus', 'Flur 1.OG')],
+      eg: [room('Wohnzimmer', I.sofa, '19,9', 60, true, false, true, 4), room('Küche & Esszimmer', I.pot, '19,5', 58, false, false, true, 1), room('Flur EG', I.door, '18,9', 58, true, false, false, 1), action('Alle Räume', I.tune, '', 'einstellen')],
+      days: [day('So', 6, 11, I.storm, '#bf9bff'), day('Mo', 4, 10, I.rain, '#8fd0ff'), day('Di', 3, 9, I.cloud, '#cfd6e0'), day('Mi', 2, 11, I.sun, '#ffd60a'), day('Do', 4, 12, I.cloud, '#cfd6e0')]
+    };
+  }
+}
+</script>
+</body>
+</html>

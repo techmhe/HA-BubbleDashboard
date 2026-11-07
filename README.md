@@ -50,6 +50,25 @@ views:
       - type: custom:ha-start-dashboard
 ```
 
+### Tablet and desktop layout
+
+The card measures its own width and picks one of three layouts (mockups in
+`docs/design/ipad/`):
+
+| Width | Layout | Navigation |
+|---|---|---|
+| < 700 px | phone (the mockups in `design/`) | tab bar at the bottom |
+| 700–999 px (iPad portrait) | tablet: pages in two columns | tab bar at the bottom |
+| ≥ 1000 px (iPad landscape, MacBook) | wide: pages in two or three columns that fill the screen; long columns scroll on their own | vertical rail on the left |
+
+- **Start**: Aktuell and the door camera, the room tiles grouped by floor, weather
+  (12-hour chart, 5 days) and energy (house power, today's PV against consumption).
+- **Klima**: one card per room with presets, −/Soll/+ and the state line.
+- **Räume**: room cards in columns. **Energie**: flow and day curve next to Heute and the
+  consumers. **Schutz**: camera on the left, alarm modes and windows & doors on the right.
+- **Pop-ups** open as a panel on the right (440 px) over the dimmed page; Robby uses a wider
+  two-column panel. Stacked pop-ups shift the one underneath to the left.
+
 ## Installation
 
 ### HACS

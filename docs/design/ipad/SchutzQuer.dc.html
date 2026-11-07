@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Schutz iPad quer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1194px; height: 834px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(55% 40% at 0% 0%, rgba(191,155,255,0.22), transparent 70%), radial-gradient(50% 40% at 100% 100%, rgba(48,209,88,0.10), transparent 70%); display: flex; gap: 18px; padding: 22px 24px 22px 16px">
+
+<nav aria-label="Bereiche" style="align-self: center; flex-shrink: 0; width: 76px; display: flex; flex-direction: column; gap: 6px; padding: 6px; box-sizing: border-box; border-radius: 38px; background: rgba(30,32,40,0.88); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.55)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+<a href="{{n.href}}" aria-label="{{n.name}}" style="{{n.style}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{n.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg><span style="font-size: 11px; font-weight: 700">{{n.name}}</span></a>
+</sc-for>
+</nav>
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+<header style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; height: 58px">
+<div style="flex: 1; min-width: 0; padding-left: 4px">
+<div style="font-size: 14px; color: rgba(255,255,255,0.72)">1 Fenster offen · Alarm aus</div>
+<h1 style="margin: 2px 0 0; font-size: 28px; font-weight: 700">Schutz</h1>
+</div>
+</header>
+
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px">
+
+<section aria-labelledby="cam-h" style="min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 26px; background: rgba(255,255,255,0.06)">
+<div style="display: flex; align-items: center; gap: 8px; padding: 0 2px">
+<h2 id="cam-h" style="margin: 0; flex: 1; font-size: 15px; font-weight: 600">Haustür</h2>
+<span style="height: 28px; padding: 0 10px; border-radius: 14px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; background: rgba(255,69,58,0.18); color: #ffb3ad"><span style="width: 8px; height: 8px; border-radius: 4px; background: #ff453a"></span>Live</span>
+</div>
+<div style="flex: 1; min-height: 0; border-radius: 18px; overflow: hidden; background: linear-gradient(175deg, #3a4356 0%, #262c39 45%, #1a1e27 100%); position: relative">
+<span aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 0; height: 36%; background: linear-gradient(180deg, #2b2f38, #202329)"></span>
+<span aria-hidden="true" style="position: absolute; left: 60%; bottom: 36%; width: 17%; height: 52%; border-radius: 4px 4px 0 0; background: #4a3a2c; box-shadow: inset 0 0 0 4px #3a2d22"></span>
+<span aria-hidden="true" style="position: absolute; left: 14%; bottom: 36%; width: 26%; height: 30%; border-radius: 4px; background: rgba(255,255,255,0.05)"></span>
+<span style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.6)"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 10a3 3 0 1 0 0 6a3 3 0 1 0 0-6"></path></svg>Livebild</span>
+<span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 6px">
+<span style="height: 28px; padding: 0 10px; border-radius: 14px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.5); color: rgba(255,255,255,0.85)"><span style="width: 8px; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.4)"></span>Keine Bewegung</span>
+<span style="height: 28px; padding: 0 10px; border-radius: 14px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: rgba(0,0,0,0.5); color: rgba(255,255,255,0.85)"><span style="width: 8px; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.4)"></span>Keine Person</span>
+</span>
+<span style="position: absolute; right: 10px; bottom: 10px; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); background: rgba(0,0,0,0.45); padding: 4px 8px; border-radius: 8px">20:14:32</span>
+</div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin: 4px 4px 0"><span style="font-size: 14px; font-weight: 600">Letzte Ereignisse</span><span style="font-size: 12px; color: rgba(255,255,255,0.6)">heute</span></div>
+<div style="flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<sc-for list="{{events}}" as="e" hint-placeholder-count="4">
+<a href="#" style="display: flex; flex-direction: column; gap: 6px">
+<span style="aspect-ratio: 4 / 3; border-radius: 12px; position: relative; overflow: hidden; background: linear-gradient(175deg, #353d4e, #1d2129)"><span aria-hidden="true" style="position: absolute; left: 60%; bottom: 0; width: 17%; height: 55%; background: #3f3226"></span><span style="{{e.badge}}">{{e.what}}</span></span>
+<span style="font-size: 12px; color: rgba(255,255,255,0.7)">{{e.t}}</span>
+</a>
+</sc-for>
+</div>
+</section>
+
+<div style="min-height: 0; display: flex; flex-direction: column; gap: 12px">
+<section aria-labelledby="al-h" style="flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px; border-radius: 26px; background: linear-gradient(160deg, rgba(191,155,255,0.18), rgba(255,255,255,0.05) 65%)">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; background: #bf9bff"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141018" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path></svg></span>
+<span style="flex: 1"><h2 id="al-h" style="margin: 0; font-size: 17px; font-weight: 700">Alarm aus</h2><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">Alle Personen zu Hause</span></span>
+</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{arm}}" as="m" hint-placeholder-count="4">
+<button type="button" style="{{m.style}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{m.c}}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg>{{m.name}}</button>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="win-h" style="flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 26px; background: rgba(255,255,255,0.06)">
+<div style="display: flex; align-items: center; justify-content: space-between; margin: 0 4px 2px"><h2 id="win-h" style="margin: 0; font-size: 15px; font-weight: 600">Fenster &amp; Türen</h2><span style="font-size: 12px; color: #ffb3ad">1 offen</span></div>
+<sc-for list="{{floors}}" as="f" hint-placeholder-count="2">
+<span style="font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 6px 6px 0">{{f.name}}</span>
+<sc-for list="{{f.rooms}}" as="r" hint-placeholder-count="4">
+<span style="flex: 1; max-height: 46px; min-height: 0; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 12px; border-radius: 20px; background: rgba(255,255,255,0.04)">
+<span style="flex: 1; min-width: 0; font-size: 13px; font-weight: 600">{{r.name}}</span>
+<sc-for list="{{r.items}}" as="i" hint-placeholder-count="2">
+<span title="{{i.title}}" style="{{i.chip}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{i.stroke}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.icon}}"></path></svg>{{i.label}}</span>
+</sc-for>
+</span>
+</sc-for>
+</sc-for>
+</section>
+</div>
+
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      car: 'M5 16l1.5-5h11L19 16M4 16h16v3H4zM7 19v1M17 19v1',
+      moon: 'M20 14a8 8 0 1 1-10-10 7 7 0 0 0 10 10z',
+      off: 'M12 3v8M6.4 6.4a8 8 0 1 0 11.2 0',
+      window: 'M4 3h16v18H4zM12 3v18M4 12h16',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01'
+    };
+    var item = function (kind, label, open) {
+      return { label: label, title: label + (open ? ' offen' : ' zu'), icon: kind === 'door' ? I.door : I.window,
+        stroke: open ? '#fff' : '#7ee8a0',
+        chip: 'flex-shrink: 0; display: flex; align-items: center; gap: 5px; height: 32px; padding: 0 10px 0 8px; border-radius: 16px; font-size: 12px; font-weight: 600; white-space: nowrap; ' + (open ? 'background: #ff453a; color: #fff' : 'background: rgba(48,209,88,0.14); color: #b6f5c8') };
+    };
+    var r = function (name, items) { return { name: name, items: items }; };
+    var W = function (t, open) { return item('window', t, open); };
+    var D = function (t) { return item('door', t, false); };
+    var mode = function (name, icon, active) {
+      return { name: name, icon: icon, c: active ? '#101218' : '#fff',
+        style: 'display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 62px; border-radius: 20px; border: none; font-size: 13px; font-weight: 600; ' + (active ? 'background: #fff; color: #101218' : 'background: rgba(255,255,255,0.08); color: #fff') };
+    };
+    var ev = function (what, t, color) {
+      return { what: what, t: t, badge: 'position: absolute; left: 6px; bottom: 6px; height: 22px; padding: 0 8px; border-radius: 11px; display: flex; align-items: center; font-size: 11px; font-weight: 700; color: #101010; background: ' + color };
+    };
+    var nav = function (name, icon, href, active) {
+      return { name: name, icon: icon, href: href, active: active, c: active ? '#101218' : 'rgba(255,255,255,0.8)',
+        style: (active ? 'background: #fff; color: #101218' : 'color: rgba(255,255,255,0.8)') + '; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; border-radius: 32px' };
+    };
+    return {
+      nav: [nav('Start', I.home, 'UebersichtQuerB.dc.html', false), nav('Klima', I.thermo, 'KlimaQuer.dc.html', false), nav('Räume', I.grid, 'RaeumeQuer.dc.html', false), nav('Energie', I.bolt, 'EnergieQuer.dc.html', false), nav('Schutz', I.shield, 'SchutzQuer.dc.html', true)],
+      arm: [mode('Abwesend', I.car, false), mode('Zuhause', I.home, false), mode('Nacht', I.moon, false), mode('Aus', I.off, true)],
+      events: [ev('Person', '18:42', '#ff9f0a'), ev('Bewegung', '17:10', '#5ac8fa'), ev('Klingel', '15:03', '#bf9bff'), ev('Person', '12:27', '#ff9f0a')],
+      floors: [
+        { name: 'Erdgeschoss', rooms: [
+          r('Wohnzimmer', [W('Eingang'), W('Straße 1'), W('Straße 2')]),
+          r('Flur EG', [D('Haustür')]),
+          r('Küche', [W('Fenster')]),
+          r('Esszimmer', [D('Wintergarten')])
+        ] },
+        { name: 'Obergeschoss', rooms: [
+          r('Büro Anna', [W('Straße'), W('Eingang')]),
+          r('Büro Max', [W('Fenster')]),
+          r('Badezimmer', [W('Fenster', true)]),
+          r('Schlafzimmer', [W('Fenster')]),
+          r('Flur 1.OG', [W('Fenster')])
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

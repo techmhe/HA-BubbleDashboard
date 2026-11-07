@@ -10,6 +10,7 @@ import { roomAccent, shortOpen, type WindowState } from '../logic/window-state';
 import { fmt, state } from '../logic/util';
 import { ent } from '../logic/entities';
 import type { PageContext } from './context';
+import { tileRows } from '../logic/wide';
 
 /** Chip next to the room name: wind = airing recommended, window = open (blue ok, red too long, grey doubtful). */
 function winChip(w: WindowState) {
@@ -184,6 +185,137 @@ export function renderClimate(ctx: PageContext) {
       </div>
 
       ${floors.map((f) => renderFloor(ctx, f, acId, acFloor))}
+    </div>
+  `;
+}
+
+/** Room card for tablets and wide screens: presets per room and a big stepper (docs/design/ipad/KlimaQuer). */
+function roomCardWide(ctx: PageContext, room: Room) {
+  const c = roomClimate(ctx.hass, room, ctx.target(room.climate));
+  const w = ctx.window(room);
+  const accent = roomAccent(w, c.heating);
+  const climate = room.climate;
+  const heat = ctx.heating().find((a) => a.slug === room.slug);
+  const valves = ctx.hass.states[climate ?? '']?.attributes.valve_open_percent;
+  const state = winLabel(w) ?? (c.heating && Number.isFinite(Number(valves)) && Number(valves) > 0 ? `heizt · Ventile ${fmt(Number(valves))} %` : c.label);
+  return html`
+    <div class="kw-card ${accent}">
+      <button class="kw-main" @click=${() => ctx.openSheet({ id: 'room', slug: room.slug })}>
+        <span class="kw-top">
+          <span class="circle kroom-circle kw-circle ${accent === 'heat' ? 'breathe' : ''}">${icon(roomIcon(room.name, room.icon), 17, accent ? '#141008' : '#fff', 2)}</span>
+          <span class="kw-name">${room.name}</span>
+          ${c.fanOn ? fanIcon(true, fanLevel('on', ctx.hass.states[room.purifier ?? '']?.attributes ?? {}), 15, 'rgba(255,255,255,0.75)', 2.2) : nothing}
+          ${c.aq ? html`<span class="dot" style="width:8px;height:8px;background:${c.aq}" title=${c.pm25 !== null ? `PM2.5 ${fmt(c.pm25)} µg/m³` : ''}></span>` : nothing}
+          ${winChip(w)}
+          ${heat ? html`<span class="heatchip" title="Heizung prüfen" aria-label="Heizung prüfen">${icon(I.thermo, 11, '#ff9f0a', 2.6)}!</span>` : nothing}
+        </span>
+        <span class="kw-now">
+          <span class="kw-cur">${temp(c.cur)}°</span>
+          <span class="kw-state">${c.hum ?? '–'} % · ${state}</span>
+        </span>
+      </button>
+      ${climate
+        ? html`<span class="kw-presets" role="group" aria-label="Profil ${room.name}">
+            ${PRESETS.map((p) => {
+              const active = c.preset === p.id;
+              const t = c.presetTemps[p.id];
+              return html`<button class="kw-preset ${active ? 'active' : ''}" aria-pressed=${active} aria-label="${p.name}${t !== undefined ? ` ${fmt(t, t % 1 ? 1 : 0)} Grad` : ''}" title=${p.name}
+                @click=${() => ctx.call('climate', 'set_preset_mode', { preset_mode: p.id }, { entity_id: climate })}>
+                ${icon(PRESET_ICONS[p.id], 15, active ? '#101218' : p.color, 2.2)}${t !== undefined ? `${fmt(t, t % 1 ? 1 : 0)}°` : ''}
+              </button>`;
+            })}
+          </span>
+          <span class="kw-stepper">
+            <button class="step" aria-label="Soll senken" @click=${() => ctx.stepTarget(climate, -0.5)}>−</button>
+            <span class="kw-target"><span>Soll </span><strong>${temp(c.target)}°</strong></span>
+            <button class="step" aria-label="Soll erhöhen" @click=${() => ctx.stepTarget(climate, 0.5)}>+</button>
+          </span>`
+        : nothing}
+    </div>`;
+}
+
+function acCardWide(ctx: PageContext, id: string) {
+  const s = ctx.hass.states[id];
+  if (!s) return nothing;
+  const a = s.attributes;
+  const sub = [a.current_temperature != null ? `${fmt(Number(a.current_temperature), 1)}° innen` : '', a.temperature != null ? `Soll ${fmt(Number(a.temperature), 1)}°` : '']
+    .filter(Boolean).join(' · ');
+  return html`
+    <div class="kw-card kw-ac">
+      <button class="kw-main" aria-label="Klimaanlage öffnen" @click=${() => ctx.openSheet({ id: 'ac' })}>
+        <span class="kw-top">
+          <span class="circle kroom-circle kw-circle" style="background:rgba(100,210,255,0.18)">${icon(IC.snowflake, 17, '#8fd8ff', 2)}</span>
+          <span class="kw-name">Klimaanlage</span>
+        </span>
+        <span class="kw-now"><span class="kw-cur">${HVAC_DE[s.state] ?? s.state}</span><span class="kw-state">${sub}</span></span>
+      </button>
+      <span class="kw-acmodes">
+        ${AC_MODES.map((m) => {
+          const active = s.state === m.mode;
+          return html`<button class="kw-acmode ${active ? 'active' : ''}" aria-pressed=${active}
+            @click=${() => ctx.call('climate', 'set_hvac_mode', { hvac_mode: m.mode }, { entity_id: id })}>${m.name}</button>`;
+        })}
+      </span>
+    </div>`;
+}
+
+export function renderClimateWide(ctx: PageContext) {
+  const { hass, rooms } = ctx;
+  const heatingId = ent(ctx.config, 'heating');
+  const heatingOn = state(hass, heatingId) === 'on';
+  const out = outdoor(hass, rooms, ctx.config);
+  const acId = ent(ctx.config, 'ac');
+  const acFloor = hass.states[acId] ? entityFloor(hass, acId) : undefined;
+  const floors = floorGroups(hass, rooms);
+  const weather = hass.states[ent(ctx.config, 'weather')]?.state ?? '';
+  const airing = airingInfo(hass, rooms, ctx.config, ctx.now);
+  const recommend = rooms.some((r) => ctx.window(r).kind === 'recommend');
+  const cols = ctx.layout === 'wide' ? 3 : 2;
+  const counts = floors.map((f) => f.rooms.length + (acFloor === f.id ? 1 : 0));
+
+  return html`
+    <div class="kw ${ctx.layout === 'wide' ? 'kw-wide' : ''}">
+      <header class="kw-head">
+        <div class="grow">
+          <div class="date">${climateSummary(hass, rooms)}</div>
+          <h1>Klima</h1>
+        </div>
+        <button class="kw-pill" @click=${() => ctx.openSheet({ id: 'airing' })}>
+          <span class="circle" style="width:42px;height:42px;background:rgba(143,208,255,0.2)">${weatherAnim(weather, 20, '#8fd0ff')}</span>
+          <span><span class="t1">${out.title}</span><span class="t2">${out.sub}</span></span>
+        </button>
+        <button class="kw-pill ${airing.active || recommend ? 'kw-air' : ''}" @click=${() => ctx.openSheet({ id: 'airing' })}>
+          <span class="circle" style="width:42px;height:42px;background:${airing.active || recommend ? '#5ac8fa' : 'rgba(255,255,255,0.12)'}">${icon(I.wind, 20, airing.active || recommend ? '#06202c' : '#fff', 2.2)}</span>
+          <span>
+            <span class="t1">${airing.active ? 'Lüften läuft' : recommend ? 'Jetzt lüften' : 'Lüften'}</span>
+            <span class="t2">${airing.active ? `noch ${clock(airing.remaining)}` : out.minutes !== null ? `Stoßlüften ${fmt(Math.round(out.minutes))} min` : 'Übersicht'}</span>
+          </span>
+        </button>
+        ${hass.states[heatingId]
+          ? html`<button class="kw-pill kw-heat ${heatingOn ? 'on' : ''}" role="switch" aria-checked=${heatingOn}
+              @click=${() => ctx.call('input_boolean', 'toggle', {}, { entity_id: heatingId })}>
+              <span><span class="t1">Zentralheizung</span><span class="t2">${heatingOn ? 'Heizbetrieb an' : 'Heizbetrieb aus'}</span></span>
+              <span class="track"><span class="knob">${icon(IC.flame, 14, heatingOn ? '#ff9f0a' : '#888', 2.6)}</span></span>
+            </button>`
+          : nothing}
+      </header>
+
+      <div class="kw-all">
+        <span class="kw-alllabel">Alle Räume</span>
+        ${PRESETS.map((p) => html`
+          <button class="kw-allbtn" aria-label="Alle auf ${p.name}"
+            @click=${() => ctx.runScript(ent(ctx.config, 'preset_all'), { preset: p.id })}>
+            ${icon(PRESET_ICONS[p.id], 18, p.color, 2.2)}${p.name}
+          </button>`)}
+        <button class="kw-tune" @click=${() => ctx.openSheet({ id: 'allRooms' })}>${icon(IC.tune, 18, '#101218', 2.2)}Einstellen</button>
+      </div>
+
+      <div class="kw-grid" style="grid-template-columns:repeat(${cols},minmax(0,1fr));grid-template-rows:${tileRows(counts, cols, 186)}">
+        ${floors.map((f) => html`
+          <span class="kw-floor">${f.name}</span>
+          ${f.rooms.map((r) => roomCardWide(ctx, r))}
+          ${acFloor === f.id ? acCardWide(ctx, acId) : nothing}`)}
+      </div>
     </div>
   `;
 }
@@ -454,5 +586,257 @@ export const climateStyles = css`
   }
   .ac-mode.active {
     background: #fff;
+  }
+
+  .kw {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .kw-head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-left: 4px;
+  }
+  :host([layout='tablet']) .kw-head {
+    flex-wrap: wrap;
+  }
+  :host([layout='tablet']) .kw-head > .grow {
+    flex-basis: 100%;
+  }
+  :host([layout='tablet']) .kw-head .kw-pill {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .kw-head h1 {
+    margin-top: 2px;
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .kw-pill {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 58px;
+    padding: 0 16px 0 8px;
+    border-radius: 29px;
+    background: var(--sd-fill);
+    text-align: left;
+  }
+  .kw-pill.kw-air {
+    background: linear-gradient(90deg, rgba(90, 200, 250, 0.32), rgba(90, 200, 250, 0.12));
+  }
+  .kw-heat {
+    gap: 12px;
+    padding: 0 10px 0 18px;
+  }
+  .kw-heat.on {
+    background: rgba(255, 159, 10, 0.16);
+  }
+  .kw-heat.on .t2 {
+    color: #ffc061;
+  }
+  .kw-heat.on .track {
+    background: #ff9f0a;
+  }
+  .kw-heat.on .knob {
+    left: 23px;
+  }
+  .kw-all {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px;
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .kw-alllabel {
+    padding: 0 10px 0 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .kw-allbtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 46px;
+    border-radius: 23px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .kw-tune {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 46px;
+    padding: 0 18px 0 14px;
+    border-radius: 23px;
+    background: #fff;
+    color: #101218;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .kw-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    gap: 10px 12px;
+  }
+  :host([layout='wide']) .kw-grid {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .kw-floor {
+    grid-column: 1 / -1;
+    margin: 2px 8px 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .kw-card {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 22px;
+    background: var(--sd-fill);
+  }
+  .kw-card.heat {
+    background: rgba(255, 159, 10, 0.11);
+  }
+  .kw-card.vent {
+    background: rgba(90, 200, 250, 0.13);
+  }
+  .kw-card.alert {
+    background: rgba(255, 69, 58, 0.13);
+  }
+  .kw-card.heat .kroom-circle {
+    background: #ff9f0a;
+  }
+  .kw-card.vent .kroom-circle {
+    background: #5ac8fa;
+  }
+  .kw-card.alert .kroom-circle {
+    background: #ff453a;
+  }
+  .kw-ac {
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.18);
+  }
+  .kw-main {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+  }
+  .kw-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .kw-circle {
+    width: 34px;
+    height: 34px;
+  }
+  .kw-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  .kw-now {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+  }
+  .kw-cur {
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .kw-state {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .kw-card.heat .kw-state {
+    color: #ffc061;
+  }
+  .kw-card.vent .kw-state {
+    color: #8fd8ff;
+    font-weight: 600;
+  }
+  .kw-presets {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.22);
+  }
+  .kw-preset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 32px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .kw-preset.active {
+    background: #fff;
+    color: #101218;
+    font-weight: 700;
+  }
+  .kw-stepper {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 42px;
+    padding: 0 4px;
+    border-radius: 22px;
+    background: rgba(0, 0, 0, 0.22);
+  }
+  .kw-target {
+    flex: 1;
+    text-align: center;
+    font-size: 14px;
+  }
+  .kw-target span {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .kw-acmodes {
+    flex-shrink: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .kw-acmode {
+    height: 44px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .kw-acmode.active {
+    background: #fff;
+    color: #101218;
+    font-weight: 700;
   }
 `;

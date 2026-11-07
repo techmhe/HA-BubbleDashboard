@@ -20,6 +20,33 @@ export function renderRooms(ctx: PageContext) {
   const filter = filters.some((f) => f.id === ctx.roomsFilter) ? ctx.roomsFilter : 'all';
   const shown = applyRoomsFilter(views, filter);
   const lightsOn = views.flatMap((v) => v.devices.filter((d) => d.on && d.kind === 'light').map((d) => d.id));
+  const filterBar = html`<div class="rfilter" role="tablist" aria-label="Filter" style="grid-template-columns: repeat(${filters.length}, minmax(0, 1fr))">
+    ${filters.map((f) => html`<button role="tab" aria-selected=${f.id === filter} class=${f.id === filter ? 'sel' : ''}
+      @click=${() => ctx.setRoomsFilter(f.id)}>${f.label}</button>`)}
+  </div>`;
+  const lightsOff = html`<button class="lightsoff" ?disabled=${!lightsOn.length}
+    @click=${() => ctx.call('light', 'turn_off', {}, { entity_id: lightsOn })}>
+    ${icon(IC.power, 16, '#fff', 2.4)}Licht aus
+  </button>`;
+
+  if (ctx.layout !== 'phone') {
+    // Tablets and wide screens: filters in the header, rooms as masonry columns (docs/design/ipad/RaeumeQuer).
+    return html`
+      <div class="rooms rw">
+        <header class="rw-head">
+          <div class="grow">
+            <div class="date">${roomsHeader(views)}</div>
+            <h1>Räume</h1>
+          </div>
+          ${filterBar}
+          ${lightsOff}
+        </header>
+        <div class="rw-cols">
+          ${shown.length ? shown.map((v) => roomCard(ctx, v, filter === 'on')) : html`<div class="rempty">Gerade ist nichts an.</div>`}
+        </div>
+      </div>
+    `;
+  }
 
   return html`
     <div class="rooms">
@@ -28,16 +55,10 @@ export function renderRooms(ctx: PageContext) {
           <div class="date">${roomsHeader(views)}</div>
           <h1>Räume</h1>
         </div>
-        <button class="lightsoff" ?disabled=${!lightsOn.length}
-          @click=${() => ctx.call('light', 'turn_off', {}, { entity_id: lightsOn })}>
-          ${icon(IC.power, 16, '#fff', 2.4)}Licht aus
-        </button>
+        ${lightsOff}
       </header>
 
-      <div class="rfilter" role="tablist" aria-label="Filter" style="grid-template-columns: repeat(${filters.length}, minmax(0, 1fr))">
-        ${filters.map((f) => html`<button role="tab" aria-selected=${f.id === filter} class=${f.id === filter ? 'sel' : ''}
-          @click=${() => ctx.setRoomsFilter(f.id)}>${f.label}</button>`)}
-      </div>
+      ${filterBar}
 
       ${shown.length ? shown.map((v) => roomCard(ctx, v, filter === 'on')) : html`<div class="rempty">Gerade ist nichts an.</div>`}
     </div>
@@ -80,7 +101,7 @@ function roomCard(ctx: PageContext, v: RoomView, compact = false) {
       ${compact
         ? html`<div class="rgrid">${v.devices.map((d) => deviceTile(ctx, d))}</div>`
         : html`${v.scenes.length
-            ? html`<div class="rgrid" role="group" aria-label="Szenen ${room.name}">
+            ? html`<div class="rgrid rscn" role="group" aria-label="Szenen ${room.name}">
                 ${v.scenes.map((sc, i) => sceneButton(ctx, sc, i, activeIds))}
               </div>`
             : nothing}
@@ -299,5 +320,75 @@ export const roomsStyles = css`
   .rdstate {
     display: block;
     font-size: 11px;
+  }
+
+  .rw-head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 4px;
+  }
+  .rw-head h1 {
+    margin-top: 2px;
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .rw-head .rfilter {
+    flex: 1;
+    max-width: 420px;
+    border-radius: 26px;
+  }
+  .rw-head .rfilter button {
+    height: 44px;
+    border-radius: 22px;
+    font-size: 14px;
+  }
+  .rw-head .lightsoff {
+    height: 52px;
+    padding: 0 18px 0 14px;
+    border-radius: 26px;
+    font-size: 14px;
+  }
+  .rw {
+    gap: 16px;
+  }
+  .rw-cols {
+    column-count: 3;
+    column-gap: 16px;
+  }
+  :host([layout='tablet']) .rw-cols {
+    column-count: 2;
+  }
+  :host([layout='wide']) .rw-cols {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .rw-cols .rcard {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 28px;
+  }
+  .rw-cols .rgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .rw-cols .rscn {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .rw-cols .rscene {
+    height: 46px;
+    padding: 0 14px 0 6px;
+    border-radius: 23px;
+  }
+  .rw-cols .rname h2 {
+    white-space: normal;
+    line-height: 1.25;
+  }
+  .rw-cols .rdev {
+    height: 54px;
   }
 `;

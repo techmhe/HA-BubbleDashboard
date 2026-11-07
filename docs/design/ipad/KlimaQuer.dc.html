@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Klima iPad quer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1194px; height: 834px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(55% 40% at 0% 0%, rgba(255,159,10,0.20), transparent 70%), radial-gradient(50% 40% at 100% 100%, rgba(90,200,250,0.12), transparent 70%); display: flex; gap: 18px; padding: 22px 24px 22px 16px">
+
+<nav aria-label="Bereiche" style="align-self: center; flex-shrink: 0; width: 76px; display: flex; flex-direction: column; gap: 6px; padding: 6px; box-sizing: border-box; border-radius: 38px; background: rgba(30,32,40,0.88); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.55)">
+<sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+<a href="{{n.href}}" aria-label="{{n.name}}" style="{{n.style}}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{n.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg><span style="font-size: 11px; font-weight: 700">{{n.name}}</span></a>
+</sc-for>
+</nav>
+
+<div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+<header style="flex-shrink: 0; display: flex; align-items: center; gap: 12px">
+<div style="flex: 1; min-width: 0; padding-left: 4px">
+<div style="font-size: 14px; color: rgba(255,255,255,0.72)">3 von 8 Räumen heizen · 2 lüften</div>
+<h1 style="margin: 2px 0 0; font-size: 28px; font-weight: 700">Klima</h1>
+</div>
+<a href="#" style="flex-shrink: 0; display: flex; align-items: center; gap: 10px; height: 58px; padding: 0 16px 0 8px; border-radius: 29px; background: rgba(255,255,255,0.07)">
+<span style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 21px; display: flex; align-items: center; justify-content: center; background: rgba(143,208,255,0.2)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8fd0ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 15a5 5 0 1 1 3-9 6 6 0 0 1 9 5 4 4 0 0 1-2 4H7M8 18l-1 3M12 18l-1 3M16 18l-1 3"></path></svg></span>
+<span><span style="display: block; font-size: 15px; font-weight: 700">Außen 9,0° · 82 %</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.72)">Taupunkt 6,1° · draußen trockener</span></span>
+</a>
+<a href="LueftenQuer.dc.html" style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; height: 58px; padding: 0 18px 0 8px; border-radius: 29px; background: linear-gradient(90deg, rgba(90,200,250,0.32), rgba(90,200,250,0.12))">
+<span style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 21px; display: flex; align-items: center; justify-content: center; background: #5ac8fa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg></span>
+<span><span style="display: block; font-size: 15px; font-weight: 700">Jetzt lüften</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.8)">Stoßlüften 8 min</span></span>
+</a>
+<button type="button" role="switch" aria-checked="true" style="flex-shrink: 0; display: flex; align-items: center; gap: 12px; height: 58px; padding: 0 10px 0 18px; border-radius: 29px; border: none; background: rgba(255,159,10,0.16); color: #fff; text-align: left">
+<span><span style="display: block; font-size: 15px; font-weight: 700">Zentralheizung</span><span style="display: block; font-size: 12px; color: #ffc061">Heizbetrieb an</span></span>
+<span aria-hidden="true" style="position: relative; width: 52px; height: 32px; border-radius: 16px; background: #ff9f0a"><span style="position: absolute; right: 3px; top: 3px; width: 26px; height: 26px; border-radius: 13px; background: #fff"></span></span>
+</button>
+</header>
+
+<div style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 6px; border-radius: 30px; background: rgba(255,255,255,0.05)">
+<span style="padding: 0 10px 0 12px; font-size: 14px; font-weight: 600">Alle Räume</span>
+<sc-for list="{{presets}}" as="p" hint-placeholder-count="4">
+<button type="button" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; height: 46px; border-radius: 23px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; font-weight: 600">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{p.c}}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg>{{p.name}}<span style="font-weight: 400; color: rgba(255,255,255,0.6)">{{p.t}}</span>
+</button>
+</sc-for>
+<a href="AlleRaeumeQuer.dc.html" style="flex-shrink: 0; display: flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px 0 14px; border-radius: 23px; background: #fff; color: #101218; font-size: 14px; font-weight: 700">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101218" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M14 4v4M8 10v4M16 16v4"></path></svg>Einstellen
+</a>
+</div>
+
+<div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: auto repeat(2, minmax(0, 1fr)) auto minmax(0, 1fr); gap: 10px 12px">
+<span style="grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 2px 8px 0">Obergeschoss</span>
+<sc-for list="{{og}}" as="r" hint-placeholder-count="5">
+<div style="{{r.card}}">
+<a href="RaumPanelQuer.dc.html" style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0">
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="{{r.circle}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="flex: 1; min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.2">{{r.name}}</span>
+<sc-if value="{{r.fan}}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Luftreiniger an"><path d="M12 12c0-3 1-6 4-6a3 3 0 0 1 0 6zM12 12c3 0 6 1 6 4a3 3 0 0 1-6 0zM12 12c0 3-1 6-4 6a3 3 0 0 1 0-6zM12 12c-3 0-6-1-6-4a3 3 0 0 1 6 0z"></path></svg></sc-if>
+<span style="{{r.aq}}"></span>
+</span>
+<span style="display: flex; align-items: baseline; gap: 10px">
+<span style="font-size: 30px; font-weight: 700; line-height: 1">{{r.temp}}</span>
+<span style="{{r.subStyle}}">{{r.sub}}</span>
+</span>
+</a>
+<span role="group" aria-label="Profil" style="flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 3px; border-radius: 20px; background: rgba(0,0,0,0.22)">
+<sc-for list="{{r.presets}}" as="p" hint-placeholder-count="4">
+<button type="button" aria-label="{{p.name}}" title="{{p.name}}" style="{{p.style}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{p.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg>{{p.t}}</button>
+</sc-for>
+</span>
+<span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; border-radius: 22px; background: rgba(0,0,0,0.22)">
+<button type="button" aria-label="Soll senken" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 20px; font-weight: 600; line-height: 1">−</button>
+<span style="flex: 1; text-align: center; font-size: 14px"><span style="color: rgba(255,255,255,0.6)">Soll </span><span style="font-weight: 700">{{r.target}}</span></span>
+<button type="button" aria-label="Soll erhöhen" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 20px; font-weight: 600; line-height: 1">+</button>
+</span>
+</div>
+</sc-for>
+<div style="min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 22px; box-sizing: border-box; border: 1px dashed rgba(255,255,255,0.18)">
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="flex-shrink: 0; width: 34px; height: 34px; border-radius: 17px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"></path></svg></span>
+<span style="flex: 1; font-size: 15px; font-weight: 600">Klimaanlage</span>
+<span style="font-size: 12px; color: rgba(255,255,255,0.6)">Flur 1.OG</span>
+</span>
+<span style="display: flex; align-items: baseline; gap: 10px">
+<span style="font-size: 30px; font-weight: 700; line-height: 1">Aus</span>
+<span style="font-size: 13px; color: rgba(255,255,255,0.72)">20,5° innen · Soll 24°</span>
+</span>
+<span style="flex: 1"></span>
+<span style="flex-shrink: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: rgba(90,200,250,0.16); color: #8fd8ff; font-size: 14px; font-weight: 600">Kühlen</button>
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; font-weight: 600">Trocknen</button>
+<button type="button" style="height: 44px; border-radius: 22px; border: none; background: #fff; color: #101218; font-size: 14px; font-weight: 700">Aus</button>
+</span>
+</div>
+<span style="grid-column: 1 / -1; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); margin: 2px 8px 0">Erdgeschoss</span>
+<sc-for list="{{eg}}" as="r" hint-placeholder-count="3">
+<div style="{{r.card}}">
+<a href="RaumPanelQuer.dc.html" style="display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0">
+<span style="display: flex; align-items: center; gap: 10px">
+<span style="{{r.circle}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="{{r.stroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg></span>
+<span style="flex: 1; min-width: 0; font-size: 15px; font-weight: 600; line-height: 1.2">{{r.name}}</span>
+<sc-if value="{{r.fan}}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Luftreiniger an"><path d="M12 12c0-3 1-6 4-6a3 3 0 0 1 0 6zM12 12c3 0 6 1 6 4a3 3 0 0 1-6 0zM12 12c0 3-1 6-4 6a3 3 0 0 1 0-6zM12 12c-3 0-6-1-6-4a3 3 0 0 1 6 0z"></path></svg></sc-if>
+<span style="{{r.aq}}"></span>
+</span>
+<span style="display: flex; align-items: baseline; gap: 10px">
+<span style="font-size: 30px; font-weight: 700; line-height: 1">{{r.temp}}</span>
+<span style="{{r.subStyle}}">{{r.sub}}</span>
+</span>
+</a>
+<span role="group" aria-label="Profil" style="flex-shrink: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 3px; border-radius: 20px; background: rgba(0,0,0,0.22)">
+<sc-for list="{{r.presets}}" as="p" hint-placeholder-count="4">
+<button type="button" aria-label="{{p.name}}" title="{{p.name}}" style="{{p.style}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{p.c}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{p.icon}}"></path></svg>{{p.t}}</button>
+</sc-for>
+</span>
+<span style="flex-shrink: 0; display: flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; border-radius: 22px; background: rgba(0,0,0,0.22)">
+<button type="button" aria-label="Soll senken" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 20px; font-weight: 600; line-height: 1">−</button>
+<span style="flex: 1; text-align: center; font-size: 14px"><span style="color: rgba(255,255,255,0.6)">Soll </span><span style="font-weight: 700">{{r.target}}</span></span>
+<button type="button" aria-label="Soll erhöhen" style="width: 36px; height: 36px; border-radius: 18px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 20px; font-weight: 600; line-height: 1">+</button>
+</span>
+</div>
+</sc-for>
+</div>
+
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var I = {
+      home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+      thermo: 'M14 14.8V5a2 2 0 1 0-4 0v9.8a4 4 0 1 0 4 0z',
+      grid: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
+      bolt: 'M13 2 4 14h7l-1 8 9-12h-7z',
+      shield: 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+      desk: 'M4 5h16v10H4zM9 19h6M12 15v4',
+      bath: 'M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zM6 12V5a2 2 0 0 1 4 0',
+      bed: 'M3 18V7M3 13h18v5M7 13v-3h5v3',
+      door: 'M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17M4 21h16M14 12h.01',
+      sofa: 'M4 11V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v3M2 13a2 2 0 0 1 4 0v2h12v-2a2 2 0 0 1 4 0v5H2z',
+      pot: 'M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM2 10h2M20 10h2M9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2',
+      leaf: 'M5 19c8 0 14-6 14-14-8 0-14 6-14 14zM5 19l7-7',
+      sun: 'M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4',
+      flame: 'M12 3c1 4 5 6 5 11a5 5 0 0 1-10 0c0-3 2-4 2-7 1 1 2 2 3 2 0-2 0-4 0-6z',
+      snow: 'M12 2v20M2 12h20M5 5l14 14M19 5 5 19'
+    };
+    var circ = function (bg, s) { return 'flex-shrink: 0; width: ' + s + 'px; height: ' + s + 'px; border-radius: ' + (s / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var spark = function (vals) {
+      var lo = Math.min.apply(null, vals) - 0.3, hi = Math.max.apply(null, vals) + 0.3, n = vals.length - 1;
+      var pts = vals.map(function (v, i) { return (i / n * 200).toFixed(1) + ',' + (38 - (v - lo) / (hi - lo) * 34).toFixed(1); });
+      return { line: pts.join(' '), area: 'M0,40 L' + pts.join(' L') + ' L200,40 Z' };
+    };
+    // state: 'heat' | 'vent' | 'ok'
+    var PRE = [['Eco', I.leaf, '#7ee8a0'], ['Komfort', I.sun, '#ffd60a'], ['Boost', I.flame, '#ff9f0a'], ['Frost', I.snow, '#8fd8ff']];
+    var room = function (name, icon, temp, hum, target, state, extra, aq, fan, vals, pre) {
+      var s = spark(vals);
+      var temps = [pre === 0 ? target : '17', pre === 1 ? target : '21', '23', '7'];
+      var presets = PRE.map(function (d, i) {
+        var on = i === pre;
+        return { name: d[0], icon: d[1], t: temps[i] + '°', c: on ? '#101218' : d[2],
+          style: 'display: flex; align-items: center; justify-content: center; gap: 4px; height: 32px; border-radius: 16px; border: none; font-size: 12px; font-weight: ' + (on ? '700; background: #fff; color: #101218' : '600; background: transparent; color: rgba(255,255,255,0.8)') };
+      });
+      var heat = state === 'heat', vent = state === 'vent';
+      return { name: name, icon: icon, temp: temp + '°', target: target + '°', fan: fan, presets: presets,
+        sub: hum + ' % · ' + (vent ? 'lüften' : (heat ? 'heizt' + (extra ? ' · Ventile ' + extra + ' %' : '') : 'Soll erreicht')),
+        subStyle: 'font-size: 13px; ' + (vent ? 'font-weight: 600; color: #8fd8ff' : (heat ? 'color: #ffc061' : 'color: rgba(255,255,255,0.72)')),
+        aq: aq ? 'flex-shrink: 0; width: 8px; height: 8px; border-radius: 4px; background: ' + aq : 'display: none',
+        card: 'min-height: 0; display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 22px; box-sizing: border-box; background: ' + (vent ? 'rgba(90,200,250,0.13)' : (heat ? 'rgba(255,159,10,0.11)' : 'rgba(255,255,255,0.07)')),
+        circle: circ(vent ? '#5ac8fa' : (heat ? '#ff9f0a' : 'rgba(255,255,255,0.12)'), 34),
+        stroke: (vent || heat) ? '#141008' : '#fff',
+        line: s.line, area: s.area,
+        lineC: vent ? '#8fd8ff' : (heat ? '#ffb340' : 'rgba(255,255,255,0.7)'),
+        fill: vent ? 'rgba(90,200,250,0.14)' : (heat ? 'rgba(255,159,10,0.14)' : 'rgba(255,255,255,0.06)') };
+    };
+    var nav = function (name, icon, href, active) {
+      return { name: name, icon: icon, href: href, active: active, c: active ? '#101218' : 'rgba(255,255,255,0.8)',
+        style: (active ? 'background: #fff; color: #101218' : 'color: rgba(255,255,255,0.8)') + '; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; height: 64px; border-radius: 32px' };
+    };
+    var G = '#30d158';
+    return {
+      nav: [nav('Start', I.home, 'UebersichtQuerB.dc.html', false), nav('Klima', I.thermo, 'KlimaQuer.dc.html', true), nav('Räume', I.grid, 'RaeumeQuer.dc.html', false), nav('Energie', I.bolt, 'EnergieQuer.dc.html', false), nav('Schutz', I.shield, 'SchutzQuer.dc.html', false)],
+      presets: [
+        { name: 'Eco', t: '17°', icon: I.leaf, c: '#7ee8a0' },
+        { name: 'Komfort', t: '21°', icon: I.sun, c: '#ffd60a' },
+        { name: 'Boost', t: '23°', icon: I.flame, c: '#ff9f0a' },
+        { name: 'Frost', t: '7°', icon: I.snow, c: '#8fd8ff' }
+      ],
+      og: [
+        room('Büro Anna', I.desk, '19,0', 62, '21,0', 'vent', 0, G, true, [20.4, 20.6, 20.5, 20.1, 19.8, 19.9, 20.3, 20.8, 20.9, 20.6, 19.4, 19.0], 1),
+        room('Büro Max', I.desk, '19,2', 57, '19,0', 'ok', 0, G, true, [19.0, 19.1, 19.0, 18.9, 18.8, 19.0, 19.3, 19.4, 19.3, 19.2, 19.2, 19.2], 0),
+        room('Badezimmer', I.bath, '19,1', 61, '22,0', 'vent', 0, '', false, [21.8, 21.9, 22.0, 21.7, 21.5, 22.4, 22.6, 21.9, 21.6, 21.2, 19.9, 19.1], 1),
+        room('Schlafzimmer', I.bed, '19,1', 58, '20,0', 'heat', 35, '', true, [18.2, 18.0, 17.9, 17.8, 18.4, 18.9, 18.6, 18.3, 18.2, 18.5, 18.8, 19.1], 1),
+        room('Flur 1.OG', I.door, '19,5', 59, '19,0', 'ok', 0, '', false, [19.2, 19.3, 19.2, 19.1, 19.0, 19.2, 19.4, 19.5, 19.4, 19.5, 19.5, 19.5], 0)
+      ],
+      eg: [
+        room('Wohnzimmer', I.sofa, '19,9', 60, '21,0', 'heat', 55, G, true, [20.8, 20.6, 20.3, 20.0, 19.7, 19.6, 20.1, 20.5, 20.7, 20.4, 20.0, 19.9], 1),
+        room('Küche & Esszimmer', I.pot, '19,5', 58, '19,5', 'ok', 0, G, true, [19.3, 19.2, 19.1, 19.0, 19.4, 20.2, 19.8, 19.5, 19.4, 20.4, 19.9, 19.5], 0),
+        room('Flur EG', I.door, '18,9', 58, '20,0', 'heat', 40, '', false, [19.6, 19.5, 19.3, 19.1, 18.8, 18.7, 18.9, 19.1, 19.2, 19.0, 18.8, 18.9], 1)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

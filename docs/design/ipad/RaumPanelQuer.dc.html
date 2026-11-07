@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>Raumkarte Seitenpanel</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#101218}
+a{color:inherit;text-decoration:none}a:hover{color:inherit}
+button{font-family:inherit;cursor:pointer}
+</style>
+</helmet>
+<div style="position: relative; width: 1194px; height: 834px; box-sizing: border-box; overflow: hidden; font-family: Rubik, system-ui, sans-serif; color: #ffffff; background-color: #101218; background-image: radial-gradient(60% 40% at 0% 0%, rgba(110,90,200,0.34), transparent 70%)">
+
+<div aria-hidden="true" style="position: absolute; inset: 0; pointer-events: none"><dc-import name="UebersichtQuerB" hint-size="1194px,834px"></dc-import></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(8,9,12,0.58)"></div>
+
+<aside aria-label="Büro Anna" style="position: absolute; top: 16px; right: 16px; bottom: 16px; width: 440px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 18px 16px; border-radius: 32px; background: #181a22; border: 1px solid rgba(255,255,255,0.1); box-shadow: -20px 0 60px rgba(0,0,0,0.55), 0 0 80px rgba(90,200,250,0.10)">
+
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex-shrink: 0; width: 46px; height: 46px; border-radius: 23px; display: flex; align-items: center; justify-content: center; background: #5ac8fa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#06202c" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H4zM9 19h6M12 15v4"></path></svg></span>
+<span style="flex: 1; min-width: 0"><h2 style="margin: 0; font-size: 20px; font-weight: 700">Büro Anna</h2><span style="display: block; font-size: 13px; color: rgba(255,255,255,0.72)">Obergeschoss · Fenster zu</span></span>
+<button type="button" aria-label="Schließen" style="flex-shrink: 0; width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"></path></svg></button>
+</div>
+
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 28px; background: linear-gradient(160deg, rgba(255,159,10,0.16), rgba(255,255,255,0.05) 60%)">
+<button type="button" aria-label="Soll senken" style="flex-shrink: 0; width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 26px; font-weight: 600">−</button>
+<span style="flex: 1; text-align: center"><span style="display: block; font-size: 40px; font-weight: 700; line-height: 1">21,0°</span><span style="display: block; margin-top: 4px; font-size: 13px; font-weight: 600; color: #ffc061">heizt · Ventile 40 %</span></span>
+<button type="button" aria-label="Soll erhöhen" style="flex-shrink: 0; width: 56px; height: 56px; border-radius: 28px; border: none; background: rgba(255,255,255,0.1); color: #fff; font-size: 26px; font-weight: 600">+</button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{presets}}" as="p" hint-placeholder-count="4">
+<button type="button" style="{{p.style}}"><span style="display: block; font-size: 13px; font-weight: 700">{{p.name}}</span><span style="display: block; font-size: 12px; opacity: 0.75">{{p.t}}</span></button>
+</sc-for>
+</div>
+
+<a href="#" aria-label="Verlauf öffnen" style="display: flex; flex-direction: column; gap: 6px; padding: 12px 14px 10px; border-radius: 22px; background: rgba(255,255,255,0.06)">
+<span style="display: flex; align-items: center; gap: 12px; font-size: 13px"><span style="font-weight: 600; flex: 1">Letzte 24 h</span><span style="color: #ffc061; font-weight: 600">19,0°</span><span style="color: #8fd8ff; font-weight: 600">62 %</span><span style="color: rgba(255,255,255,0.6)">Verlauf ›</span></span>
+<svg viewBox="0 0 402 92" width="100%" height="92" role="img" aria-label="Temperatur und Luftfeuchte der letzten 24 Stunden"><line x1="4" y1="76" x2="398" y2="76" stroke="rgba(255,255,255,0.1)"></line><polyline points="4.0,50.0 20.4,50.0 36.8,42.0 53.2,42.0 69.6,34.0 86.0,34.0 102.4,26.0 118.8,26.0 135.2,34.0 151.6,50.0 168.0,58.0 184.4,66.0 200.8,66.0 217.2,58.0 233.6,58.0 250.0,50.0 266.4,50.0 282.8,42.0 299.2,34.0 315.6,26.0 332.0,26.0 348.4,34.0 364.8,34.0 381.2,34.0 397.6,34.0" fill="none" stroke="#5ac8fa" stroke-width="2" stroke-linejoin="round"></polyline><polyline points="4.0,37.0 20.4,41.5 36.8,46.0 53.2,55.0 69.6,59.5 86.0,64.0 102.4,64.0 118.8,59.5 135.2,37.0 151.6,19.0 168.0,14.5 184.4,19.0 200.8,28.0 217.2,32.5 233.6,37.0 250.0,37.0 266.4,41.5 282.8,46.0 299.2,37.0 315.6,28.0 332.0,32.5 348.4,46.0 364.8,55.0 381.2,55.0 397.6,55.0" fill="none" stroke="#ff9f0a" stroke-width="2" stroke-linejoin="round"></polyline><text x="4" y="89" font-size="9" fill="rgba(255,255,255,0.6)">20</text><text x="102" y="89" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">2</text><text x="201" y="89" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">8</text><text x="299" y="89" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.6)">14</text><text x="398" y="89" text-anchor="end" font-size="9" fill="rgba(255,255,255,0.6)">jetzt</text></svg>
+</a>
+
+<a href="#" style="display: flex; align-items: center; gap: 10px; height: 56px; padding: 0 8px 0 6px; border-radius: 28px; background: linear-gradient(90deg, rgba(90,200,250,0.3), rgba(255,255,255,0.05) 75%)">
+<span style="flex-shrink: 0; width: 42px; height: 42px; border-radius: 21px; display: flex; align-items: center; justify-content: center; background: #5ac8fa"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#101010" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h8"></path></svg></span>
+<span style="flex: 1; min-width: 0"><span style="display: block; font-size: 14px; font-weight: 600">Jetzt lüften</span><span style="display: block; font-size: 12px; color: rgba(255,255,255,0.8)">Taupunkt innen 11,6° · außen 7,2°</span></span>
+<span style="height: 40px; padding: 0 18px; border-radius: 20px; display: flex; align-items: center; font-size: 14px; font-weight: 700; color: #101010; background: #5ac8fa">Start</span>
+</a>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{facts}}" as="f" hint-placeholder-count="3">
+<span style="padding: 10px; border-radius: 18px; background: rgba(255,255,255,0.06)"><span style="display: block; font-size: 11px; color: rgba(255,255,255,0.65)">{{f.k}}</span><span style="display: block; font-size: 14px; font-weight: 700">{{f.v}}</span></span>
+</sc-for>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; margin: 2px 4px 0"><span style="font-size: 13px; font-weight: 600">Geräte</span><span aria-hidden="true" style="flex: 1; height: 2px; border-radius: 1px; background: rgba(255,255,255,0.12)"></span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+<sc-for list="{{devices}}" as="d" hint-placeholder-count="4">
+<a href="#" style="{{d.tile}}">
+<span style="{{d.circle}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="{{d.stroke}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{d.icon}}"></path></svg></span>
+<span style="min-width: 0"><span style="display: block; font-size: 13px; font-weight: 600">{{d.name}}</span><span style="{{d.stateStyle}}">{{d.state}}</span></span>
+</a>
+</sc-for>
+</div>
+</aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var circ = function (bg, s) { return 'flex-shrink: 0; width: ' + s + 'px; height: ' + s + 'px; border-radius: ' + (s / 2) + 'px; display: flex; align-items: center; justify-content: center; background: ' + bg; };
+    var preset = function (name, t, active) {
+      return { name: name, t: t, style: 'height: 56px; border-radius: 22px; border: none; text-align: center; ' + (active ? 'background: #fff; color: #101218' : 'background: rgba(255,255,255,0.08); color: #fff') };
+    };
+    var dev = function (name, icon, state, on, light) {
+      return { name: name, icon: icon, state: state,
+        tile: 'display: flex; align-items: center; gap: 8px; height: 54px; padding: 0 10px 0 6px; border-radius: 20px; background: ' + (on ? (light ? 'rgba(255,214,10,0.16)' : 'rgba(48,209,88,0.14)') : 'rgba(255,255,255,0.06)'),
+        circle: circ(on ? (light ? '#ffd60a' : '#30d158') : 'rgba(255,255,255,0.1)', 32), stroke: on ? '#151005' : '#fff',
+        stateStyle: 'display: block; font-size: 11px; color: ' + (on ? (light ? '#ffe37a' : '#9af0b5') : 'rgba(255,255,255,0.55)') };
+    };
+    return {
+      presets: [preset('Eco', '17°', false), preset('Komfort', '21°', true), preset('Boost', '23°', false), preset('Frost', '7°', false)],
+      facts: [{ k: 'PM2.5', v: '8 µg/m³' }, { k: 'Taupunkt', v: '11,6°' }, { k: 'Luftreiniger', v: 'Auto' }],
+      devices: [
+        dev('Stehlampe', 'M9 2h6l3 8H6zM12 10v11M8 21h8', 'Aus', false, true),
+        dev('Decke', 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z', 'Aus', false, true),
+        dev('Schreibtisch', 'M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4', 'Aus', false, false),
+        dev('Luftreiniger', 'M12 10a2 2 0 1 0 0 4a2 2 0 1 0 0-4M12 10c0-4 1-7 4-7 2 0 3 2 2 4l-4 3M14 12c4 0 7 1 7 4 0 2-2 3-4 2l-3-4M12 14c0 4-1 7-4 7-2 0-3-2-2-4l4-3M10 12c-4 0-7-1-7-4 0-2 2-3 4-2l3 4', 'An · Auto', true, false)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

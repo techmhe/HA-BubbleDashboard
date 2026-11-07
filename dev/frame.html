@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <title>Start Dashboard – iPad frame</title>
+  <style>
+    body { margin: 0; background: #000; display: flex; align-items: flex-start; justify-content: flex-start; }
+    iframe { border: 0; display: block; }
+  </style>
+</head>
+<body>
+  <!-- iPad Pro 11" viewport: frame.html?portrait for 834 × 1194; other query params go to the preview. -->
+  <iframe id="f"></iframe>
+  <script>
+    const q = new URLSearchParams(location.search);
+    const portrait = q.has('portrait');
+    q.delete('portrait');
+    const f = document.getElementById('f');
+    f.width = portrait ? 834 : 1194;
+    f.height = portrait ? 1194 : 834;
+    f.src = './index.html' + (q.toString() ? '?' + q : '');
+  </script>
+</body>
+</html>

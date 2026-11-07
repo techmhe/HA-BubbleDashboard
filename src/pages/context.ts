@@ -11,6 +11,7 @@ import type { PowerPoint } from '../logic/appliances';
 import type { WindowState } from '../logic/window-state';
 import type { CardConfig, HomeAssistant, PageId } from '../types';
 import type { ConfirmOptions } from '../components/ui';
+import type { Layout } from '../logic/layout';
 
 export interface Target {
   entity_id: string | string[];
@@ -86,6 +87,8 @@ export interface PageContext {
   config: CardConfig;
   rooms: Room[];
   now: Date;
+  /** Card layout from its width: phone, tablet (iPad portrait) or wide (iPad landscape, MacBook). */
+  layout: Layout;
   go(page: PageId, opts?: { roomsFilter?: string }): void;
   moreInfo(entityId: string): void;
   /** Navigate inside the HA frontend, e.g. to /energy. */

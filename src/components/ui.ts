@@ -36,6 +36,8 @@ export interface SheetOptions {
   onBack?: () => void;
   /** Hide the close button (e.g. when a back button is shown). */
   noClose?: boolean;
+  /** 'xl': a wider side panel on tablets (two columns, e.g. Robby). */
+  size?: 'xl';
 }
 
 /** Bottom sheet rendered inside the card (pop-ups do not depend on Bubble Card). */
@@ -44,7 +46,7 @@ export function sheet(o: SheetOptions): TemplateResult {
   const dismiss = o.onBack ?? o.onClose;
   return html`
     <div class="backdrop" @click=${dismiss}></div>
-    <section class="sheet" role="dialog" aria-modal="true" aria-label=${o.title}
+    <section class="sheet ${o.size ?? ''}" role="dialog" aria-modal="true" aria-label=${o.title}
       style="background-image: radial-gradient(100% 30% at 50% 0%, ${o.glow}, transparent 70%)"
       ${swipeToClose(dismiss)}
       @keydown=${(e: KeyboardEvent) => e.key === 'Escape' && dismiss()}>
@@ -221,6 +223,46 @@ export const sheetStyles = css`
     .sheet,
     .backdrop {
       animation: none;
+    }
+  }
+
+  /* Tablets and wide screens: sheets open as a panel on the right over the dimmed page. */
+  :host([layout='tablet']) .backdrop,
+  :host([layout='wide']) .backdrop {
+    background: rgba(8, 9, 12, 0.58);
+  }
+  :host([layout='tablet']) .sheet,
+  :host([layout='wide']) .sheet {
+    left: auto;
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    bottom: 16px;
+    width: 440px;
+    max-width: calc(100% - 32px);
+    max-height: none;
+    transform: translate(0, var(--drag, 0px));
+    border-radius: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: -20px 0 60px rgba(0, 0, 0, 0.55);
+    padding: 16px 16px 18px;
+    animation: slide-in 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  :host([layout='tablet']) .sheet.xl,
+  :host([layout='wide']) .sheet.xl {
+    width: 720px;
+  }
+  :host([layout='tablet']) .grabber,
+  :host([layout='wide']) .grabber {
+    display: none;
+  }
+  :host([layout='tablet']) .layer.under .sheet,
+  :host([layout='wide']) .layer.under .sheet {
+    transform: translate(-28px, 0) scale(0.96);
+    transform-origin: 100% 50%;
+  }
+  @keyframes slide-in {
+    from {
+      transform: translate(calc(100% + 32px), 0);
     }
   }
 `;

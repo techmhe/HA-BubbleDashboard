@@ -5,6 +5,7 @@ import { watts } from '../logic/devices';
 import { batteryNote, consumers, energyCost, energyHeadline, energyNow, energyToday, gridTariff, houseSources, type BatteryCoupling, type Consumer, type EnergyNow } from '../logic/energy';
 import { fmt } from '../logic/util';
 import type { PageContext } from './context';
+import { dayCurve } from './overview-wide';
 
 const E = {
   pylon: 'M12 2 6 22M12 2l6 20M8 9h8M7 14h10',
@@ -145,18 +146,17 @@ export function renderEnergy(ctx: PageContext) {
   const bat = now.battery;
   const coupled = now.coupled;
 
-  return html`
-    <div class="energy">
+  const head = html`
       <header class="ehead">
         <div class="date">${energyHeadline(ctx.now, now)}</div>
         <h1>Energie</h1>
-      </header>
-
+      </header>`;
+  const flow = html`
       <div class="flow">
         ${coupled && bat ? sourcesFlow(ctx, now, coupled, bat, chart) : classicFlow(ctx, now, chart)}
         <button class="elink" @click=${() => ctx.navigate('/energy')}>Energie-Dashboard ›</button>
-      </div>
-
+      </div>`;
+  const todayBlock = html`
       <div class="section-head">
         <h2>Heute</h2><span class="rule" aria-hidden="true"></span>
         <span class="meta">ca. ${kwh(today.consumed)} verbraucht</span>
@@ -191,9 +191,9 @@ export function renderEnergy(ctx: PageContext) {
                   [today.export, '#64d2ff', `Eingespeist ${kwh(today.export)}`], () => chart('selfuse'))
               : html`<div class="nopv">Heute noch kein Solarstrom.</div>`}
           </div>`
-        : nothing}
-
-      <div class="section-head"><h2>Aktuell</h2><span class="rule" aria-hidden="true"></span></div>
+        : nothing}`;
+  const consumersBlock = html`
+      <div class="section-head"><h2>${ctx.layout === 'phone' ? 'Aktuell' : 'Verbraucher jetzt'}</h2><span class="rule" aria-hidden="true"></span></div>
       ${top.length
         ? top.map((c) => html`
             <button class="cons" aria-label="${c.name} ${watts(c.value)}, Verlauf anzeigen" @click=${() => chart(c.id, c.name)}>
@@ -206,7 +206,30 @@ export function renderEnergy(ctx: PageContext) {
       ${all.length > SHOWN
         ? html`<button class="cmore" @click=${() => ctx.setConsumersAll(!ctx.consumersAll)}>
             ${ctx.consumersAll ? 'Weniger anzeigen' : `Alle anzeigen (${all.length})`}</button>`
-        : nothing}
+        : nothing}`;
+
+  if (ctx.layout !== 'phone') {
+    // Tablets and wide screens: flow and day curve left, totals and consumers right (docs/design/ipad/EnergieQuer).
+    return html`
+      <div class="energy ew">
+        ${head}
+        <div class="ew-grid">
+          <div class="wcol">
+            <div class="wcard ew-flow">${flow}</div>
+            <div class="wcard ew-day">${dayCurve(ctx, 'Heute')}</div>
+          </div>
+          <div class="wcol">${todayBlock}${consumersBlock}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  return html`
+    <div class="energy">
+      ${head}
+      ${flow}
+      ${todayBlock}
+      ${consumersBlock}
     </div>
   `;
 }
@@ -593,5 +616,32 @@ export const energyStyles = css`
   .cval {
     font-size: 14px;
     font-weight: 700;
+  }
+
+  .ew {
+    gap: 14px;
+  }
+  .ew-grid {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 16px;
+  }
+  .ew-flow {
+    flex-shrink: 0;
+    padding: 12px 14px;
+  }
+  .ew-flow .flow {
+    background: none;
+    padding: 0;
+  }
+  .ew-day {
+    flex: 1;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 16px 12px;
   }
 `;

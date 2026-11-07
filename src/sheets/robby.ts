@@ -61,6 +61,7 @@ export function robbySheet(ctx: PageContext) {
     iconPath: I.vacuum,
     iconStroke: dot,
     onClose: ctx.closeSheet,
+    size: 'xl',
     headerExtra: html`
       ${st.cleaning
         ? html`<button class="rb-ctl" aria-label="Pause" title="Pause" @click=${() => vacCall('pause')}>${icon(R.pause, 16, '#fff', 2.2)}</button>`
@@ -68,7 +69,14 @@ export function robbySheet(ctx: PageContext) {
       <button class="rb-ctl" aria-label="Zur Station" title="Zur Station" @click=${() => vacCall('return_to_base')}>${icon(R.dock, 16, '#fff', 2.2)}</button>
       <button class="rb-ctl" aria-label="Orten" title="Orten" @click=${() => vacCall('locate')}>${icon(R.locate, 16, '#fff', 2.2)}</button>
     `,
-    body: html`
+    body: html`<div class="rb-cols"><div class="rb-col">
+      <div class="rb-big" role="group" aria-label="Steuerung">
+        <button class=${st.cleaning ? '' : 'on'} @click=${() => vacCall('start')}>${icon(IC.play, 20, 'currentColor', 2.1)}Start</button>
+        <button class=${st.cleaning ? 'on' : ''} @click=${() => vacCall('pause')}>${icon(R.pause, 20, 'currentColor', 2.1)}Pause</button>
+        <button @click=${() => vacCall('return_to_base')}>${icon(R.dock, 20, 'currentColor', 2.1)}Station</button>
+        <button @click=${() => vacCall('locate')}>${icon(R.locate, 20, 'currentColor', 2.1)}Orten</button>
+      </div>
+      ${cons.length ? html`<h3 class="rb-wh">Wartung</h3>` : nothing}
       ${cons.length
         ? html`<div class="rb-stats" style="grid-template-columns: repeat(${cons.length}, minmax(0, 1fr))">
             ${cons.map((c) => html`<button class="rb-stat ${c.due ? 'due' : ''}" aria-label="${c.name}: ${c.value}${c.reset ? ', tippen zum Zurücksetzen' : ''}"
@@ -91,7 +99,7 @@ export function robbySheet(ctx: PageContext) {
             <span class="rb-pn">${p.name}</span>
           </button>`)}
       </div>
-
+      </div><div class="rb-col">
       ${map
         ? html`
             <div class="section-head"><h2>Selbst auswählen</h2><span class="rule" aria-hidden="true"></span></div>
@@ -129,7 +137,7 @@ export function robbySheet(ctx: PageContext) {
                       <strong style="color:#9af0b5">${FAN_SPEEDS[fanIdx]?.name ?? fan}</strong></div>
                     <div class="rb-segs" role="radiogroup" aria-label="Saugkraft" style="grid-template-columns: repeat(${FAN_SPEEDS.length}, minmax(0, 1fr))">
                       ${FAN_SPEEDS.map((f, i) => html`<button role="radio" aria-checked=${i === fanIdx} aria-label=${f.name} title=${f.name}
-                        style=${seg(i, fanIdx, FAN_SPEEDS.length, '#30d158')} @click=${() => vacCall('set_fan_speed', { fan_speed: f.id })}></button>`)}
+                        style=${seg(i, fanIdx, FAN_SPEEDS.length, '#30d158')} @click=${() => vacCall('set_fan_speed', { fan_speed: f.id })}><span class="rb-sl">${f.name}</span></button>`)}
                     </div>
                   </div>`
                 : nothing}
@@ -158,11 +166,96 @@ export function robbySheet(ctx: PageContext) {
               </div>
             </section>`
         : nothing}
-    `,
+    </div></div>`,
   });
 }
 
 export const robbyStyles = css`
+  :host([layout='tablet']) .rb-stat,
+  :host([layout='wide']) .rb-stat {
+    display: flex;
+    flex-direction: column-reverse;
+    padding: 10px 12px;
+    border-radius: 18px;
+    text-align: left;
+  }
+  :host([layout='tablet']) .rb-sv,
+  :host([layout='wide']) .rb-sv {
+    font-size: 15px;
+  }
+  :host([layout='tablet']) .rb-sn,
+  :host([layout='wide']) .rb-sn {
+    font-size: 12px;
+    opacity: 0.6;
+  }
+
+  .rb-big,
+  .rb-wh,
+  .rb-sl {
+    display: none;
+  }
+  :host([layout='tablet']) .rb-ctl,
+  :host([layout='wide']) .rb-ctl {
+    display: none;
+  }
+  :host([layout='tablet']) .rb-big,
+  :host([layout='wide']) .rb-big {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .rb-big button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    height: 64px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .rb-big button.on {
+    background: #fff;
+    color: #101218;
+  }
+  :host([layout='tablet']) .rb-wh,
+  :host([layout='wide']) .rb-wh {
+    display: block;
+    margin: 4px 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  :host([layout='tablet']) .rb-stats,
+  :host([layout='wide']) .rb-stats {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  :host([layout='tablet']) .rb-sl,
+  :host([layout='wide']) .rb-sl {
+    display: inline;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .rb-cols,
+  .rb-col {
+    display: contents;
+  }
+  :host([layout='tablet']) .rb-cols,
+  :host([layout='wide']) .rb-cols {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  :host([layout='tablet']) .rb-col,
+  :host([layout='wide']) .rb-col {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
   .rb-ctl {
     flex-shrink: 0;
     width: 40px;
