@@ -520,10 +520,8 @@ export const securityStyles = css`
     aspect-ratio: 16 / 9;
   }
   .sw-view .stream {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-    object-fit: contain;
+    width: 100%;
+    max-height: 100%;
   }
   .sw-chips {
     position: absolute;
